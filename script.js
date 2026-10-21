@@ -36,17 +36,39 @@ const TEAM_LOGOS = {
   "VCARB": "https://lh3.googleusercontent.com/d/1AfEAprJx9b4ivULrg41CCYiVUnBi6ps2", 
   "Sauber": "https://lh3.googleusercontent.com/d/1w0dvPdMVK2b09liK6G-XEt2LXu6S-Mt0", 
   "Haas": "https://lh3.googleusercontent.com/d/1i7aUDygqHB5Qf0ySyWIUSzy0F-YW8jHz", 
-  "Cadilac": "https://lh3.googleusercontent.com/d/1GIArchbZm5K7bmSNfpkGNi8bHae5G1w0" 
+  "Cadilac": "https://lh3.googleusercontent.com/d/1GIArchbZm5K7bmSNfpkGNi8bHae5G1w0",
+  "Cadillac": "https://lh3.googleusercontent.com/d/1GIArchbZm5K7bmSNfpkGNi8bHae5G1w0"
 };
 
-const DRIVERS = [
-  "Kimi Antonelli", "George Russell", "Max Verstappen", "Isack Hadjar", 
-  "Lando Norris", "Oscar Piastri", "Lewis Hamilton", "Charles Leclerc", 
-  "Liam Lawson", "Arvid Lindblad", "Nico Hülkenberg", "Gabriel Bortoleto", 
-  "Oliver Bearman", "Esteban Ocon", "Carlos Sainz", "Alexander Albon", 
-  "Pierre Gasly", "Franco Colapinto", "Fernando Alonso", "Lance Stroll", 
-  "Sergio Pérez", "Valtteri Bottas"
-];
+// --- ฐานข้อมูลนักแข่งสำหรับแสดงผลการ์ด (สามารถนำลิงก์รูปจริงมาเปลี่ยนที่ค่า img ได้เลย) ---
+const DEFAULT_DRIVER_IMG = "https://cdn-icons-png.flaticon.com/512/1995/1995470.png";
+
+const DRIVER_INFO = {
+  "Kimi Antonelli": { team: "Mercedes", color: "#27f4d2", img: DEFAULT_DRIVER_IMG },
+  "George Russell": { team: "Mercedes", color: "#27f4d2", img: DEFAULT_DRIVER_IMG },
+  "Max Verstappen": { team: "Red Bull Racing", color: "#3671c6", img: DEFAULT_DRIVER_IMG },
+  "Isack Hadjar": { team: "Red Bull Racing", color: "#3671c6", img: DEFAULT_DRIVER_IMG },
+  "Lando Norris": { team: "McLaren", color: "#ff8000", img: DEFAULT_DRIVER_IMG },
+  "Oscar Piastri": { team: "McLaren", color: "#ff8000", img: DEFAULT_DRIVER_IMG },
+  "Lewis Hamilton": { team: "Ferrari", color: "#e10600", img: DEFAULT_DRIVER_IMG },
+  "Charles Leclerc": { team: "Ferrari", color: "#e10600", img: DEFAULT_DRIVER_IMG },
+  "Liam Lawson": { team: "VCARB", color: "#6692ff", img: DEFAULT_DRIVER_IMG },
+  "Arvid Lindblad": { team: "VCARB", color: "#6692ff", img: DEFAULT_DRIVER_IMG },
+  "Nico Hülkenberg": { team: "Sauber", color: "#00e701", img: DEFAULT_DRIVER_IMG },
+  "Gabriel Bortoleto": { team: "Sauber", color: "#00e701", img: DEFAULT_DRIVER_IMG },
+  "Oliver Bearman": { team: "Haas", color: "#ffffff", img: DEFAULT_DRIVER_IMG },
+  "Esteban Ocon": { team: "Haas", color: "#ffffff", img: DEFAULT_DRIVER_IMG },
+  "Carlos Sainz": { team: "Williams", color: "#005aff", img: DEFAULT_DRIVER_IMG },
+  "Alexander Albon": { team: "Williams", color: "#005aff", img: DEFAULT_DRIVER_IMG },
+  "Pierre Gasly": { team: "Alpine", color: "#ff87bc", img: DEFAULT_DRIVER_IMG },
+  "Franco Colapinto": { team: "Alpine", color: "#ff87bc", img: DEFAULT_DRIVER_IMG },
+  "Fernando Alonso": { team: "Aston Martin", color: "#229971", img: DEFAULT_DRIVER_IMG },
+  "Lance Stroll": { team: "Aston Martin", color: "#229971", img: DEFAULT_DRIVER_IMG },
+  "Sergio Pérez": { team: "Cadillac", color: "#ffd700", img: DEFAULT_DRIVER_IMG },
+  "Valtteri Bottas": { team: "Cadillac", color: "#ffd700", img: DEFAULT_DRIVER_IMG }
+};
+
+const DRIVERS = Object.keys(DRIVER_INFO);
 
 let secretClicks = 0; 
 let clickTimer = null; 
@@ -56,6 +78,8 @@ let breakdownModalInstance = null;
 let regModalInstance = null; 
 let loginGateModalInstance = null; 
 let imagePreviewModalInstance = null; 
+let driverSelectorModalInstance = null;
+let currentSelectingSlot = null;
 let countdownInterval = null; 
 let currentDeadline = null; 
 let globalLeaderboard = []; 
@@ -72,11 +96,79 @@ window.onload = function() {
   regModalInstance = new bootstrap.Modal(document.getElementById('regModal')); 
   loginGateModalInstance = new bootstrap.Modal(document.getElementById('loginGateModal')); 
   imagePreviewModalInstance = new bootstrap.Modal(document.getElementById('imagePreviewModal'));
+  driverSelectorModalInstance = new bootstrap.Modal(document.getElementById('driverSelectorModal'));
   
   const optHtml = '<option value="" disabled selected>-- เลือกนักแข่ง --</option>' + DRIVERS.map(function(d) { return '<option value="' + d + '">' + d + '</option>'; }).join('');
   document.querySelectorAll('.driver-opt').forEach(function(el) { el.innerHTML = optHtml; });
+  
+  buildDriverGrid();
   loadData();
 };
+
+// --- ฟังก์ชันจัดการการ์ดเลือกนักแข่ง (Driver Cards) ---
+function buildDriverGrid() {
+  const container = document.getElementById('driverGridContainer');
+  if (!container) return;
+  let html = '';
+  DRIVERS.forEach(function(name) {
+    const info = DRIVER_INFO[name] || { team: "F1", color: "#888888", img: DEFAULT_DRIVER_IMG };
+    const safeName = name.replace(/'/g, "\\'");
+    html += '<div class="driver-pick-btn" style="--team-color: ' + info.color + '" onclick="confirmSelectDriver(\'' + safeName + '\')">' +
+              '<div class="driver-pick-name">' + name + '</div>' +
+              '<div class="driver-pick-team">' + info.team + '</div>' +
+              '<img src="' + getDriveDirectLink(info.img) + '" class="driver-pick-img" alt="' + name + '">' +
+            '</div>';
+  });
+  container.innerHTML = html;
+}
+
+function openDriverSelector(slotId) {
+  triggerHaptic();
+  currentSelectingSlot = slotId;
+  const titles = { 
+    'pos1': 'P1 (อันดับที่ 1)', 
+    'pos2': 'P2 (อันดับที่ 2)', 
+    'pos3': 'P3 (อันดับที่ 3)', 
+    'pos4': 'P4 (อันดับที่ 4)', 
+    'posFL': 'Fastest Lap' 
+  };
+  document.getElementById('driverSelectorTitle').innerHTML = '<i class="fa-solid fa-helmet-safety text-danger me-2"></i>เลือกนักแข่งสำหรับ ' + (titles[slotId] || '');
+  driverSelectorModalInstance.show();
+}
+
+function confirmSelectDriver(driverName) {
+  triggerHaptic();
+  if (!currentSelectingSlot) return;
+  const selectEl = document.getElementById(currentSelectingSlot);
+  if (selectEl) selectEl.value = driverName;
+  updateCardUI(currentSelectingSlot, driverName);
+  driverSelectorModalInstance.hide();
+}
+
+function updateCardUI(slotId, driverName) {
+  const card = document.getElementById('card-' + slotId);
+  if (!card) return;
+  const emptyState = card.querySelector('.slot-empty-state');
+  const filledState = card.querySelector('.slot-filled-state');
+  
+  if (!driverName) {
+    card.classList.remove('filled');
+    emptyState.classList.remove('d-none');
+    filledState.classList.add('d-none');
+    return;
+  }
+  
+  const info = DRIVER_INFO[driverName] || { team: "F1", color: "#e10600", img: DEFAULT_DRIVER_IMG };
+  card.classList.add('filled');
+  card.style.setProperty('--team-color', info.color);
+  
+  document.getElementById('name-' + slotId).innerText = driverName;
+  document.getElementById('team-' + slotId).innerText = info.team;
+  document.getElementById('img-' + slotId).src = getDriveDirectLink(info.img);
+  
+  emptyState.classList.add('d-none');
+  filledState.classList.remove('d-none');
+}
 
 function registerSecretClick() { 
   triggerHaptic(); 
@@ -164,7 +256,7 @@ function onAdminRaceChange() {
 
 function switchToRegisterFromLogin() { loginGateModalInstance.hide(); regModalInstance.show(); }
 
-// 🔐 อัปเดตฟังก์ชันตรวจสอบ PIN ตอนเข้าสู่ระบบ
+// 🔐 ตรวจสอบ PIN ตอนเข้าสู่ระบบ
 function confirmLoginGate() { 
   triggerHaptic(); 
   const selected = document.getElementById('loginPlayerSelect').value; 
@@ -320,12 +412,26 @@ function onRaceChange() {
     }
   }
 
+  // เคลียร์การ์ดให้ว่างก่อนดึงข้อมูลเดิมของสนามนั้น
+  ['pos1','pos2','pos3','pos4','posFL'].forEach(function(id) { 
+    document.getElementById(id).value = ''; 
+    updateCardUI(id, ''); 
+  });
+
   const player = localStorage.getItem('f1_player_name'); const histAlert = document.getElementById('savedPredAlert');
   if (player) {
     callGAS("getUserSavedPrediction", { raceId: raceId, playerName: player }).then(function(res) {
       if (res.found) {
-        histAlert.style.display = 'block'; document.getElementById('savedPredTime').innerText = 'บันทึกเมื่อ: ' + res.submittedAt; document.getElementById('savedPredContent').innerHTML = '<strong>P1:</strong> ' + res.p1 + ' | <strong>P2:</strong> ' + res.p2 + '<br><strong>P3:</strong> ' + res.p3 + ' | <strong>P4:</strong> ' + res.p4 + (res.fl ? ' | <strong>FL:</strong> ' + res.fl : '');
-        ['pos1','pos2','pos3','pos4','posFL'].forEach(function(id, i) { document.getElementById(id).value = [res.p1, res.p2, res.p3, res.p4, res.fl][i] || ''; });
+        histAlert.style.display = 'block'; 
+        document.getElementById('savedPredTime').innerText = 'บันทึกเมื่อ: ' + res.submittedAt; 
+        document.getElementById('savedPredContent').innerHTML = '<strong>P1:</strong> ' + res.p1 + ' | <strong>P2:</strong> ' + res.p2 + '<br><strong>P3:</strong> ' + res.p3 + ' | <strong>P4:</strong> ' + res.p4 + (res.fl ? ' | <strong>FL:</strong> ' + res.fl : '');
+        
+        const savedVals = [res.p1, res.p2, res.p3, res.p4, res.fl];
+        ['pos1','pos2','pos3','pos4','posFL'].forEach(function(id, i) { 
+          const val = savedVals[i] || '';
+          document.getElementById(id).value = val; 
+          updateCardUI(id, val);
+        });
       } else { histAlert.style.display = 'none'; }
     });
   } else { histAlert.style.display = 'none'; }
@@ -544,7 +650,7 @@ function checkAdminSubmissions() {
 
 function copyPendingList() { if (!lastPendingList || lastPendingList.length === 0) return; const text = '🏁 ทวงคำทายผล F1\n⚠️ คนที่ยังไม่ได้ส่ง (' + lastPendingList.length + ' คน):\n' + lastPendingList.map(function(n, i) { return (i + 1) + '. ' + n; }).join('\n') + '\n\nรีบส่งก่อนหมดเวลานะครับ!'; navigator.clipboard.writeText(text).then(function() { showToast('คัดลอกเรียบร้อย!', 'success'); }); }
 
-// 🔐 อัปเดตฟังก์ชันสมัครสมาชิก ให้ส่งรหัส PIN ไปด้วย
+// 🔐 สมัครสมาชิกพร้อมตั้งรหัส PIN
 function handleRegister(e) { 
   e.preventDefault(); triggerHaptic(); 
   const btn = document.getElementById('btnReg'), 
@@ -570,7 +676,21 @@ function handlePrediction(e) {
   e.preventDefault(); triggerHaptic(); 
   const player = localStorage.getItem('f1_player_name'); 
   if (!player) { loginGateModalInstance.show(); return; } 
-  const btn = document.getElementById('btnPred'), rSel = document.getElementById('selRace'), p1 = document.getElementById('pos1').value, p2 = document.getElementById('pos2').value, p3 = document.getElementById('pos3').value, p4 = document.getElementById('pos4').value; 
+  
+  const rSel = document.getElementById('selRace');
+  if (!rSel.value) { showToast('กรุณาเลือกสนามแข่งขันก่อนครับ', 'error'); return; }
+  
+  const p1 = document.getElementById('pos1').value, 
+        p2 = document.getElementById('pos2').value, 
+        p3 = document.getElementById('pos3').value, 
+        p4 = document.getElementById('pos4').value; 
+        
+  if (!p1 || !p2 || !p3 || !p4) {
+    showToast('กรุณาแตะการ์ดเลือกนักแข่งให้ครบทั้ง P1 - P4 ครับ', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('btnPred');
   btn.disabled = true; 
   callGAS("submitPrediction", { data: { playerName: player, raceId: rSel.value, type: rSel.options[rSel.selectedIndex].dataset.type, p1: p1, p2: p2, p3: p3, p4: p4, fl: document.getElementById('posFL').value } }).then(function(res) { 
     btn.disabled = false; showToast(res.msg, res.success ? 'success' : 'error'); 
