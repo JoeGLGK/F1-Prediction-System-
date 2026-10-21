@@ -1,5 +1,5 @@
 // ⚠️ นำ Web App URL ที่ได้จากการ Deploy ใน Google Apps Script มาใส่ในเครื่องหมายคำพูดด้านล่างนี้ครับ
-const GAS_API_URL = "https://script.google.com/macros/s/AKfycby7fAjoQiCvNjXAa3oGgp79riJgcC_Gk1tYxycSOKzXpFBflzLjnEGzE5W60eQTKfH8/exec";
+const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzBRIZWun7Iui1nDt28iHV_JHTSyKZkBQLGoaVGtuYc3Wue4WAs9CqzxxYdy0jF1xBM/exec";
 
 // ฟังก์ชันกลางสำหรับส่งคำสั่งไปหา Google Apps Script
 async function callGAS(action, payload = {}) {
