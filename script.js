@@ -25,19 +25,29 @@ function triggerHaptic() {
   if (navigator.vibrate) navigator.vibrate(40); 
 }
 
-const TEAM_LOGOS = { 
-  "Ferrari": "https://lh3.googleusercontent.com/d/1vSyLK4voiZIq9-ctG7X5aAkdPezha1xu", 
-  "Red Bull Racing": "https://lh3.googleusercontent.com/d/1pM-9Vo3HyaA-ZL5bjavA0D9nNYoClRAv", 
-  "McLaren": "https://lh3.googleusercontent.com/d/1EhsPjx5G3tVpXROG9x5Eos7xYXTIUKMf", 
-  "Mercedes": "https://lh3.googleusercontent.com/d/1i-5H1bNHXpX3Jt7ZciAP3gmV5QjtAwlF", 
-  "Aston Martin": "https://lh3.googleusercontent.com/d/1smqEEy8i7d1AbQmqVXR68hD1qP0Qwx1p", 
-  "Alpine": "https://lh3.googleusercontent.com/d/1CAPj3vwXe7cWOuxBPhOX-ciiJ8FlGqFG", 
-  "Williams": "https://lh3.googleusercontent.com/d/18mn901TW_w5SW4Fg5Ke0WBKgxyt-5ICN", 
-  "VCARB": "https://lh3.googleusercontent.com/d/1AfEAprJx9b4ivULrg41CCYiVUnBi6ps2", 
-  "Sauber": "https://lh3.googleusercontent.com/d/1w0dvPdMVK2b09liK6G-XEt2LXu6S-Mt0", 
-  "Haas": "https://lh3.googleusercontent.com/d/1i7aUDygqHB5Qf0ySyWIUSzy0F-YW8jHz", 
-  "Cadilac": "https://lh3.googleusercontent.com/d/1GIArchbZm5K7bmSNfpkGNi8bHae5G1w0",
-  "Cadillac": "https://lh3.googleusercontent.com/d/1GIArchbZm5K7bmSNfpkGNi8bHae5G1w0"
+const DRIVER_INFO = {
+  "Kimi Antonelli": { team: "Mercedes", color: "#27f4d2", img: "https://drive.google.com/file/d/1Z3B9dcHlcJwL2m6UuRgvpekkE8uyhb4o/view?usp=drive_link" },
+  "George Russell": { team: "Mercedes", color: "#27f4d2", img: "https://drive.google.com/file/d/1SEAsPHx7GufvYX_AjxtcWceaAiOabIQ4/view?usp=drive_link" },
+  "Max Verstappen": { team: "Red Bull Racing", color: "#3671c6", img: "https://drive.google.com/file/d/1I69SD1zbe051eQ6O2TtxVkbiKIzfJb5b/view?usp=drive_link" },
+  "Isack Hadjar": { team: "Red Bull Racing", color: "#3671c6", img: "https://drive.google.com/file/d/1Ku9cm80h488nXGuwwMg4Ndy6FlzCJpW3/view?usp=drive_link" },
+  "Lando Norris": { team: "McLaren", color: "#ff8000", img: "https://drive.google.com/file/d/1Au4weIEmtSa1Eu229D-MwF1j40f4yEWP/view?usp=drive_link" },
+  "Oscar Piastri": { team: "McLaren", color: "#ff8000", img: "https://drive.google.com/file/d/1BKZZDIPfbMdqCqfCftCPp54IP7E4wjJV/view?usp=drive_link" },
+  "Lewis Hamilton": { team: "Ferrari", color: "#e10600", img: "https://drive.google.com/file/d/1I79D78_vJ9TxTCqcsmBGkAwrw5XIdBvT/view?usp=drive_link" },
+  "Charles Leclerc": { team: "Ferrari", color: "#e10600", img: "https://drive.google.com/file/d/1_dWIyQH-pEEYKQGoCwkDJvxJm2Alznjg/view?usp=drive_link" },
+  "Liam Lawson": { team: "VCARB", color: "#6692ff", img: "https://drive.google.com/file/d/1c38jBlTVGPkV7xypKWt2AAhc0-l5Cvi7/view?usp=drive_link" },
+  "Arvid Lindblad": { team: "VCARB", color: "#6692ff", img: "https://drive.google.com/file/d/1vs0mhRt-gWFv4sl9RAT-JQNHlagnkWz2/view?usp=drive_link" },
+  "Nico Hülkenberg": { team: "Sauber", color: "#00e701", img: "https://drive.google.com/file/d/1ryVo8TP_Q9jfZpGV-0vxhANBW0RhC3tQ/view?usp=drive_link" },
+  "Gabriel Bortoleto": { team: "Sauber", color: "#00e701", img: "https://drive.google.com/file/d/1do5JC4V3FS7na-AYCwwjsU2pdciAGvjP/view?usp=drive_link" },
+  "Oliver Bearman": { team: "Haas", color: "#ffffff", img: "https://drive.google.com/file/d/11dCm-zrtWSlwR6wjdS9Jt7xrwm8oXtkn/view?usp=drive_link" },
+  "Esteban Ocon": { team: "Haas", color: "#ffffff", img: "https://drive.google.com/file/d/1nHhebkdUjKcZ-ktABsO2goiIUYVDzcs-/view?usp=drive_link" },
+  "Carlos Sainz": { team: "Williams", color: "#005aff", img: "https://drive.google.com/file/d/1zllJ8nmqKxO2lEY88ivJL1JCmkmZkCQV/view?usp=drive_link" },
+  "Alexander Albon": { team: "Williams", color: "#005aff", img: "https://drive.google.com/file/d/1TDHrGvKL1P8gDs77xyoGn9zv_jJxRU0V/view?usp=drive_link" },
+  "Pierre Gasly": { team: "Alpine", color: "#ff87bc", img: "https://drive.google.com/file/d/1-mz-I1ES4i4rOju8vWZd4Kt0P_RVF_xg/view?usp=drive_link" },
+  "Franco Colapinto": { team: "Alpine", color: "#ff87bc", img: "https://drive.google.com/file/d/1s5l8wV2O4NxN_LZJSbCD99HnHPeT1ycE/view?usp=drive_link" },
+  "Fernando Alonso": { team: "Aston Martin", color: "#229971", img: "https://drive.google.com/file/d/1_nO7FUy6vFLy9uUGKsfQKifQM_ojLrSC/view?usp=drive_link" },
+  "Lance Stroll": { team: "Aston Martin", color: "#229971", img: "https://drive.google.com/file/d/1l8RIeYWoYh77nwvdpupJhNJCOEWS9qdM/view?usp=drive_link" },
+  "Sergio Pérez": { team: "Cadillac", color: "#ffd700", img: "https://drive.google.com/file/d/1WCMjLAQvF-i7XWzWf-agvgyGPET1nNqS/view?usp=drive_link" },
+  "Valtteri Bottas": { team: "Cadillac", color: "#ffd700", img: "https://drive.google.com/file/d/15QvFU2gYU2asPIyNc1FFfXh0hpUF0N69/view?usp=drive_link" }
 };
 
 // --- ฐานข้อมูลนักแข่งสำหรับแสดงผลการ์ด (สามารถนำลิงก์รูปจริงมาเปลี่ยนที่ค่า img ได้เลย) ---
