@@ -635,3 +635,175 @@ body {
   padding: 3px 8px;
   border-radius: 6px;
 }
+
+/* --- Driver Card UI --- */
+.driver-slot-card {
+  background: rgba(20, 22, 30, 0.6);
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  height: 110px;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.driver-slot-card:hover {
+  background: rgba(30, 33, 45, 0.8);
+  border-color: var(--f1-red);
+}
+.driver-slot-card.filled {
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: 4px solid var(--team-color, #555);
+  background: linear-gradient(145deg, rgba(20,22,30,1) 0%, rgba(30,33,45,1) 100%);
+  justify-content: flex-start;
+  align-items: flex-start;
+  padding: 12px;
+}
+.driver-slot-card.filled::before {
+  content: ''; 
+  position: absolute; 
+  inset: 0;
+  background: radial-gradient(circle at top right, var(--team-color, transparent) 0%, transparent 60%);
+  opacity: 0.15; 
+  z-index: 0;
+}
+.fl-card { height: 90px; }
+.slot-badge-ui {
+  position: absolute;
+  top: 8px; 
+  right: 8px;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  z-index: 2;
+  display: flex; 
+  align-items: center; 
+  gap: 4px;
+}
+.slot-empty-state { 
+  color: rgba(255, 255, 255, 0.4); 
+  text-align: center; 
+}
+.slot-filled-state { 
+  position: relative; 
+  z-index: 2; 
+  width: 100%; 
+  height: 100%; 
+}
+.driver-name-ui { 
+  font-size: 0.92rem; 
+  font-weight: 700; 
+  color: #fff; 
+  margin-top: 18px; 
+  line-height: 1.1; 
+  text-shadow: 0 2px 5px rgba(0,0,0,0.8); 
+  max-width: 75%;
+}
+.fl-card .driver-name-ui { 
+  margin-top: 6px; 
+  font-size: 1.05rem; 
+}
+.driver-team-ui { 
+  font-size: 0.65rem; 
+  color: #cbd5e1; 
+  margin-top: 2px; 
+  text-transform: uppercase; 
+  font-weight: 600; 
+}
+.driver-img-ui {
+  position: absolute;
+  bottom: -12px; 
+  right: -10px;
+  height: 90px; 
+  width: 90px;
+  object-fit: cover; 
+  object-position: top;
+  z-index: 1;
+  filter: drop-shadow(-2px 2px 5px rgba(0,0,0,0.5));
+  mask-image: linear-gradient(to top, rgba(0,0,0,1) 70%, rgba(0,0,0,0) 100%);
+  -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,1) 70%, rgba(0,0,0,0) 100%);
+}
+.fl-card .driver-img-ui { 
+  height: 80px; 
+  width: 80px; 
+  right: 10px; 
+  bottom: -10px;
+}
+
+/* --- Bottom Sheet Modal --- */
+.bottom-sheet-modal .modal-dialog-bottom {
+  display: flex;
+  align-items: flex-end;
+  min-height: 100%;
+  margin: 0 auto;
+  max-width: 540px;
+}
+.bottom-sheet-modal .modal-content {
+  border-radius: 20px 20px 0 0;
+  background: #11131a !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-bottom: none !important;
+  animation: slideUpModal 0.3s ease-out;
+  width: 100%;
+}
+@keyframes slideUpModal { 
+  from { transform: translateY(100%); } 
+  to { transform: translateY(0); } 
+}
+.driver-list-grid { 
+  display: grid; 
+  grid-template-columns: 1fr 1fr; 
+  gap: 8px; 
+}
+.driver-pick-btn {
+  background: rgba(26, 29, 38, 0.85);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-left: 4px solid var(--team-color, #555);
+  border-radius: 10px;
+  padding: 10px;
+  text-align: left;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  min-height: 65px;
+  transition: all 0.15s ease;
+}
+.driver-pick-btn:hover { 
+  background: rgba(40, 45, 60, 0.95); 
+  transform: translateY(-1px);
+}
+.driver-pick-name { 
+  font-size: 0.82rem; 
+  font-weight: 700; 
+  color: #fff; 
+  position: relative; 
+  z-index: 2; 
+  line-height: 1.15; 
+  max-width: 75%;
+}
+.driver-pick-team { 
+  font-size: 0.62rem; 
+  color: #94a3b8; 
+  position: relative; 
+  z-index: 2; 
+  margin-top: 2px;
+}
+.driver-pick-img { 
+  position: absolute; 
+  right: -5px; 
+  bottom: 0; 
+  height: 58px; 
+  width: 50px; 
+  object-fit: cover; 
+  object-position: top; 
+  opacity: 0.85; 
+  z-index: 1; 
+}
+.text-purple { color: #a855f7 !important; }
