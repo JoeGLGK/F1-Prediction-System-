@@ -9,8 +9,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#0d0e12">
   
-  <link rel="icon" type="image/png" href="https://i.postimg.cc/CMPZT6St/App-Formula-1-(3).png">
-  <link rel="apple-touch-icon" href="https://i.postimg.cc/CMPZT6St/App-Formula-1-(3).png">
+  <link rel="icon" type="image/png" href="https://i.postimg.cc/m2PCzCRh/App-Formula-1.png">
+  <link rel="apple-touch-icon" href="https://i.postimg.cc/m2PCzCRh/App-Formula-1.png">
   <link rel="manifest" href="manifest.json">
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -218,8 +218,68 @@
   </div>
 
   <!-- Modals -->
-  <div class="modal fade" id="loginGateModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered"><div class="modal-content f1-card border-danger text-white"><div class="modal-header border-secondary"><h6 class="modal-title f1-font text-white"><i class="fa-solid fa-id-card-clip text-danger me-2"></i>เลือกโปรไฟล์ผู้เล่นของคุณ</h6></div><div class="modal-body"><p class="text-secondary small mb-3">กรุณาแตะเลือกชื่อเล่นของคุณเพื่อเข้าสู่ระบบทายผล</p><div class="mb-3"><select id="loginPlayerSelect" class="form-select fs-6 py-2"><option value="" disabled selected>-- แตะเลือกชื่อของคุณ --</option></select></div><button type="button" class="btn btn-race w-100 f1-font mb-3" onclick="confirmLoginGate()"><i class="fa-solid fa-right-to-bracket me-2"></i>เข้าสู่ระบบ</button><div class="text-center"><span class="text-secondary small">ยังไม่มีชื่อในระบบ? </span><a href="javascript:void(0)" onclick="switchToRegisterFromLogin()" class="text-danger small fw-bold text-decoration-none">+ ลงทะเบียนใหม่</a></div></div></div></div></div>
-  <div class="modal fade" id="regModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered"><div class="modal-content f1-card border-secondary text-white"><div class="modal-header border-secondary"><h6 class="modal-title f1-font text-white"><i class="fa-solid fa-id-card text-danger me-2"></i>REGISTRATION</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><form onsubmit="handleRegister(event)"><div class="mb-3"><label class="form-label">ชื่อเล่นของคุณ</label><input type="text" id="regName" class="form-control" required></div><div class="mb-3"><label class="form-label">ทีม F1 ที่ชื่นชอบ</label><select id="regTeam" class="form-select" required><option value="" disabled selected>-- เลือกทีมโปรด --</option><option value="Ferrari">🔴 Ferrari</option><option value="Red Bull Racing">🔵 Red Bull Racing</option><option value="McLaren">🟠 McLaren</option><option value="Mercedes">🟢 Mercedes</option><option value="Aston Martin">🌿 Aston Martin</option><option value="Alpine">🩵 Alpine</option><option value="Williams">🔷 Williams</option><option value="VCARB">⚪ VCARB</option><option value="Sauber">💚 Sauber</option><option value="Haas">⚫ Haas</option><option value="Cadilac">⬜ Cadilac</option></select></div><button type="submit" id="btnReg" class="btn btn-race w-100 f1-font"><i class="fa-solid fa-check me-2"></i>CONFIRM</button></form></div></div></div></div>
+  <!-- แก้ไข Login Modal ให้มีช่องกรอก PIN -->
+  <div class="modal fade" id="loginGateModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content f1-card border-danger text-white">
+        <div class="modal-header border-secondary">
+          <h6 class="modal-title f1-font text-white"><i class="fa-solid fa-id-card-clip text-danger me-2"></i>เลือกโปรไฟล์ผู้เล่นของคุณ</h6>
+        </div>
+        <div class="modal-body">
+          <p class="text-secondary small mb-3">กรุณาแตะเลือกชื่อเล่น และกรอก PIN ของคุณเพื่อเข้าสู่ระบบ</p>
+          <div class="mb-3">
+            <select id="loginPlayerSelect" class="form-select fs-6 py-2 mb-2"><option value="" disabled selected>-- แตะเลือกชื่อของคุณ --</option></select>
+            <input type="password" id="loginPin" class="form-control text-center fs-5" pattern="[0-9]{4}" inputmode="numeric" maxlength="4" placeholder="รหัส PIN 4 หลัก" required>
+          </div>
+          <button type="button" class="btn btn-race w-100 f1-font mb-3" onclick="confirmLoginGate()"><i class="fa-solid fa-right-to-bracket me-2"></i>เข้าสู่ระบบ</button>
+          <div class="text-center"><span class="text-secondary small">ยังไม่มีชื่อในระบบ? </span><a href="javascript:void(0)" onclick="switchToRegisterFromLogin()" class="text-danger small fw-bold text-decoration-none">+ ลงทะเบียนใหม่</a></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- แก้ไข Register Modal ให้มีช่องตั้งรหัส PIN -->
+  <div class="modal fade" id="regModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content f1-card border-secondary text-white">
+        <div class="modal-header border-secondary">
+          <h6 class="modal-title f1-font text-white"><i class="fa-solid fa-id-card text-danger me-2"></i>REGISTRATION</h6>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form onsubmit="handleRegister(event)">
+            <div class="mb-3">
+              <label class="form-label">ชื่อเล่นของคุณ</label>
+              <input type="text" id="regName" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">ทีม F1 ที่ชื่นชอบ</label>
+              <select id="regTeam" class="form-select" required>
+                <option value="" disabled selected>-- เลือกทีมโปรด --</option>
+                <option value="Ferrari">🔴 Ferrari</option>
+                <option value="Red Bull Racing">🔵 Red Bull Racing</option>
+                <option value="McLaren">🟠 McLaren</option>
+                <option value="Mercedes">🟢 Mercedes</option>
+                <option value="Aston Martin">🌿 Aston Martin</option>
+                <option value="Alpine">🩵 Alpine</option>
+                <option value="Williams">🔷 Williams</option>
+                <option value="VCARB">⚪ VCARB</option>
+                <option value="Sauber">💚 Sauber</option>
+                <option value="Haas">⚫ Haas</option>
+                <option value="Cadilac">⬜ Cadilac</option>
+              </select>
+            </div>
+            <div class="mb-4">
+              <label class="form-label">ตั้งรหัส PIN 4 หลัก (เพื่อใช้ล็อกอิน)</label>
+              <input type="password" id="regPin" class="form-control text-center fs-5 text-warning" pattern="[0-9]{4}" inputmode="numeric" maxlength="4" placeholder="XXXX" required>
+            </div>
+            <button type="submit" id="btnReg" class="btn btn-race w-100 f1-font"><i class="fa-solid fa-check me-2"></i>CONFIRM</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="modal fade" id="breakdownModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered"><div class="modal-content f1-card border-success text-white"><div class="modal-header border-secondary"><h6 class="modal-title f1-font text-success"><i class="fa-solid fa-square-poll-vertical me-2"></i>RACE RESULT & SCORE BREAKDOWN</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body" id="breakdownBody">กำลังคำนวณผลการตรวจคะแนน...</div></div></div></div>
   <div class="modal fade" id="statsModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered"><div class="modal-content f1-card border-secondary text-white"><div class="modal-header border-secondary"><h6 class="modal-title f1-font text-warning"><i class="fa-solid fa-chart-simple me-2"></i>PLAYER CAREER STATS</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body text-center" id="statsBody">กำลังประมวลผลสถิติ...</div></div></div></div>
   
@@ -319,10 +379,14 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="script.js"></script>
+  
+  <!-- โค้ดเรียกใช้ Service Worker สำหรับ PWA -->
   <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => { navigator.serviceWorker.register('service-worker.js'); });
-  }
-</script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js');
+      });
+    }
+  </script>
 </body>
 </html>
