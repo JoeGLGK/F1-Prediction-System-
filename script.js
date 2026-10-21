@@ -164,15 +164,36 @@ function onAdminRaceChange() {
 
 function switchToRegisterFromLogin() { loginGateModalInstance.hide(); regModalInstance.show(); }
 
+// 🔐 อัปเดตฟังก์ชันตรวจสอบ PIN ตอนเข้าสู่ระบบ
 function confirmLoginGate() { 
   triggerHaptic(); 
   const selected = document.getElementById('loginPlayerSelect').value; 
+  const pin = document.getElementById('loginPin').value;
+  
   if (!selected) { showToast('กรุณาเลือกชื่อก่อน', 'error'); return; } 
-  localStorage.setItem('f1_player_name', selected); 
-  updateUserSessionUI(); 
-  loginGateModalInstance.hide(); 
-  onRaceChange(); 
-  showToast('เข้าสู่ระบบสำเร็จ!', 'success'); 
+  if (!pin || pin.length !== 4) { showToast('กรุณากรอก PIN 4 หลัก', 'error'); return; }
+  
+  const btn = document.querySelector('#loginGateModal .btn-race');
+  const oldText = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>ตรวจสอบ...';
+
+  callGAS("loginPlayer", { playerName: selected, pin: pin }).then(function(res) {
+    btn.disabled = false; btn.innerHTML = oldText;
+    if (res.success) {
+      localStorage.setItem('f1_player_name', selected); 
+      document.getElementById('loginPin').value = '';
+      updateUserSessionUI(); 
+      loginGateModalInstance.hide(); 
+      onRaceChange(); 
+      showToast('เข้าสู่ระบบสำเร็จ!', 'success'); 
+    } else {
+      showToast(res.msg, 'error');
+    }
+  }).catch(function(err) {
+    btn.disabled = false; btn.innerHTML = oldText;
+    showToast('Error: ' + err, 'error');
+  });
 }
 
 function showTab(tabId, el) { 
@@ -199,8 +220,13 @@ function loadData() {
     
     const pGate = document.getElementById('loginPlayerSelect');
     if(pGate) pGate.innerHTML = '<option value="" disabled selected>-- เลือกชื่อ --</option>' + globalPlayers.map(function(p) { return '<option value="' + p + '">' + p + '</option>'; }).join('');
+    
     const savedPlayer = localStorage.getItem('f1_player_name');
-    if (!savedPlayer || !globalPlayers.includes(savedPlayer)) { if(loginGateModalInstance) loginGateModalInstance.show(); } else { if(pGate) pGate.value = savedPlayer; }
+    if (!savedPlayer || !globalPlayers.includes(savedPlayer)) { 
+      if(loginGateModalInstance) loginGateModalInstance.show(); 
+    } else { 
+      if(pGate) pGate.value = savedPlayer; 
+    }
     updateUserSessionUI();
 
     const openRaces = globalRaces.filter(function(r) { return r.status === 'OPEN'; });
@@ -518,13 +544,25 @@ function checkAdminSubmissions() {
 
 function copyPendingList() { if (!lastPendingList || lastPendingList.length === 0) return; const text = '🏁 ทวงคำทายผล F1\n⚠️ คนที่ยังไม่ได้ส่ง (' + lastPendingList.length + ' คน):\n' + lastPendingList.map(function(n, i) { return (i + 1) + '. ' + n; }).join('\n') + '\n\nรีบส่งก่อนหมดเวลานะครับ!'; navigator.clipboard.writeText(text).then(function() { showToast('คัดลอกเรียบร้อย!', 'success'); }); }
 
+// 🔐 อัปเดตฟังก์ชันสมัครสมาชิก ให้ส่งรหัส PIN ไปด้วย
 function handleRegister(e) { 
   e.preventDefault(); triggerHaptic(); 
-  const btn = document.getElementById('btnReg'), name = document.getElementById('regName').value, team = document.getElementById('regTeam').value; 
+  const btn = document.getElementById('btnReg'), 
+        name = document.getElementById('regName').value, 
+        team = document.getElementById('regTeam').value, 
+        pin = document.getElementById('regPin').value; 
+        
   btn.disabled = true; 
-  callGAS("registerPlayer", { playerName: name, teamName: team }).then(function(res) { 
+  callGAS("registerPlayer", { playerName: name, teamName: team, pin: pin }).then(function(res) { 
     showToast(res.msg, res.success ? 'success' : 'error'); btn.disabled = false; 
-    if (res.success) { localStorage.setItem('f1_player_name', name); document.getElementById('regName').value = ''; regModalInstance.hide(); forceRefreshData(); showTab('tab-pred', document.querySelectorAll('.f1-nav-link')[1]); } 
+    if (res.success) { 
+      localStorage.setItem('f1_player_name', name); 
+      document.getElementById('regName').value = ''; 
+      document.getElementById('regPin').value = ''; 
+      regModalInstance.hide(); 
+      forceRefreshData(); 
+      showTab('tab-pred', document.querySelectorAll('.f1-nav-link')[1]); 
+    } 
   }); 
 }
 
