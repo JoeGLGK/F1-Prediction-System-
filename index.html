@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>🏁 F1 PREDICTION LEAGUE 2026</title>
 
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#0d0e12">
@@ -93,7 +94,7 @@
           <div class="d-flex justify-content-between align-items-center mb-1"><span class="small fw-bold text-success"><i class="fa-solid fa-circle-check me-1"></i>คุณได้ส่งคำทายสนามนี้ไว้แล้ว</span><span class="badge bg-success" style="font-size:0.65rem;">บันทึกแล้ว</span></div>
           <div class="small text-secondary mb-2" id="savedPredTime" style="font-size:0.75rem;">เวลาส่ง: -</div>
           <div class="p-2 rounded bg-dark border border-secondary text-start small text-white" id="savedPredContent" style="font-size:0.8rem;">-</div>
-          <div class="small text-muted mt-2" style="font-size:0.7rem;">💡 คุณสามารถแก้ไขตัวเลือกด้านล่าง แล้วกด Submit เพื่ออัปเดตคำทายใหม่ได้จนกว่าจะหมดเวลา</div>
+          <div class="small text-muted mt-2" style="font-size:0.7rem;">💡 คุณสามารถแตะเปลี่ยนการ์ดนักแข่งด้านล่าง แล้วกด Submit เพื่ออัปเดตคำทายใหม่ได้จนกว่าจะหมดเวลา</div>
         </div>
 
         <form onsubmit="handlePrediction(event)">
@@ -113,13 +114,73 @@
 
             <div id="countdownBox" class="countdown-box" style="display: none;"></div>
           </div>
-          <div class="row g-2 mb-3">
-            <div class="col-6"><label class="form-label"><span class="pos-badge pos-1">1</span> P1</label><select id="pos1" class="form-select driver-opt" required></select></div>
-            <div class="col-6"><label class="form-label"><span class="pos-badge pos-2">2</span> P2</label><select id="pos2" class="form-select driver-opt" required></select></div>
-            <div class="col-6"><label class="form-label"><span class="pos-badge pos-3">3</span> P3</label><select id="pos3" class="form-select driver-opt" required></select></div>
-            <div class="col-6"><label class="form-label"><span class="pos-badge pos-4">4</span> P4</label><select id="pos4" class="form-select driver-opt" required></select></div>
+
+          <!-- ซ่อน Dropdown เดิมไว้สำหรับให้ระบบหลังบ้านดึงข้อมูลไปบันทึก -->
+          <div class="d-none">
+            <select id="pos1" class="driver-opt"></select>
+            <select id="pos2" class="driver-opt"></select>
+            <select id="pos3" class="driver-opt"></select>
+            <select id="pos4" class="driver-opt"></select>
+            <select id="posFL" class="driver-opt"></select>
           </div>
-          <div class="mb-4" id="flWrapper"><label class="form-label"><span class="pos-badge pos-fl"><i class="fa-solid fa-bolt"></i></span> Fastest Lap (+1)</label><select id="posFL" class="form-select driver-opt"></select></div>
+
+          <!-- UI การ์ดนักแข่งแบบใหม่ (Driver Cards) -->
+          <label class="form-label mb-2"><i class="fa-solid fa-trophy text-warning me-1"></i> เลือกนักแข่งเข้าเส้นชัย (P1 - P4)</label>
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <div class="driver-slot-card p1-card" id="card-pos1" onclick="openDriverSelector('pos1')">
+                <div class="slot-badge-ui"><span class="pos-badge pos-1 m-0">1</span> P1</div>
+                <div class="slot-empty-state"><i class="fa-solid fa-plus fs-4 mb-1"></i><div class="small">เลือก P1</div></div>
+                <div class="slot-filled-state d-none">
+                  <div class="driver-name-ui" id="name-pos1">Name</div><div class="driver-team-ui" id="team-pos1">Team</div>
+                  <img src="" class="driver-img-ui" id="img-pos1" alt="Driver">
+                </div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="driver-slot-card p2-card" id="card-pos2" onclick="openDriverSelector('pos2')">
+                <div class="slot-badge-ui"><span class="pos-badge pos-2 m-0">2</span> P2</div>
+                <div class="slot-empty-state"><i class="fa-solid fa-plus fs-4 mb-1"></i><div class="small">เลือก P2</div></div>
+                <div class="slot-filled-state d-none">
+                  <div class="driver-name-ui" id="name-pos2">Name</div><div class="driver-team-ui" id="team-pos2">Team</div>
+                  <img src="" class="driver-img-ui" id="img-pos2" alt="Driver">
+                </div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="driver-slot-card p3-card" id="card-pos3" onclick="openDriverSelector('pos3')">
+                <div class="slot-badge-ui"><span class="pos-badge pos-3 m-0">3</span> P3</div>
+                <div class="slot-empty-state"><i class="fa-solid fa-plus fs-4 mb-1"></i><div class="small">เลือก P3</div></div>
+                <div class="slot-filled-state d-none">
+                  <div class="driver-name-ui" id="name-pos3">Name</div><div class="driver-team-ui" id="team-pos3">Team</div>
+                  <img src="" class="driver-img-ui" id="img-pos3" alt="Driver">
+                </div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="driver-slot-card p4-card" id="card-pos4" onclick="openDriverSelector('pos4')">
+                <div class="slot-badge-ui"><span class="pos-badge pos-4 m-0">4</span> P4</div>
+                <div class="slot-empty-state"><i class="fa-solid fa-plus fs-4 mb-1"></i><div class="small">เลือก P4</div></div>
+                <div class="slot-filled-state d-none">
+                  <div class="driver-name-ui" id="name-pos4">Name</div><div class="driver-team-ui" id="team-pos4">Team</div>
+                  <img src="" class="driver-img-ui" id="img-pos4" alt="Driver">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-4" id="flWrapper">
+            <label class="form-label mb-2"><i class="fa-solid fa-bolt text-purple me-1"></i> FASTEST LAP (+1 คะแนน)</label>
+            <div class="driver-slot-card fl-card" id="card-posFL" onclick="openDriverSelector('posFL')">
+              <div class="slot-badge-ui"><span class="pos-badge pos-fl m-0"><i class="fa-solid fa-bolt"></i></span> FL</div>
+              <div class="slot-empty-state"><i class="fa-solid fa-plus fs-4 mb-1"></i><div class="small">แตะเพื่อเลือกนักแข่ง Fastest Lap</div></div>
+              <div class="slot-filled-state d-none">
+                <div class="driver-name-ui" id="name-posFL">Name</div><div class="driver-team-ui" id="team-posFL">Team</div>
+                <img src="" class="driver-img-ui" id="img-posFL" alt="Driver">
+              </div>
+            </div>
+          </div>
+
           <button type="submit" id="btnPred" class="btn btn-race w-100 f1-font"><i class="fa-solid fa-paper-plane me-2"></i>SUBMIT PREDICTION</button>
         </form>
       </div>
@@ -218,7 +279,7 @@
   </div>
 
   <!-- Modals -->
-  <!-- แก้ไข Login Modal ให้มีช่องกรอก PIN -->
+  <!-- Login Modal (พร้อม PIN 4 หลัก) -->
   <div class="modal fade" id="loginGateModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content f1-card border-danger text-white">
@@ -238,7 +299,7 @@
     </div>
   </div>
 
-  <!-- แก้ไข Register Modal ให้มีช่องตั้งรหัส PIN -->
+  <!-- Register Modal (พร้อมตั้งรหัส PIN 4 หลัก) -->
   <div class="modal fade" id="regModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content f1-card border-secondary text-white">
@@ -362,11 +423,29 @@
     </div>
   </div>
 
+  <!-- Image Preview Modal -->
   <div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
       <div class="modal-content bg-transparent border-0">
         <div class="modal-header border-0 pb-0 justify-content-end"><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" style="filter: drop-shadow(0 0 5px rgba(0,0,0,0.8));"></button></div>
         <div class="modal-body text-center pt-0"><img id="previewImageSrc" src="" class="img-fluid rounded shadow-lg" alt="Preview" style="max-height: 80vh; object-fit: contain;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal รายชื่อนักแข่ง (Bottom Sheet สำหรับเลือกการ์ดนักแข่ง) -->
+  <div class="modal fade bottom-sheet-modal" id="driverSelectorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-bottom">
+      <div class="modal-content f1-card border-secondary text-white">
+        <div class="modal-header border-secondary pb-2 pt-3">
+          <h6 class="modal-title f1-font text-white" id="driverSelectorTitle"><i class="fa-solid fa-helmet-safety text-danger me-2"></i>เลือกนักแข่ง</h6>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-2" style="max-height: 70vh; overflow-y: auto;">
+          <div class="driver-list-grid" id="driverGridContainer">
+            <!-- JS จะนำปุ่มรายชื่อนักแข่งมาสร้างไว้ตรงนี้อัตโนมัติ -->
+          </div>
+        </div>
       </div>
     </div>
   </div>
