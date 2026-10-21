@@ -1,0 +1,552 @@
+// ⚠️ นำ Web App URL ที่ได้จากการ Deploy ใน Google Apps Script มาใส่ในเครื่องหมายคำพูดด้านล่างนี้ครับ
+const GAS_API_URL = "https://script.google.com/macros/library/d/1-BRiwxmOKHsLI5TIpvrAUwvpwQhUxeesg9RrC3MwbKEp9yPv1m9sbjwN/4";
+
+// ฟังก์ชันกลางสำหรับส่งคำสั่งไปหา Google Apps Script
+async function callGAS(action, payload = {}) {
+  const response = await fetch(GAS_API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify(Object.assign({ action: action }, payload))
+  });
+  return await response.json();
+}
+
+function showToast(msg, type='success') { 
+  const c = document.getElementById('f1ToastContainer'); 
+  if(!c) return; 
+  const t = document.createElement('div'); 
+  t.className = 'f1-toast ' + type; 
+  t.innerHTML = (type==='success'?'✅':'⚠️') + ' <span>' + msg + '</span>'; 
+  c.appendChild(t); 
+  setTimeout(function() { t.remove(); }, 4700); 
+}
+
+function triggerHaptic() { 
+  if (navigator.vibrate) navigator.vibrate(40); 
+}
+
+const TEAM_LOGOS = { 
+  "Ferrari": "https://lh3.googleusercontent.com/d/1vSyLK4voiZIq9-ctG7X5aAkdPezha1xu", 
+  "Red Bull Racing": "https://lh3.googleusercontent.com/d/1pM-9Vo3HyaA-ZL5bjavA0D9nNYoClRAv", 
+  "McLaren": "https://lh3.googleusercontent.com/d/1EhsPjx5G3tVpXROG9x5Eos7xYXTIUKMf", 
+  "Mercedes": "https://lh3.googleusercontent.com/d/1i-5H1bNHXpX3Jt7ZciAP3gmV5QjtAwlF", 
+  "Aston Martin": "https://lh3.googleusercontent.com/d/1smqEEy8i7d1AbQmqVXR68hD1qP0Qwx1p", 
+  "Alpine": "https://lh3.googleusercontent.com/d/1CAPj3vwXe7cWOuxBPhOX-ciiJ8FlGqFG", 
+  "Williams": "https://lh3.googleusercontent.com/d/18mn901TW_w5SW4Fg5Ke0WBKgxyt-5ICN", 
+  "VCARB": "https://lh3.googleusercontent.com/d/1AfEAprJx9b4ivULrg41CCYiVUnBi6ps2", 
+  "Sauber": "https://lh3.googleusercontent.com/d/1w0dvPdMVK2b09liK6G-XEt2LXu6S-Mt0", 
+  "Haas": "https://lh3.googleusercontent.com/d/1i7aUDygqHB5Qf0ySyWIUSzy0F-YW8jHz", 
+  "Cadilac": "https://lh3.googleusercontent.com/d/1GIArchbZm5K7bmSNfpkGNi8bHae5G1w0" 
+};
+
+const DRIVERS = [
+  "Kimi Antonelli", "George Russell", "Max Verstappen", "Isack Hadjar", 
+  "Lando Norris", "Oscar Piastri", "Lewis Hamilton", "Charles Leclerc", 
+  "Liam Lawson", "Arvid Lindblad", "Nico Hülkenberg", "Gabriel Bortoleto", 
+  "Oliver Bearman", "Esteban Ocon", "Carlos Sainz", "Alexander Albon", 
+  "Pierre Gasly", "Franco Colapinto", "Fernando Alonso", "Lance Stroll", 
+  "Sergio Pérez", "Valtteri Bottas"
+];
+
+let secretClicks = 0; 
+let clickTimer = null; 
+let adminModalInstance = null; 
+let statsModalInstance = null; 
+let breakdownModalInstance = null; 
+let regModalInstance = null; 
+let loginGateModalInstance = null; 
+let imagePreviewModalInstance = null; 
+let countdownInterval = null; 
+let currentDeadline = null; 
+let globalLeaderboard = []; 
+let globalPlayers = []; 
+let globalRaces = []; 
+let lastPendingList = []; 
+let currentActiveMedia = null;
+let isRefreshing = false;
+
+window.onload = function() {
+  adminModalInstance = new bootstrap.Modal(document.getElementById('adminModal')); 
+  statsModalInstance = new bootstrap.Modal(document.getElementById('statsModal')); 
+  breakdownModalInstance = new bootstrap.Modal(document.getElementById('breakdownModal')); 
+  regModalInstance = new bootstrap.Modal(document.getElementById('regModal')); 
+  loginGateModalInstance = new bootstrap.Modal(document.getElementById('loginGateModal')); 
+  imagePreviewModalInstance = new bootstrap.Modal(document.getElementById('imagePreviewModal'));
+  
+  const optHtml = '<option value="" disabled selected>-- เลือกนักแข่ง --</option>' + DRIVERS.map(function(d) { return '<option value="' + d + '">' + d + '</option>'; }).join('');
+  document.querySelectorAll('.driver-opt').forEach(function(el) { el.innerHTML = optHtml; });
+  loadData();
+};
+
+function registerSecretClick() { 
+  triggerHaptic(); 
+  secretClicks++; 
+  clearTimeout(clickTimer); 
+  if (secretClicks >= 5) { 
+    secretClicks = 0; 
+    openAdminModal(); 
+  } else { 
+    clickTimer = setTimeout(function() { secretClicks = 0; }, 2000); 
+  } 
+}
+
+function openAdminModal() { adminModalInstance.show(); } 
+function openRegisterModal() { regModalInstance.show(); } 
+function openLoginGateModal() { loginGateModalInstance.show(); }
+
+function getDriveDirectLink(url) {
+  if (!url) return "";
+  const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
+  if (match && match[1]) {
+    return 'https://lh3.googleusercontent.com/d/' + match[1];
+  }
+  return url; 
+}
+
+function openMediaPreview(type) { 
+  triggerHaptic(); 
+  if (!currentActiveMedia || !currentActiveMedia[type]) { 
+    showToast('ไม่มีรูป', 'error'); 
+    return; 
+  } 
+  document.getElementById('previewImageSrc').src = getDriveDirectLink(currentActiveMedia[type]); 
+  imagePreviewModalInstance.show(); 
+}
+
+function openMediaPreview2025(type) { 
+  triggerHaptic(); 
+  if (!currentActiveMedia || !currentActiveMedia[type]) { 
+    showToast('ไม่มีรูปปีก่อน', 'error'); 
+    return; 
+  } 
+  document.getElementById('previewImageSrc').src = getDriveDirectLink(currentActiveMedia[type]); 
+  imagePreviewModalInstance.show(); 
+}
+
+document.getElementById('imagePreviewModal').addEventListener('hidden.bs.modal', function () { 
+  document.getElementById('previewImageSrc').src = ''; 
+});
+
+function previewTrackImageById(imgId) {
+  triggerHaptic();
+  const el = document.getElementById(imgId);
+  if (!el || !el.src) return;
+  document.getElementById('previewImageSrc').src = el.src;
+  imagePreviewModalInstance.show();
+}
+
+function onAdminMediaRaceChange() {
+  const raceId = document.getElementById('adMediaRace').value; 
+  const currentRace = globalRaces.find(function(r) { return r.id === raceId; });
+  if (currentRace && currentRace.media) { 
+    document.getElementById('adTrackImgUrl').value = currentRace.media.trackImg || "";
+    document.getElementById('adPracticeUrl').value = currentRace.media.practiceImg || ""; 
+    document.getElementById('adQuali2025Url').value = currentRace.media.quali2025 || ""; 
+    document.getElementById('adRace2025Url').value = currentRace.media.race2025 || ""; 
+    document.getElementById('adExtLink').value = currentRace.media.extLink || ""; 
+  } else { 
+    document.getElementById('adTrackImgUrl').value = "";
+    document.getElementById('adPracticeUrl').value = ""; 
+    document.getElementById('adQuali2025Url').value = ""; 
+    document.getElementById('adRace2025Url').value = ""; 
+    document.getElementById('adExtLink').value = ""; 
+  }
+}
+
+function onAdminRaceChange() {
+  const rSel = document.getElementById('adminRace');
+  const opt = rSel.options[rSel.selectedIndex];
+  if (!opt || !opt.value) return;
+  const isSprint = opt.dataset.type === 'Sprint';
+  const flWrap = document.getElementById('adminFlWrapper');
+  if (flWrap) flWrap.style.display = isSprint ? 'none' : 'block';
+}
+
+function switchToRegisterFromLogin() { loginGateModalInstance.hide(); regModalInstance.show(); }
+
+function confirmLoginGate() { 
+  triggerHaptic(); 
+  const selected = document.getElementById('loginPlayerSelect').value; 
+  if (!selected) { showToast('กรุณาเลือกชื่อก่อน', 'error'); return; } 
+  localStorage.setItem('f1_player_name', selected); 
+  updateUserSessionUI(); 
+  loginGateModalInstance.hide(); 
+  onRaceChange(); 
+  showToast('เข้าสู่ระบบสำเร็จ!', 'success'); 
+}
+
+function showTab(tabId, el) { 
+  triggerHaptic(); 
+  document.querySelectorAll('.tab-pane-custom').forEach(function(p) { p.style.display = 'none'; }); 
+  document.querySelectorAll('.f1-nav-link').forEach(function(l) { l.classList.remove('active'); }); 
+  document.getElementById(tabId).style.display = 'block'; 
+  el.classList.add('active'); 
+}
+
+function forceRefreshData() { 
+  if (isRefreshing) return;
+  isRefreshing = true;
+  triggerHaptic();
+  document.getElementById('globalLoader').classList.remove('hidden'); 
+  loadData(); 
+}
+
+function loadData() {
+  callGAS("getInitData").then(function(data) {
+    isRefreshing = false; 
+    if(!data) return;
+    globalLeaderboard = data.leaderboard || []; globalPlayers = data.players || []; globalRaces = data.races || [];
+    
+    const pGate = document.getElementById('loginPlayerSelect');
+    if(pGate) pGate.innerHTML = '<option value="" disabled selected>-- เลือกชื่อ --</option>' + globalPlayers.map(function(p) { return '<option value="' + p + '">' + p + '</option>'; }).join('');
+    const savedPlayer = localStorage.getItem('f1_player_name');
+    if (!savedPlayer || !globalPlayers.includes(savedPlayer)) { if(loginGateModalInstance) loginGateModalInstance.show(); } else { if(pGate) pGate.value = savedPlayer; }
+    updateUserSessionUI();
+
+    const openRaces = globalRaces.filter(function(r) { return r.status === 'OPEN'; });
+    const selRace = document.getElementById('selRace');
+    if(selRace) selRace.innerHTML = '<option value="" disabled selected>-- เลือกสนาม --</option>' + openRaces.map(function(r) { return '<option value="' + r.id + '" data-type="' + r.type + '" data-dl="' + r.deadline + '">🟢 ' + r.name + '</option>'; }).join('');
+
+    const allRaceOpts = '<option value="" disabled selected>-- เลือกสนาม --</option>' + globalRaces.map(function(r) { return '<option value="' + r.id + '" data-type="' + r.type + '">' + (r.status === 'OPEN' ? '🟢' : (r.status === 'CALCULATED' ? '🏁' : '🟡')) + ' ' + r.name + '</option>'; }).join('');
+    ['selCommRace','adminRace','adRaceDead','adRaceCheck','adMediaRace','selCenterRace','sel2025Race'].forEach(function(id) { let el = document.getElementById(id); if(el) el.innerHTML = allRaceOpts; });
+
+    if (globalRaces.length > 0) { document.getElementById('adMediaRace').value = globalRaces[0].id; onAdminMediaRaceChange(); }
+    if (openRaces.length > 0) { document.getElementById('selCenterRace').value = openRaces[0].id; document.getElementById('sel2025Race').value = openRaces[0].id; onCenterRaceChange(); on2025RaceChange(); }
+
+    const tbody = document.getElementById('lbBody'); const podiumContainer = document.getElementById('podiumContainer');
+    if (!globalLeaderboard || globalLeaderboard.length === 0) {
+      if(podiumContainer) podiumContainer.innerHTML = ''; if(tbody) tbody.innerHTML = '<tr><td colspan="4" class="text-muted py-3">ยังไม่มีคะแนนสะสม</td></tr>';
+    } else {
+      let podiumHtml = ''; const top3 = globalLeaderboard.slice(0, 3); const rest = globalLeaderboard.slice(3); const podiumOrder = [];
+      if(top3[1]) podiumOrder.push({ d: top3[1], r: 2, c: 'podium-2' });
+      if(top3[0]) podiumOrder.push({ d: top3[0], r: 1, c: 'podium-1' });
+      if(top3[2]) podiumOrder.push({ d: top3[2], r: 3, c: 'podium-3' });
+
+      podiumOrder.forEach(function(p) {
+        const logoUrl = TEAM_LOGOS[p.d[4] || "Ferrari"] || ""; const teamIcon = logoUrl ? '<img src="' + logoUrl + '" class="podium-avatar">' : '';
+        podiumHtml += '<div class="podium-card ' + p.c + '" onclick="showPlayerStats(decodeURIComponent(\'' + encodeURIComponent(String(p.d[1])) + '\'))"><div class="podium-rank">' + p.r + '</div>' + teamIcon + '<div class="podium-name">' + p.d[1] + '</div><div class="podium-pts">' + p.d[2] + ' PTS</div></div>';
+      });
+      if(podiumContainer) podiumContainer.innerHTML = podiumHtml;
+
+      if(tbody) {
+        tbody.innerHTML = rest.map(function(row) {
+          const lastPts = Number(row[3]) || 0; const lastBadge = lastPts > 0 ? '<span class="last-pts-badge pts-gain">+' + lastPts + '</span>' : '<span class="last-pts-badge pts-zero">0</span>';
+          const logoUrl = TEAM_LOGOS[row[4] || "Ferrari"] || ""; const teamIconHtml = logoUrl ? '<img src="' + logoUrl + '" class="team-logo-icon">' : '';
+          return '<tr class="player-row" onclick="showPlayerStats(decodeURIComponent(\'' + encodeURIComponent(String(row[1])) + '\'))"><td><span class="rank-circle rank-other">' + row[0] + '</span></td><td class="text-start fw-bold text-white">' + row[1] + ' ' + teamIconHtml + '</td><td>' + lastBadge + '</td><td class="text-warning fw-black fs-5 f1-font">' + row[2] + '</td></tr>';
+        }).join('');
+      }
+    }
+
+    const calcRaces = globalRaces.filter(function(r) { return r.status === 'CALCULATED'; }); const finishedSelect = document.getElementById('selFinishedRace');
+    if(finishedSelect) {
+      if (calcRaces.length === 0) { finishedSelect.innerHTML = '<option value="" disabled selected>-- ยังไม่มีสนามที่สรุปผล --</option>'; finishedSelect.disabled = true; } 
+      else { finishedSelect.disabled = false; finishedSelect.innerHTML = '<option value="" disabled selected>-- เลือกสนาม --</option>' + calcRaces.map(function(r) { return '<option value="' + r.id + '">🏁 ' + r.name + '</option>'; }).join(''); }
+    }
+    document.getElementById('globalLoader').classList.add('hidden');
+  }).catch(function(err) { 
+    isRefreshing = false; showToast('Error: ' + err, 'error'); document.getElementById('globalLoader').classList.add('hidden'); 
+  });
+}
+
+function handleCheckFinishedRace() { triggerHaptic(); const raceId = document.getElementById('selFinishedRace').value; if (!raceId) { showToast('กรุณาเลือกสนามก่อน', 'error'); return; } openBreakdownModal(raceId); }
+
+function updateUserSessionUI() {
+  const player = localStorage.getItem('f1_player_name');
+  const formDisplay = document.getElementById('formPlayerDisplay');
+  
+  if (!player) { 
+    document.getElementById('myPlayerName').innerText = '--'; 
+    document.getElementById('myCurrentRank').innerText = '-'; 
+    document.getElementById('myTotalScore').innerText = '0'; 
+    if (formDisplay) formDisplay.innerText = '-';
+    return; 
+  }
+  
+  document.getElementById('myPlayerName').innerText = player; 
+  if (formDisplay) formDisplay.innerText = player;
+  
+  const match = globalLeaderboard.find(function(row) { return String(row[1]).toLowerCase() === player.toLowerCase(); });
+  if (match) { 
+    document.getElementById('myCurrentRank').innerText = 'อันดับที่ ' + match[0]; 
+    document.getElementById('myTotalScore').innerText = match[2]; 
+  } else { 
+    document.getElementById('myCurrentRank').innerText = 'ยังไม่มีอันดับ'; 
+    document.getElementById('myTotalScore').innerText = '0'; 
+  }
+}
+
+function onRaceChange() {
+  const rSel = document.getElementById('selRace'); const opt = rSel.options[rSel.selectedIndex]; if (!opt || !opt.value) return;
+  const raceId = opt.value; const isSprint = opt.dataset.type === 'Sprint'; document.getElementById('flWrapper').style.display = isSprint ? 'none' : 'block';
+  let rawDl = (opt.dataset.dl || "").trim(); if (!rawDl) { currentDeadline = null; } else { currentDeadline = new Date(rawDl.replace(' ', 'T')); }
+  startCountdown();
+
+  const raceObj = globalRaces.find(function(r) { return r.id === raceId; });
+  const imgWrapper = document.getElementById('trackImageWrapper');
+  const imgEl = document.getElementById('trackImagePreview');
+  if (imgWrapper && imgEl) {
+    if (raceObj && raceObj.media && raceObj.media.trackImg) {
+      imgEl.src = getDriveDirectLink(raceObj.media.trackImg);
+      imgWrapper.style.display = 'block';
+    } else {
+      imgEl.src = '';
+      imgWrapper.style.display = 'none';
+    }
+  }
+
+  const player = localStorage.getItem('f1_player_name'); const histAlert = document.getElementById('savedPredAlert');
+  if (player) {
+    callGAS("getUserSavedPrediction", { raceId: raceId, playerName: player }).then(function(res) {
+      if (res.found) {
+        histAlert.style.display = 'block'; document.getElementById('savedPredTime').innerText = 'บันทึกเมื่อ: ' + res.submittedAt; document.getElementById('savedPredContent').innerHTML = '<strong>P1:</strong> ' + res.p1 + ' | <strong>P2:</strong> ' + res.p2 + '<br><strong>P3:</strong> ' + res.p3 + ' | <strong>P4:</strong> ' + res.p4 + (res.fl ? ' | <strong>FL:</strong> ' + res.fl : '');
+        ['pos1','pos2','pos3','pos4','posFL'].forEach(function(id, i) { document.getElementById(id).value = [res.p1, res.p2, res.p3, res.p4, res.fl][i] || ''; });
+      } else { histAlert.style.display = 'none'; }
+    });
+  } else { histAlert.style.display = 'none'; }
+}
+
+function onCenterRaceChange() {
+  const raceId = document.getElementById('selCenterRace').value; 
+  const currentRace = globalRaces.find(function(r) { return r.id === raceId; }); 
+  const container = document.getElementById('rcContent');
+  if (!currentRace) { container.style.display = 'none'; return; }
+  container.style.display = 'block'; 
+  currentActiveMedia = currentRace.media || null; 
+  const m = currentActiveMedia || {};
+
+  const badgePrac = document.getElementById('badgePractice'); 
+  const thumbPrac = document.getElementById('thumbPractice');
+  if (badgePrac) { 
+    badgePrac.className = m.practiceImg ? 'badge bg-success' : 'badge bg-secondary'; 
+    badgePrac.innerText = m.practiceImg ? '🔍 แตะเพื่อขยาย' : 'ไม่มีภาพ'; 
+  }
+  if (thumbPrac) {
+    if (m.practiceImg && m.practiceImg.trim() !== "") {
+      thumbPrac.src = getDriveDirectLink(m.practiceImg);
+      thumbPrac.style.display = 'block';
+    } else {
+      thumbPrac.src = '';
+      thumbPrac.style.display = 'none';
+    }
+  }
+  
+  const oddsBtn = document.getElementById('rcExtLinkBtn');
+  if (oddsBtn) { 
+    if (m.extLink && m.extLink.trim() !== "") { 
+      oddsBtn.href = m.extLink; 
+      oddsBtn.onclick = null; 
+    } else { 
+      oddsBtn.href = "javascript:void(0)"; 
+      oddsBtn.onclick = function() { showToast("ไม่มีลิงก์", "error"); }; 
+    } 
+  }
+  
+  const info = currentRace.trackInfo || {};
+  document.getElementById('rcTrackType').innerText = info.trackType || '-'; 
+  document.getElementById('rcTires').innerText = info.tires || '-'; 
+  document.getElementById('rcSafetyCar').innerText = info.safetyCar || '-'; 
+  document.getElementById('rcWeather').innerHTML = '<span class="weather-icon-animated">' + (info.weather || '-') + '</span>'; 
+  document.getElementById('rcPrevWinners').innerText = info.prevWinners || '-'; 
+  document.getElementById('rcKeyNote').innerText = info.keyNote || '-';
+
+  const layoutWrapper = document.getElementById('rcTrackLayoutWrapper');
+  const layoutImg = document.getElementById('rcTrackLayoutImg');
+  if (layoutWrapper && layoutImg) {
+    if (m.trackLayoutImg && m.trackLayoutImg.trim() !== "") {
+      layoutImg.src = getDriveDirectLink(m.trackLayoutImg);
+      layoutWrapper.style.display = 'block';
+    } else {
+      layoutImg.src = '';
+      layoutWrapper.style.display = 'none';
+    }
+  }
+}
+
+function on2025RaceChange() {
+  const raceId = document.getElementById('sel2025Race').value; 
+  const currentRace = globalRaces.find(function(r) { return r.id === raceId; }); 
+  const container = document.getElementById('content2025');
+  if (!currentRace) { container.style.display = 'none'; return; }
+  container.style.display = 'block'; 
+  currentActiveMedia = currentRace.media || null; 
+  const m = currentActiveMedia || {};
+
+  function updateCard2025(badgeId, thumbId, imgUrl) { 
+    const el = document.getElementById(badgeId); 
+    const thumb = document.getElementById(thumbId);
+    const hasImg = !!imgUrl;
+    
+    if (el) { 
+      el.className = hasImg ? 'rc-btn-badge bg-success text-white' : 'rc-btn-badge bg-secondary text-white'; 
+      el.innerText = hasImg ? '🔍 แตะเพื่อขยาย' : 'ไม่มีภาพ'; 
+    }
+    if (thumb) {
+      if (hasImg) {
+        thumb.src = getDriveDirectLink(imgUrl);
+        thumb.style.display = 'block';
+      } else {
+        thumb.src = '';
+        thumb.style.display = 'none';
+      }
+    }
+  }
+  
+  updateCard2025('badgeQuali2025', 'thumbQuali2025', m.quali2025); 
+  updateCard2025('badgeRace2025', 'thumbRace2025', m.race2025);
+}
+
+function startCountdown() {
+  clearInterval(countdownInterval); const box = document.getElementById('countdownBox'); const submitBtn = document.getElementById('btnPred');
+  if (!currentDeadline || isNaN(currentDeadline.getTime())) { box.style.display = 'block'; box.innerHTML = '<div class="text-secondary small py-1"><i class="fa-solid fa-clock me-1"></i>ยังไม่ได้กำหนดเวลาปิดรับ</div>'; return; }
+  box.style.display = 'block';
+  function updateTimer() {
+    const diff = currentDeadline - new Date();
+    if (diff <= 0) { box.innerHTML = '<div class="text-danger fw-bold py-1">⏰ หมดเวลาทายผล</div>'; if (submitBtn) { submitBtn.disabled = true; submitBtn.innerText = 'CLOSED'; } clearInterval(countdownInterval); return; }
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane me-2"></i>SUBMIT PREDICTION'; }
+    const d = Math.floor(diff / 86400000); const h = Math.floor((diff / 3600000) % 24); const m = Math.floor((diff / 60000) % 60); const s = Math.floor((diff / 1000) % 60);
+    const pad = function(n) { return String(n).padStart(2, '0'); };
+    box.innerHTML = '<div class="timer-units"><div><div class="timer-num">' + pad(d) + '</div><div class="timer-lbl">DAY</div></div><div><div class="timer-num">' + pad(h) + '</div><div class="timer-lbl">HRS</div></div><div><div class="timer-num">' + pad(m) + '</div><div class="timer-lbl">MIN</div></div><div><div class="timer-num">' + pad(s) + '</div><div class="timer-lbl">SEC</div></div></div>';
+  }
+  updateTimer(); countdownInterval = setInterval(updateTimer, 1000);
+}
+
+function openBreakdownModal(raceId) {
+  triggerHaptic(); breakdownModalInstance.show(); const body = document.getElementById('breakdownBody'); body.innerHTML = '<div class="text-center py-3"><i class="fa-solid fa-spinner fa-spin me-2"></i>กำลังตรวจสอบผล...</div>';
+  callGAS("getRaceBreakdown", { raceId: raceId, playerName: localStorage.getItem('f1_player_name') || '' }).then(function(res) {
+    if (!res.actual) { body.innerHTML = '<div class="text-danger text-center">ไม่พบข้อมูล</div>'; return; }
+    const act = res.actual, pred = res.userPred;
+    function matchRow(posName, actVal, predVal) {
+      const isMatch = predVal && actVal && (predVal.trim().toLowerCase() === actVal.trim().toLowerCase());
+      const badge = pred ? (isMatch ? '<span class="badge bg-success">✅ +2</span>' : '<span class="badge bg-danger">❌ 0</span>') : '';
+      return '<div class="p-2 mb-2 rounded bg-black border ' + (isMatch ? 'border-success' : 'border-secondary') + '"><div class="d-flex justify-content-between small text-secondary mb-1"><span><strong>' + posName + '</strong> (จริง: <span class="text-warning">' + (actVal || '-') + '</span>)</span>' + badge + '</div><div class="small text-white">คุณทาย: <strong>' + (predVal || '<span class="text-muted">ไม่ได้ส่ง</span>') + '</strong></div></div>';
+    }
+    let html = '<div class="mb-3 text-center"><h6 class="fw-bold text-white mb-1">' + act.name + '</h6>' + (pred ? '<span class="badge bg-warning text-dark fs-6">คะแนน: ' + pred.score + ' แต้ม</span>' : '<span class="badge bg-secondary">ไม่ได้ส่งคำทาย</span>') + '</div>' + matchRow('P1', act.p1, pred?pred.p1:'') + matchRow('P2', act.p2, pred?pred.p2:'') + matchRow('P3', act.p3, pred?pred.p3:'') + matchRow('P4', act.p4, pred?pred.p4:'');
+    if (act.type !== 'Sprint') {
+      const mFL = pred && pred.fl && act.fl && pred.fl.trim().toLowerCase() === act.fl.trim().toLowerCase();
+      const badgeFl = pred ? (mFL ? '<span class="badge bg-success">✅ +1</span>' : '<span class="badge bg-danger">❌ 0</span>') : '';
+      html += '<div class="p-2 mb-2 rounded bg-black border ' + (mFL ? 'border-success' : 'border-secondary') + '"><div class="d-flex justify-content-between small text-secondary mb-1"><span><strong>⚡ FL</strong> (จริง: <span class="text-warning">' + (act.fl || '-') + '</span>)</span>' + badgeFl + '</div><div class="small text-white">คุณทาย: <strong>' + (pred?pred.fl:'<span class="text-muted">ไม่ได้ส่ง</span>') + '</strong></div></div>';
+    }
+    body.innerHTML = html;
+  });
+}
+
+function loadCommunityPredictions() {
+  const raceId = document.getElementById('selCommRace').value; const box = document.getElementById('commContent'); box.innerHTML = '<div class="text-center text-secondary py-3"><i class="fa-solid fa-spinner fa-spin me-2"></i>กำลังตรวจสอบข้อมูล...</div>';
+  callGAS("getCommunityPredictions", { raceId: raceId }).then(function(res) {
+    if (!res.locked) { box.innerHTML = '<div class="p-3 rounded text-center bg-black border border-warning"><div class="text-warning fw-bold fs-5 mb-2"><i class="fa-solid fa-lock me-2"></i>ยังไม่เปิดเผยข้อมูล</div><div class="small text-secondary">' + res.msg + '</div></div>'; return; }
+    if (res.predictions.length === 0) { box.innerHTML = '<div class="text-center text-muted py-3">ไม่มีใครส่งคำทายในสนามนี้</div>'; return; }
+    let html = '<div class="consensus-stat-card"><div class="small text-secondary fw-bold mb-2 text-uppercase"><i class="fa-solid fa-chart-pie text-info me-1"></i>สถิติเสียงส่วนใหญ่ (' + res.totalPredictors + ' คน)</div><div class="d-flex justify-content-between small py-1 border-bottom border-dark"><span>🏆 เต็ง 1 (P1):</span><span class="text-warning fw-bold">' + res.topP1 + '</span></div><div class="d-flex justify-content-between small py-1"><span>⚡ เต็ง FL:</span><span class="text-info fw-bold">' + res.topFL + '</span></div></div>';
+    html += res.predictions.map(function(p) { return '<div class="p-3 mb-2 rounded bg-black border border-secondary text-start"><div class="d-flex justify-content-between align-items-center mb-2"><span class="fw-bold text-white"><i class="fa-solid fa-user-astronaut text-danger me-2"></i>' + p.player + '</span><span class="badge bg-danger">ได้ ' + p.score + ' แต้ม</span></div><div class="small text-secondary"><div><strong>P1:</strong> ' + p.p1 + ' | <strong>P2:</strong> ' + p.p2 + '</div><div><strong>P3:</strong> ' + p.p3 + ' | <strong>P4:</strong> ' + p.p4 + '</div>' + (p.fl ? '<div class="text-purple"><strong>⚡ FL:</strong> ' + p.fl + '</div>' : '') + '</div></div>'; }).join('');
+    box.innerHTML = html;
+  });
+}
+
+function showPlayerStats(playerName) {
+  triggerHaptic(); statsModalInstance.show(); document.getElementById('statsBody').innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>กำลังคำนวณสถิติ...';
+  callGAS("getPlayerStats", { playerName: playerName }).then(function(res) {
+    document.getElementById('statsBody').innerHTML = '<div class="mb-3"><div class="fs-4 fw-bold text-white mb-1"><i class="fa-solid fa-user-astronaut text-danger me-2"></i>' + res.playerName + '</div><span class="badge bg-warning text-dark fs-6">อันดับที่ ' + res.rank + '</span> <span class="badge bg-danger fs-6">' + res.totalScore + ' คะแนน</span></div><div class="row g-2 mb-3"><div class="col-6"><div class="p-2 rounded bg-black border border-secondary"><div class="text-secondary small">ทายเป๊ะ (P1-P4)</div><div class="fs-4 fw-bold text-info">' + res.exactHits + ' ครั้ง</div></div></div><div class="col-6"><div class="p-2 rounded bg-black border border-secondary"><div class="text-secondary small">ทาย FL ถูก</div><div class="fs-4 fw-bold text-purple">' + res.flHits + ' ครั้ง</div></div></div></div><h6 class="text-secondary small fw-bold text-start text-uppercase mb-2">ประวัติคะแนนแต่ละสนาม</h6><div class="p-2 rounded bg-black border border-secondary" style="max-height: 180px; overflow-y: auto;">' + (res.history.length === 0 ? '<div class="text-muted small">ยังไม่มีประวัติ</div>' : res.history.map(function(h) { return '<div class="d-flex justify-content-between small py-1 border-bottom border-dark text-start"><span>' + h.race + '</span><span class="text-warning fw-bold">' + h.score + ' pts</span></div>'; }).join('')) + '</div>';
+  });
+}
+
+function handleAdminDeadline() { 
+  const pin = document.getElementById('adminPin').value, raceId = document.getElementById('adRaceDead').value, rawDt = document.getElementById('adNewDead').value; 
+  if (!pin || !raceId) { showToast('กรุณากรอก Admin PIN', 'error'); return; } 
+  callGAS("adminUpdateRaceSettings", { pin: pin, raceId: raceId, newDeadline: rawDt?rawDt.replace('T', ' '):'', newStatus: document.getElementById('adNewStatus').value }).then(function(res) { 
+    showToast(res.msg, res.success ? 'success' : 'error'); if(res.success) forceRefreshData(); 
+  }); 
+}
+
+function handleAdminSetupNewSeason() { 
+  const pin = document.getElementById('adminPin').value, year = document.getElementById('adSeasonYear').value; 
+  if (!pin || !year) return; 
+  if (!confirm('ยืนยันการดึงตารางแข่ง?')) return; 
+  showToast('กำลังดึงข้อมูลปฏิทิน...', 'success'); 
+  callGAS("adminSetupNewSeasonCalendar", { pin: pin, seasonYear: year }).then(function(res) { 
+    showToast(res.msg, res.success ? 'success' : 'error'); if(res.success) forceRefreshData(); 
+  }); 
+}
+
+function handleAdminSaveMediaLinks() { 
+  const pin = document.getElementById('adminPin').value, raceId = document.getElementById('adMediaRace').value; 
+  if (!pin || !raceId) { showToast('กรุณากรอก Admin PIN', 'error'); return; } 
+  const payload = { 
+    raceId: raceId, 
+    trackImg: document.getElementById('adTrackImgUrl').value.trim(),
+    practiceImg: document.getElementById('adPracticeUrl').value.trim(), 
+    quali2025: document.getElementById('adQuali2025Url').value.trim(), 
+    race2025: document.getElementById('adRace2025Url').value.trim(), 
+    extLink: document.getElementById('adExtLink').value.trim(), 
+    extTitle: "อัตราต่อรอง" 
+  }; 
+  callGAS("adminSaveTrackMediaLinks", { pin: pin, data: payload }).then(function(res) { 
+    showToast(res.msg, res.success ? 'success' : 'error'); 
+    if(res.success) forceRefreshData(); 
+  }); 
+}
+
+function matchDriverOption(selectId, apiName) { if (!apiName) return; const select = document.getElementById(selectId); const cleanApi = apiName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim(); for (let i = 0; i < select.options.length; i++) if (select.options[i].value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() === cleanApi) { select.selectedIndex = i; return; } const lastName = cleanApi.split(" ").pop(); for (let i = 0; i < select.options.length; i++) if (select.options[i].value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().includes(lastName)) { select.selectedIndex = i; return; } }
+
+function handleFetchOfficialResults() { 
+  const pin = document.getElementById('adminPin').value, raceId = document.getElementById('adminRace').value, btn = document.getElementById('btnApiFetch'); 
+  if (!pin || !raceId) return; 
+  btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>'; 
+  callGAS("adminFetchOfficialResults", { pin: pin, raceId: raceId }).then(function(res) { 
+    btn.disabled = false; btn.innerHTML = 'ดึงผลจริง API'; 
+    if (!res.success) { showToast("⚠️ " + res.msg, 'error'); return; } 
+    matchDriverOption('adP1', res.data.p1); matchDriverOption('adP2', res.data.p2); matchDriverOption('adP3', res.data.p3); matchDriverOption('adP4', res.data.p4); 
+    if (res.data.type !== 'Sprint' && res.data.fl) matchDriverOption('adFL', res.data.fl); 
+    if (res.data.url) document.getElementById('adLink').value = res.data.url; 
+    showToast(res.msg, 'success'); 
+  }); 
+}
+
+function checkAdminSubmissions() { 
+  const pin = document.getElementById('adminPin').value, raceId = document.getElementById('adRaceCheck').value; 
+  if (!pin || !raceId) return; 
+  document.getElementById('subStatusContainer').style.display = 'block'; 
+  document.getElementById('subStatusSummary').innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>'; 
+  callGAS("adminGetSubmissionStatus", { pin: pin, raceId: raceId }).then(function(res) { 
+    if (!res.success) { showToast(res.msg, 'error'); document.getElementById('subStatusContainer').style.display = 'none'; return; } 
+    lastPendingList = res.pending || []; 
+    document.getElementById('subStatusSummary').innerHTML = 'รวม: <strong>' + res.total + '</strong> | ส่งแล้ว: <strong class="text-success">' + res.submittedCount + '</strong> | ค้าง: <strong class="text-danger">' + res.pendingCount + '</strong>'; 
+    document.getElementById('cntPending').innerText = res.pendingCount; 
+    document.getElementById('cntSubmitted').innerText = res.submittedCount; 
+    document.getElementById('listPending').innerHTML = res.pending.length ? res.pending.map(function(name) { return '<span class="badge bg-danger text-white me-1 mb-1">' + name + '</span>'; }).join('') : '<span class="text-success small">ส่งครบทุกคนแล้ว!</span>'; 
+    document.getElementById('listSubmitted').innerHTML = res.submitted.length ? res.submitted.map(function(s) { return '<div class="d-flex justify-content-between py-1 border-bottom border-secondary"><span class="text-white">✅ ' + s.name + '</span><span class="text-secondary">' + s.time + '</span></div>'; }).join('') : 'ยังไม่มีใครส่ง'; 
+  }); 
+}
+
+function copyPendingList() { if (!lastPendingList || lastPendingList.length === 0) return; const text = '🏁 ทวงคำทายผล F1\n⚠️ คนที่ยังไม่ได้ส่ง (' + lastPendingList.length + ' คน):\n' + lastPendingList.map(function(n, i) { return (i + 1) + '. ' + n; }).join('\n') + '\n\nรีบส่งก่อนหมดเวลานะครับ!'; navigator.clipboard.writeText(text).then(function() { showToast('คัดลอกเรียบร้อย!', 'success'); }); }
+
+function handleRegister(e) { 
+  e.preventDefault(); triggerHaptic(); 
+  const btn = document.getElementById('btnReg'), name = document.getElementById('regName').value, team = document.getElementById('regTeam').value; 
+  btn.disabled = true; 
+  callGAS("registerPlayer", { playerName: name, teamName: team }).then(function(res) { 
+    showToast(res.msg, res.success ? 'success' : 'error'); btn.disabled = false; 
+    if (res.success) { localStorage.setItem('f1_player_name', name); document.getElementById('regName').value = ''; regModalInstance.hide(); forceRefreshData(); showTab('tab-pred', document.querySelectorAll('.f1-nav-link')[1]); } 
+  }); 
+}
+
+function handlePrediction(e) { 
+  e.preventDefault(); triggerHaptic(); 
+  const player = localStorage.getItem('f1_player_name'); 
+  if (!player) { loginGateModalInstance.show(); return; } 
+  const btn = document.getElementById('btnPred'), rSel = document.getElementById('selRace'), p1 = document.getElementById('pos1').value, p2 = document.getElementById('pos2').value, p3 = document.getElementById('pos3').value, p4 = document.getElementById('pos4').value; 
+  btn.disabled = true; 
+  callGAS("submitPrediction", { data: { playerName: player, raceId: rSel.value, type: rSel.options[rSel.selectedIndex].dataset.type, p1: p1, p2: p2, p3: p3, p4: p4, fl: document.getElementById('posFL').value } }).then(function(res) { 
+    btn.disabled = false; showToast(res.msg, res.success ? 'success' : 'error'); 
+    if (res.success) { document.getElementById('savedPredAlert').style.display = 'block'; document.getElementById('savedPredTime').innerText = 'บันทึกเมื่อ: ' + res.submittedAt; document.getElementById('savedPredContent').innerHTML = '<strong>P1:</strong> ' + res.data.p1 + ' | <strong>P2:</strong> ' + res.data.p2 + '<br><strong>P3:</strong> ' + res.data.p3 + ' | <strong>P4:</strong> ' + res.data.p4 + (res.data.fl ? ' | <strong>FL:</strong> ' + res.data.fl : ''); forceRefreshData(); } 
+  }); 
+}
+
+function handleAdminSubmit(e) { 
+  e.preventDefault(); 
+  if (!confirm('ยืนยันบันทึกผลและตัดคะแนน?')) return; 
+  const btn = document.getElementById('btnAdmin'), rSel = document.getElementById('adminRace'); 
+  btn.disabled = true; 
+  callGAS("saveResultAndCalculate", { pin: document.getElementById('adminPin').value, resultData: { raceId: rSel.value, type: rSel.options[rSel.selectedIndex].dataset.type, p1: document.getElementById('adP1').value, p2: document.getElementById('adP2').value, p3: document.getElementById('adP3').value, p4: document.getElementById('adP4').value, fl: document.getElementById('adFL').value, link: document.getElementById('adLink').value } }).then(function(res) { 
+    showToast(res.msg, res.success ? 'success' : 'error'); btn.disabled = false; 
+    if (res.success) { document.getElementById('adminPin').value = ''; adminModalInstance.hide(); forceRefreshData(); } 
+  }); 
+}
