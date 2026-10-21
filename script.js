@@ -1,7 +1,5 @@
-// ⚠️ Web App URL ของคุณถูกใส่ไว้เรียบร้อยแล้วครับ
 const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwZ_VB9I7ClOgDpd8bDkaY09CzipETJMeQPDK6Qk6JYVNPdgfXA6ZrmXDG8gYsJ9I6u/exec";
 
-// ฟังก์ชันกลางสำหรับส่งคำสั่งไปหา Google Apps Script
 async function callGAS(action, payload = {}) {
   const response = await fetch(GAS_API_URL, {
     method: "POST",
@@ -40,7 +38,6 @@ const TEAM_LOGOS = {
   "Cadillac": "https://lh3.googleusercontent.com/d/1GIArchbZm5K7bmSNfpkGNi8bHae5G1w0"
 };
 
-// --- ฐานข้อมูลนักแข่งสำหรับแสดงผลการ์ด (แปลงเป็น Direct Link เรียบร้อยแล้ว) ---
 const DEFAULT_DRIVER_IMG = "https://cdn-icons-png.flaticon.com/512/1995/1995470.png";
 
 const DRIVER_INFO = {
@@ -109,7 +106,6 @@ window.onload = function() {
   loadData();
 };
 
-// --- ฟังก์ชันจัดการการ์ดเลือกนักแข่ง (Driver Cards) ---
 function buildDriverGrid() {
   const container = document.getElementById('driverGridContainer');
   if (!container) return;
@@ -267,7 +263,6 @@ function onAdminRaceChange() {
 
 function switchToRegisterFromLogin() { loginGateModalInstance.hide(); regModalInstance.show(); }
 
-// 🔐 ตรวจสอบ PIN ตอนเข้าสู่ระบบ
 function confirmLoginGate() { 
   triggerHaptic(); 
   const selected = document.getElementById('loginPlayerSelect').value; 
@@ -313,65 +308,84 @@ function forceRefreshData() {
   isRefreshing = true;
   triggerHaptic();
   document.getElementById('globalLoader').classList.remove('hidden'); 
-  loadData(); 
+  loadData(true); 
 }
 
-function loadData() {
+function renderUI(data) {
+  globalLeaderboard = data.leaderboard || []; globalPlayers = data.players || []; globalRaces = data.races || [];
+  
+  const pGate = document.getElementById('loginPlayerSelect');
+  if(pGate) pGate.innerHTML = '<option value="" disabled selected>-- เลือกชื่อ --</option>' + globalPlayers.map(function(p) { return '<option value="' + p + '">' + p + '</option>'; }).join('');
+  
+  const savedPlayer = localStorage.getItem('f1_player_name');
+  if (!savedPlayer || !globalPlayers.includes(savedPlayer)) { 
+    const loginEl = document.getElementById('loginGateModal');
+    if(loginGateModalInstance && loginEl && !loginEl.classList.contains('show')) loginGateModalInstance.show(); 
+  } else { 
+    if(pGate) pGate.value = savedPlayer; 
+  }
+  updateUserSessionUI();
+
+  const openRaces = globalRaces.filter(function(r) { return r.status === 'OPEN'; });
+  const selRace = document.getElementById('selRace');
+  if(selRace) selRace.innerHTML = '<option value="" disabled selected>-- เลือกสนาม --</option>' + openRaces.map(function(r) { return '<option value="' + r.id + '" data-type="' + r.type + '" data-dl="' + r.deadline + '">🟢 ' + r.name + '</option>'; }).join('');
+
+  const allRaceOpts = '<option value="" disabled selected>-- เลือกสนาม --</option>' + globalRaces.map(function(r) { return '<option value="' + r.id + '" data-type="' + r.type + '">' + (r.status === 'OPEN' ? '🟢' : (r.status === 'CALCULATED' ? '🏁' : '🟡')) + ' ' + r.name + '</option>'; }).join('');
+  ['selCommRace','adminRace','adRaceDead','adRaceCheck','adMediaRace','selCenterRace','sel2025Race'].forEach(function(id) { let el = document.getElementById(id); if(el) el.innerHTML = allRaceOpts; });
+
+  if (globalRaces.length > 0) { document.getElementById('adMediaRace').value = globalRaces[0].id; onAdminMediaRaceChange(); }
+  if (openRaces.length > 0) { document.getElementById('selCenterRace').value = openRaces[0].id; document.getElementById('sel2025Race').value = openRaces[0].id; onCenterRaceChange(); on2025RaceChange(); }
+
+  const tbody = document.getElementById('lbBody'); const podiumContainer = document.getElementById('podiumContainer');
+  if (!globalLeaderboard || globalLeaderboard.length === 0) {
+    if(podiumContainer) podiumContainer.innerHTML = ''; if(tbody) tbody.innerHTML = '<tr><td colspan="4" class="text-muted py-3">ยังไม่มีคะแนนสะสม</td></tr>';
+  } else {
+    let podiumHtml = ''; const top3 = globalLeaderboard.slice(0, 3); const rest = globalLeaderboard.slice(3); const podiumOrder = [];
+    if(top3[1]) podiumOrder.push({ d: top3[1], r: 2, c: 'podium-2' });
+    if(top3[0]) podiumOrder.push({ d: top3[0], r: 1, c: 'podium-1' });
+    if(top3[2]) podiumOrder.push({ d: top3[2], r: 3, c: 'podium-3' });
+
+    podiumOrder.forEach(function(p) {
+      const logoUrl = TEAM_LOGOS[p.d[4] || "Ferrari"] || ""; const teamIcon = logoUrl ? '<img src="' + logoUrl + '" class="podium-avatar">' : '';
+      podiumHtml += '<div class="podium-card ' + p.c + '" onclick="showPlayerStats(decodeURIComponent(\'' + encodeURIComponent(String(p.d[1])) + '\'))"><div class="podium-rank">' + p.r + '</div>' + teamIcon + '<div class="podium-name">' + p.d[1] + '</div><div class="podium-pts">' + p.d[2] + ' PTS</div></div>';
+    });
+    if(podiumContainer) podiumContainer.innerHTML = podiumHtml;
+
+    if(tbody) {
+      tbody.innerHTML = rest.map(function(row) {
+        const lastPts = Number(row[3]) || 0; const lastBadge = lastPts > 0 ? '<span class="last-pts-badge pts-gain">+' + lastPts + '</span>' : '<span class="last-pts-badge pts-zero">0</span>';
+        const logoUrl = TEAM_LOGOS[row[4] || "Ferrari"] || ""; const teamIconHtml = logoUrl ? '<img src="' + logoUrl + '" class="team-logo-icon">' : '';
+        return '<tr class="player-row" onclick="showPlayerStats(decodeURIComponent(\'' + encodeURIComponent(String(row[1])) + '\'))"><td><span class="rank-circle rank-other">' + row[0] + '</span></td><td class="text-start fw-bold text-white">' + row[1] + ' ' + teamIconHtml + '</td><td>' + lastBadge + '</td><td class="text-warning fw-black fs-5 f1-font">' + row[2] + '</td></tr>';
+      }).join('');
+    }
+  }
+
+  const calcRaces = globalRaces.filter(function(r) { return r.status === 'CALCULATED'; }); const finishedSelect = document.getElementById('selFinishedRace');
+  if(finishedSelect) {
+    if (calcRaces.length === 0) { finishedSelect.innerHTML = '<option value="" disabled selected>-- ยังไม่มีสนามที่สรุปผล --</option>'; finishedSelect.disabled = true; } 
+    else { finishedSelect.disabled = false; finishedSelect.innerHTML = '<option value="" disabled selected>-- เลือกสนาม --</option>' + calcRaces.map(function(r) { return '<option value="' + r.id + '">🏁 ' + r.name + '</option>'; }).join(''); }
+  }
+}
+
+function loadData(ignoreCache = false) {
+  if (!ignoreCache) {
+    const cachedStr = localStorage.getItem('f1_cached_data');
+    if (cachedStr) {
+      try {
+        const cachedData = JSON.parse(cachedStr);
+        renderUI(cachedData);
+        document.getElementById('globalLoader').classList.add('hidden');
+      } catch(e) {}
+    } else {
+      document.getElementById('globalLoader').classList.remove('hidden');
+    }
+  }
+
   callGAS("getInitData").then(function(data) {
     isRefreshing = false; 
     if(!data) return;
-    globalLeaderboard = data.leaderboard || []; globalPlayers = data.players || []; globalRaces = data.races || [];
-    
-    const pGate = document.getElementById('loginPlayerSelect');
-    if(pGate) pGate.innerHTML = '<option value="" disabled selected>-- เลือกชื่อ --</option>' + globalPlayers.map(function(p) { return '<option value="' + p + '">' + p + '</option>'; }).join('');
-    
-    const savedPlayer = localStorage.getItem('f1_player_name');
-    if (!savedPlayer || !globalPlayers.includes(savedPlayer)) { 
-      if(loginGateModalInstance) loginGateModalInstance.show(); 
-    } else { 
-      if(pGate) pGate.value = savedPlayer; 
-    }
-    updateUserSessionUI();
-
-    const openRaces = globalRaces.filter(function(r) { return r.status === 'OPEN'; });
-    const selRace = document.getElementById('selRace');
-    if(selRace) selRace.innerHTML = '<option value="" disabled selected>-- เลือกสนาม --</option>' + openRaces.map(function(r) { return '<option value="' + r.id + '" data-type="' + r.type + '" data-dl="' + r.deadline + '">🟢 ' + r.name + '</option>'; }).join('');
-
-    const allRaceOpts = '<option value="" disabled selected>-- เลือกสนาม --</option>' + globalRaces.map(function(r) { return '<option value="' + r.id + '" data-type="' + r.type + '">' + (r.status === 'OPEN' ? '🟢' : (r.status === 'CALCULATED' ? '🏁' : '🟡')) + ' ' + r.name + '</option>'; }).join('');
-    ['selCommRace','adminRace','adRaceDead','adRaceCheck','adMediaRace','selCenterRace','sel2025Race'].forEach(function(id) { let el = document.getElementById(id); if(el) el.innerHTML = allRaceOpts; });
-
-    if (globalRaces.length > 0) { document.getElementById('adMediaRace').value = globalRaces[0].id; onAdminMediaRaceChange(); }
-    if (openRaces.length > 0) { document.getElementById('selCenterRace').value = openRaces[0].id; document.getElementById('sel2025Race').value = openRaces[0].id; onCenterRaceChange(); on2025RaceChange(); }
-
-    const tbody = document.getElementById('lbBody'); const podiumContainer = document.getElementById('podiumContainer');
-    if (!globalLeaderboard || globalLeaderboard.length === 0) {
-      if(podiumContainer) podiumContainer.innerHTML = ''; if(tbody) tbody.innerHTML = '<tr><td colspan="4" class="text-muted py-3">ยังไม่มีคะแนนสะสม</td></tr>';
-    } else {
-      let podiumHtml = ''; const top3 = globalLeaderboard.slice(0, 3); const rest = globalLeaderboard.slice(3); const podiumOrder = [];
-      if(top3[1]) podiumOrder.push({ d: top3[1], r: 2, c: 'podium-2' });
-      if(top3[0]) podiumOrder.push({ d: top3[0], r: 1, c: 'podium-1' });
-      if(top3[2]) podiumOrder.push({ d: top3[2], r: 3, c: 'podium-3' });
-
-      podiumOrder.forEach(function(p) {
-        const logoUrl = TEAM_LOGOS[p.d[4] || "Ferrari"] || ""; const teamIcon = logoUrl ? '<img src="' + logoUrl + '" class="podium-avatar">' : '';
-        podiumHtml += '<div class="podium-card ' + p.c + '" onclick="showPlayerStats(decodeURIComponent(\'' + encodeURIComponent(String(p.d[1])) + '\'))"><div class="podium-rank">' + p.r + '</div>' + teamIcon + '<div class="podium-name">' + p.d[1] + '</div><div class="podium-pts">' + p.d[2] + ' PTS</div></div>';
-      });
-      if(podiumContainer) podiumContainer.innerHTML = podiumHtml;
-
-      if(tbody) {
-        tbody.innerHTML = rest.map(function(row) {
-          const lastPts = Number(row[3]) || 0; const lastBadge = lastPts > 0 ? '<span class="last-pts-badge pts-gain">+' + lastPts + '</span>' : '<span class="last-pts-badge pts-zero">0</span>';
-          const logoUrl = TEAM_LOGOS[row[4] || "Ferrari"] || ""; const teamIconHtml = logoUrl ? '<img src="' + logoUrl + '" class="team-logo-icon">' : '';
-          return '<tr class="player-row" onclick="showPlayerStats(decodeURIComponent(\'' + encodeURIComponent(String(row[1])) + '\'))"><td><span class="rank-circle rank-other">' + row[0] + '</span></td><td class="text-start fw-bold text-white">' + row[1] + ' ' + teamIconHtml + '</td><td>' + lastBadge + '</td><td class="text-warning fw-black fs-5 f1-font">' + row[2] + '</td></tr>';
-        }).join('');
-      }
-    }
-
-    const calcRaces = globalRaces.filter(function(r) { return r.status === 'CALCULATED'; }); const finishedSelect = document.getElementById('selFinishedRace');
-    if(finishedSelect) {
-      if (calcRaces.length === 0) { finishedSelect.innerHTML = '<option value="" disabled selected>-- ยังไม่มีสนามที่สรุปผล --</option>'; finishedSelect.disabled = true; } 
-      else { finishedSelect.disabled = false; finishedSelect.innerHTML = '<option value="" disabled selected>-- เลือกสนาม --</option>' + calcRaces.map(function(r) { return '<option value="' + r.id + '">🏁 ' + r.name + '</option>'; }).join(''); }
-    }
+    localStorage.setItem('f1_cached_data', JSON.stringify(data));
+    renderUI(data);
     document.getElementById('globalLoader').classList.add('hidden');
   }).catch(function(err) { 
     isRefreshing = false; showToast('Error: ' + err, 'error'); document.getElementById('globalLoader').classList.add('hidden'); 
@@ -424,7 +438,6 @@ function onRaceChange() {
     }
   }
 
-  // เคลียร์การ์ดให้ว่างก่อนดึงข้อมูลเดิมของสนามนั้น
   ['pos1','pos2','pos3','pos4','posFL'].forEach(function(id) { 
     const el = document.getElementById(id);
     if (el) el.value = ''; 
@@ -664,7 +677,6 @@ function checkAdminSubmissions() {
 
 function copyPendingList() { if (!lastPendingList || lastPendingList.length === 0) return; const text = '🏁 ทวงคำทายผล F1\n⚠️ คนที่ยังไม่ได้ส่ง (' + lastPendingList.length + ' คน):\n' + lastPendingList.map(function(n, i) { return (i + 1) + '. ' + n; }).join('\n') + '\n\nรีบส่งก่อนหมดเวลานะครับ!'; navigator.clipboard.writeText(text).then(function() { showToast('คัดลอกเรียบร้อย!', 'success'); }); }
 
-// 🔐 สมัครสมาชิกพร้อมตั้งรหัส PIN
 function handleRegister(e) { 
   e.preventDefault(); triggerHaptic(); 
   const btn = document.getElementById('btnReg'), 
