@@ -375,8 +375,23 @@ function renderUI(data) {
     if(top3[2]) podiumOrder.push({ d: top3[2], r: 3, c: 'podium-3' });
 
     podiumOrder.forEach(function(p) {
-      const logoUrl = TEAM_LOGOS[p.d[4] || "Ferrari"] || ""; const teamIcon = logoUrl ? '<img src="' + getDriveDirectLink(logoUrl) + '" class="podium-avatar">' : '';
-      podiumHtml += '<div class="podium-card ' + p.c + '" onclick="showPlayerStats(decodeURIComponent(\'' + encodeURIComponent(String(p.d[1])) + '\'))"><div class="podium-rank">' + p.r + '</div>' + teamIcon + '<div class="podium-name">' + p.d[1] + '</div><div class="podium-pts">' + p.d[2] + ' PTS</div></div>';
+      const team = p.d[4] || "F1";
+      const teamColor = TEAM_COLORS[team] || "#555555";
+      const logoUrl = TEAM_LOGOS[team] || ""; 
+      const carUrl = TEAM_CARS[team] || "";
+      
+      const teamIcon = logoUrl ? '<img src="' + getDriveDirectLink(logoUrl) + '" class="new-podium-logo" alt="">' : '';
+      const carImg = carUrl ? '<img src="' + getDriveDirectLink(carUrl) + '" class="new-podium-car" alt="">' : '';
+      
+      podiumHtml += '<div class="new-podium-card ' + p.c + '" style="--team-color: ' + teamColor + ';" onclick="showPlayerStats(decodeURIComponent(\'' + encodeURIComponent(String(p.d[1])) + '\'))">' +
+                      '<div class="new-podium-rank">' + p.r + '</div>' + 
+                      '<div class="new-podium-car-wrap">' + carImg + '</div>' +
+                      '<div class="new-podium-info">' +
+                        '<div class="new-podium-name">' + p.d[1] + '</div>' + 
+                        teamIcon + 
+                        '<div class="new-podium-pts">' + p.d[2] + '<span class="small-pts">PTS</span></div>' +
+                      '</div>' +
+                    '</div>';
     });
     if(podiumContainer) podiumContainer.innerHTML = podiumHtml;
 
