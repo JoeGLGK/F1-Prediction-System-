@@ -112,123 +112,218 @@ body {
   line-height: 1; 
 }
 
-/* --- โพเดียมโฉมใหม่ (จัดตำแหน่งรถไว้ตรงกลางการ์ด) --- */
-.podium-container { 
-  display: flex; 
-  align-items: flex-end; 
-  justify-content: center; 
-  gap: 12px; 
-  margin: 30px 0 25px 0; 
-}
-
-.new-podium-card { 
-  flex: 1; 
-  background: linear-gradient(180deg, #1e222d 0%, #0d0e12 100%);
-  border-radius: 16px; 
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  display: flex; 
-  flex-direction: column; 
-  align-items: center; 
-  justify-content: space-between; /* จัดพื้นที่ให้กระจาย บน-กลาง-ล่าง */
-  transition: transform 0.3s ease; 
-  cursor: pointer; 
-  position: relative;
-  padding-top: 25px; /* ดันเนื้อหาลงมาหลบวงกลมอันดับที่ลอยอยู่ด้านบน */
-  padding-bottom: 12px;
-}
-.new-podium-card:hover { transform: translateY(-4px); }
-
-/* แสง Background สาดจากด้านล่างตามสีทีม */
-.new-podium-card::before {
-  content: '';
-  position: absolute;
-  bottom: 0; left: 0; right: 0; height: 70%;
-  background: linear-gradient(0deg, var(--team-color) 0%, transparent 100%);
-  opacity: 0.15;
-  border-radius: 0 0 16px 16px;
-  pointer-events: none;
-}
-
-/* ความสูงการ์ด และเส้นขอบสีเมทัลลิกด้านบน */
-.podium-1 { height: 215px; border-top: 4px solid #ffb703; box-shadow: 0 -5px 20px rgba(255, 183, 3, 0.15); z-index: 3; }
-.podium-2 { height: 185px; border-top: 4px solid #94a3b8; box-shadow: 0 -5px 15px rgba(148, 163, 184, 0.1); z-index: 2; }
-.podium-3 { height: 170px; border-top: 4px solid #d97706; box-shadow: 0 -5px 15px rgba(217, 119, 6, 0.1); z-index: 1; }
-
-/* ป้ายวงกลมอันดับ (ลอยทับขอบบนสุด) */
-.new-podium-rank { 
-  position: absolute;
-  top: -18px; 
-  width: 36px; height: 36px; 
-  border-radius: 50%; 
-  display: flex; align-items: center; justify-content: center; 
-  font-family: 'Share Tech Mono', monospace;
-  font-weight: 900; font-size: 1.2rem; 
-  color: #000; box-shadow: 0 4px 10px rgba(0,0,0,0.6); 
-  z-index: 4;
-}
-.podium-1 .new-podium-rank { background: linear-gradient(135deg, #ffdf00, #d4af37); width: 46px; height: 46px; font-size: 1.5rem; top: -23px; } 
-.podium-2 .new-podium-rank { background: linear-gradient(135deg, #e2e8f0, #94a3b8); } 
-.podium-3 .new-podium-rank { background: linear-gradient(135deg, #f59e0b, #b45309); color: #fff; }
-
-/* จุดจัดวางรูปรถ (ให้อยู่ตรงกลางการ์ด) */
-.new-podium-car-wrap {
-  width: 140%; /* ขยายให้รถใหญ่กว่าการ์ดนิดนึง จะได้ดูทะลุขอบข้างซ้ายขวา */
+/* --- โพเดียมสไตล์ King of the Hill (อันดับ 1 เด่นสุด) --- */
+.king-of-hill-container {
   display: flex;
-  flex: 1; /* ดันให้พื้นที่ตรงกลางขยายตัว */
+  flex-direction: column;
+  gap: 12px;
+  margin: 15px 0 25px 0;
+}
+
+/* 👑 การ์ดอันดับ 1 (แนวนอน Hero Banner) */
+.king-card {
+  background: #11131a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 4px solid #ffdf00; /* ขอบบนสีทอง */
+  border-radius: 16px;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+  min-height: 120px;
+}
+.king-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(255, 223, 0, 0.15);
+}
+.king-bg-glow {
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 30%;
+  background: linear-gradient(90deg, var(--team-color) 0%, transparent 100%);
+  opacity: 0.3; /* แสงพื้นหลังซ้ายมือ */
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+.king-rank-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: linear-gradient(135deg, #ffdf00, #d4af37);
+  color: #000;
+  font-family: 'Share Tech Mono', monospace;
+  font-weight: 900;
+  font-size: 1.1rem;
+  padding: 4px 12px;
+  border-radius: 20px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  z-index: 5;
+}
+.king-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px;
+  position: relative;
+  z-index: 2;
+  height: 100%;
+}
+.king-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+.king-name {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #fff;
+  text-transform: uppercase;
+  text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.king-team-logo {
+  height: 20px;
+  object-fit: contain;
+  object-position: left;
+  margin-bottom: 12px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
+}
+.king-pts {
+  font-family: 'Titillium Web', sans-serif;
+  font-size: 1.9rem;
+  font-weight: 900;
+  color: #ffb703;
+  text-shadow: 0 3px 6px rgba(0,0,0,0.6);
+  line-height: 1;
+}
+.king-pts .small-pts {
+  font-size: 0.85rem;
+  color: #cbd5e1;
+  margin-left: 4px;
+}
+/* รูปรถอันดับ 1 (อยู่ฝั่งขวา ไม่ทะลุกรอบ) */
+.king-car-box {
+  flex: 1.3;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  height: 100%;
+}
+.king-car-img {
+  width: 100%;
+  max-height: 85px; /* คุมความสูงไม่ให้ล้นการ์ด */
+  object-fit: contain;
+  object-position: right center;
+  filter: drop-shadow(0 8px 10px rgba(0,0,0,0.6));
+}
+
+/* 🥈🥉 การ์ดอันดับ 2 และ 3 (แนวตั้งคู่กัน) */
+.princes-wrapper {
+  display: flex;
+  gap: 12px;
+}
+.prince-card {
+  flex: 1;
+  background: #151820;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 14px;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 12px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+}
+.prince-card:nth-child(1) { border-top: 3px solid #94a3b8; } /* เส้นขอบสีเงิน */
+.prince-card:nth-child(2) { border-top: 3px solid #d97706; } /* เส้นขอบสีทองแดง */
+.prince-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+}
+.prince-bg-glow {
+  position: absolute;
+  bottom: 0; left: 0; right: 0; height: 60%;
+  background: linear-gradient(0deg, var(--team-color) 0%, transparent 100%);
+  opacity: 0.2;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+.prince-rank-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
   align-items: center;
   justify-content: center;
-  pointer-events: none;
-  z-index: 3;
-  margin: 5px 0; /* เพิ่มระยะห่างบนล่างเล็กน้อย */
+  font-family: 'Share Tech Mono', monospace;
+  font-weight: 900;
+  font-size: 1rem;
+  color: #000;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+  z-index: 5;
 }
-.podium-1 .new-podium-car-wrap { width: 160%; } /* อันดับ 1 รถจะใหญ่กว่าเพื่อน */
+.prince-card:nth-child(1) .prince-rank-badge { background: linear-gradient(135deg, #e2e8f0, #94a3b8); }
+.prince-card:nth-child(2) .prince-rank-badge { background: linear-gradient(135deg, #f59e0b, #b45309); color: #fff; }
 
-/* รูปรถ */
-.new-podium-car {
+/* รูปรถอันดับ 2 และ 3 (จัดอยู่ตรงกลาง) */
+.prince-car-box {
   width: 100%;
-  height: auto;
+  height: 55px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  margin-top: 18px;
+  z-index: 2;
+}
+.prince-car-img {
+  width: 100%;
+  height: 100%;
   object-fit: contain;
-  filter: drop-shadow(0 10px 8px rgba(0,0,0,0.6));
+  filter: drop-shadow(0 5px 6px rgba(0,0,0,0.6));
 }
 
-/* ข้อมูลผู้เล่นด้านล่างสุด */
-.new-podium-info {
+.prince-info {
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   z-index: 2;
+  text-align: center;
 }
-
-.new-podium-name {
-  font-size: 1.05rem;
+.prince-name {
+  font-size: 1.15rem;
   font-weight: 800;
   color: #fff;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
-  margin-bottom: 2px;
+  margin-bottom: 4px;
 }
-.podium-1 .new-podium-name { font-size: 1.2rem; color: #ffdf00; }
-
-.new-podium-logo {
-  height: 18px;
+.prince-team-logo {
+  height: 16px;
   object-fit: contain;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
 }
-
-.new-podium-pts {
+.prince-pts {
   font-family: 'Titillium Web', sans-serif;
   font-size: 1.5rem;
   font-weight: 900;
   color: #fff;
   line-height: 1;
-  text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
 }
-.podium-1 .new-podium-pts { font-size: 1.8rem; color: #ffb703; }
-
-.new-podium-pts .small-pts {
+.prince-pts .small-pts {
   font-size: 0.75rem;
   color: #94a3b8;
   margin-left: 2px;
