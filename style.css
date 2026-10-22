@@ -1206,3 +1206,22 @@ body {
   font-size: 0.9rem;
   box-shadow: 0 0 10px rgba(225, 6, 0, 0.5);
 }
+/* --- สไตล์กล่องแสดงภาพผลซ้อมทันทีในหน้าจอ --- */
+.rc-card-img-preview {
+  background: #181a24;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+}
+.rc-card-img-preview:hover {
+  border-color: var(--f1-red);
+  transform: translateY(-1px);
+}
+.rc-card-img-preview img {
+  max-height: 250px;
+  object-fit: contain;
+  background-color: #000;
+}
