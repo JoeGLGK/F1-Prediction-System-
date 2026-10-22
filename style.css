@@ -818,19 +818,17 @@ body {
   z-index: 1; 
 }
 .text-purple { color: #a855f7 !important; }
-/* --- โลโก้ลายน้ำ (Watermark) ปรับให้สว่างขึ้น --- */
-.team-watermark-ui {
-  position: absolute;
-  top: 50%;
-  left: 5%; 
-  transform: translateY(-50%) rotate(-15deg);
-  width: 90px;
-  height: 90px;
+/* --- โลโก้ทีมใต้ชื่อนักแข่ง (ขนาดเล็ก แสดงสีเต็ม) --- */
+.team-logo-mini {
+  display: block;
+  margin-top: 6px;       /* ระยะห่างจากชื่อทีมด้านบน */
+  width: 75px;           /* ปรับความกว้างโลโก้ */
+  height: 24px;          /* ปรับความสูงโลโก้ */
   object-fit: contain;
-  opacity: 0.12; /* ปรับให้เข้มขึ้นเพื่อให้เห็นชัดเจน */
-  z-index: 0; /* ขยับขึ้นมาเหนือแสงพื้นหลัง */
-  pointer-events: none;
-  filter: grayscale(100%) brightness(300%); /* เร่งแสงสว่างให้โลโก้เด่นขึ้นบนพื้นดำ */
+  object-position: left center; /* บังคับให้โลโก้ชิดซ้ายตรงกับตัวอักษร */
+  position: relative;
+  z-index: 2;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6)); /* เพิ่มเงาให้โลโก้ลอยมีมิติ */
 }
 
 /* ดันข้อความชื่อและทีมให้ลอยขึ้นมาอยู่เหนือลายน้ำ */
