@@ -822,13 +822,13 @@ body {
 .team-watermark-ui {
   position: absolute;
   top: 50%;
-  left: 15px; 
+  left: 5%; 
   transform: translateY(-50%) rotate(-15deg);
   width: 90px;
   height: 90px;
   object-fit: contain;
-  opacity: 0.35; /* ปรับให้เข้มขึ้นเพื่อให้เห็นชัดเจน */
-  z-index: 1; /* ขยับขึ้นมาเหนือแสงพื้นหลัง */
+  opacity: 0.12; /* ปรับให้เข้มขึ้นเพื่อให้เห็นชัดเจน */
+  z-index: 0; /* ขยับขึ้นมาเหนือแสงพื้นหลัง */
   pointer-events: none;
   filter: grayscale(100%) brightness(300%); /* เร่งแสงสว่างให้โลโก้เด่นขึ้นบนพื้นดำ */
 }
