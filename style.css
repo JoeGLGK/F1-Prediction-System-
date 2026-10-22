@@ -1044,29 +1044,65 @@ body {
   font-size: 0.65rem;
   color: #cbd5e1;
 }
-/* --- Telemetry Dashboard Widgets (สไตล์ Glassmorphism นูน 3D) --- */
+/* --- Telemetry Dashboard Widgets (มีมิติแสง Ambient Corner Glow) --- */
 .telemetry-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 12px;
 }
 .telemetry-widget {
-  background: linear-gradient(145deg, rgba(26, 29, 38, 0.8) 0%, rgba(18, 20, 28, 0.9) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-top: 1px solid rgba(255, 255, 255, 0.12); /* เพิ่มมิติด้านบนรับแสง */
-  border-radius: 12px;
-  padding: 16px 10px;
+  position: relative;
+  background: #11131a; /* พื้นดำเข้มเรียบหรู */
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 18px 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.3), inset 0 -2px 10px rgba(0,0,0,0.4);
+  overflow: hidden;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+  transition: transform 0.2s ease;
 }
+.telemetry-widget:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* สร้างดวงไฟ Gradient ซ่อนที่มุมขวาบนของแต่ละกล่อง */
+.telemetry-widget:nth-child(1)::before {
+  content: ''; position: absolute; top: -30px; right: -30px; width: 80px; height: 80px;
+  background: radial-gradient(circle, rgba(225,6,0,0.2) 0%, transparent 70%);
+  pointer-events: none;
+}
+.telemetry-widget:nth-child(2)::before {
+  content: ''; position: absolute; top: -30px; right: -30px; width: 80px; height: 80px;
+  background: radial-gradient(circle, rgba(255,183,3,0.2) 0%, transparent 70%);
+  pointer-events: none;
+}
+.telemetry-widget:nth-child(3)::before {
+  content: ''; position: absolute; top: -30px; right: -30px; width: 80px; height: 80px;
+  background: radial-gradient(circle, rgba(14,165,233,0.2) 0%, transparent 70%);
+  pointer-events: none;
+}
+.telemetry-widget:nth-child(4)::before {
+  content: ''; position: absolute; top: -30px; right: -30px; width: 80px; height: 80px;
+  background: radial-gradient(circle, rgba(34,197,94,0.2) 0%, transparent 70%);
+  pointer-events: none;
+}
+
 .widget-icon {
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   margin-bottom: 8px;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+  position: relative;
+  z-index: 2;
+  filter: drop-shadow(0 2px 5px rgba(0,0,0,0.6));
 }
+/* ลูกเล่นให้ยาง Pirelli ดูเป็นยาง Medium (สีเหลือง) */
+.pirelli-tire i {
+  text-shadow: 0 0 10px rgba(255, 183, 3, 0.6);
+}
+
 .widget-label {
   font-size: 0.65rem;
   color: #94a3b8;
@@ -1074,21 +1110,26 @@ body {
   font-weight: 700;
   margin-bottom: 4px;
   letter-spacing: 0.5px;
+  position: relative;
+  z-index: 2;
 }
 .widget-value {
   font-size: 0.9rem;
   font-weight: 800;
   color: #fff;
   line-height: 1.2;
+  position: relative;
+  z-index: 2;
 }
 
 /* --- กล่องสรุปข้อมูล (Race Intel) --- */
 .telemetry-summary-card {
-  background: rgba(13, 14, 18, 0.6);
-  border: 1px dashed rgba(255, 255, 255, 0.15);
+  background: #11131a;
+  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 12px;
   padding: 12px 14px;
   font-size: 0.8rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 .summary-row {
   display: flex;
@@ -1103,19 +1144,14 @@ body {
   line-height: 1.4;
 }
 
-/* --- Track Map Card (ปรับโฉมใหม่สไตล์ Blueprint Telemetry) --- */
+/* --- Track Map Card (พื้นดำทึบ Premium Black) --- */
 .track-map-card {
-  background: #0d0e12;
-  /* ลายตารางแบบ Blueprint จางๆ */
-  background-image: 
-    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 20px 20px;
-  border: 1px solid rgba(225, 6, 0, 0.3);
-  border-radius: 12px;
+  background: #030406; /* สีดำทึบสุดล้ำ */
+  border: 1px solid rgba(225, 6, 0, 0.4);
+  border-radius: 14px;
   overflow: hidden;
   cursor: pointer;
-  box-shadow: inset 0 0 25px rgba(0,0,0,0.8), 0 6px 15px rgba(0,0,0,0.4);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.8), inset 0 0 20px rgba(225, 6, 0, 0.05);
   transition: all 0.2s ease;
   position: relative;
 }
@@ -1130,12 +1166,12 @@ body {
 .track-map-card:hover {
   transform: translateY(-2px);
   border-color: var(--f1-red);
-  box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 6px 20px rgba(225, 6, 0, 0.25);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.9), inset 0 0 25px rgba(225, 6, 0, 0.15);
 }
 .track-map-header {
-  padding: 10px 14px;
-  background: linear-gradient(180deg, rgba(20,22,30,0.95) 0%, rgba(13,14,18,0.95) 100%);
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+  padding: 12px 16px;
+  background: rgba(13, 14, 18, 0.95);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
   font-size: 0.75rem;
   font-weight: 800;
   color: #fff;
@@ -1146,17 +1182,17 @@ body {
   z-index: 2;
 }
 .track-map-body {
-  padding: 15px 15px 25px 15px;
+  padding: 20px 15px 30px 15px; /* เพิ่มพื้นที่ล่างให้รูปสนามไม่อึดอัด */
   text-align: center;
   position: relative;
   z-index: 1;
 }
-/* ใส่แสงสะท้อนเบาๆ หลังรูปสนาม */
+/* ใส่แสงสะท้อนเบาๆ ให้เส้นสนามสีขาวเด่นขึ้นบนพื้นดำทึบ */
 .track-map-body img {
   width: 100%;
   max-height: 200px;
   object-fit: contain;
-  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.25)); 
+  filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.15)); 
 }
 
 /* --- Thumbnail Cards (การ์ดภาพตัวอย่าง พร้อมภาพเบลอเป็นพื้นหลัง) --- */
