@@ -37,6 +37,12 @@ const TEAM_LOGOS = {
   "Cadilac": "https://lh3.googleusercontent.com/d/1GIArchbZm5K7bmSNfpkGNi8bHae5G1w0",
   "Cadillac": "https://lh3.googleusercontent.com/d/1GIArchbZm5K7bmSNfpkGNi8bHae5G1w0"
 };
+const TEAM_COLORS = { 
+  "Ferrari": "#e10600", "Red Bull Racing": "#3671c6", "McLaren": "#ff8000", 
+  "Mercedes": "#27f4d2", "Aston Martin": "#229971", "Alpine": "#ff87bc", 
+  "Williams": "#005aff", "VCARB": "#6692ff", "Audi": "#00e701", 
+  "Haas": "#ffffff", "Cadillac": "#ffd700" 
+};
 
 const DEFAULT_DRIVER_IMG = "https://cdn-icons-png.flaticon.com/512/1995/1995470.png";
 
@@ -342,9 +348,12 @@ function renderUI(data) {
   if (globalRaces.length > 0) { document.getElementById('adMediaRace').value = globalRaces[0].id; onAdminMediaRaceChange(); }
   if (openRaces.length > 0) { document.getElementById('selCenterRace').value = openRaces[0].id; document.getElementById('sel2025Race').value = openRaces[0].id; onCenterRaceChange(); on2025RaceChange(); }
 
-  const tbody = document.getElementById('lbBody'); const podiumContainer = document.getElementById('podiumContainer');
+  const lbContainer = document.getElementById('lbListContainer'); 
+  const podiumContainer = document.getElementById('podiumContainer');
+  
   if (!globalLeaderboard || globalLeaderboard.length === 0) {
-    if(podiumContainer) podiumContainer.innerHTML = ''; if(tbody) tbody.innerHTML = '<tr><td colspan="4" class="text-muted py-3">ยังไม่มีคะแนนสะสม</td></tr>';
+    if(podiumContainer) podiumContainer.innerHTML = ''; 
+    if(lbContainer) lbContainer.innerHTML = '<div class="text-center text-muted py-3">ยังไม่มีคะแนนสะสม</div>';
   } else {
     let podiumHtml = ''; const top3 = globalLeaderboard.slice(0, 3); const rest = globalLeaderboard.slice(3); const podiumOrder = [];
     if(top3[1]) podiumOrder.push({ d: top3[1], r: 2, c: 'podium-2' });
@@ -352,16 +361,38 @@ function renderUI(data) {
     if(top3[2]) podiumOrder.push({ d: top3[2], r: 3, c: 'podium-3' });
 
     podiumOrder.forEach(function(p) {
-      const logoUrl = TEAM_LOGOS[p.d[4] || "Ferrari"] || ""; const teamIcon = logoUrl ? '<img src="' + logoUrl + '" class="podium-avatar">' : '';
+      const logoUrl = TEAM_LOGOS[p.d[4] || "Ferrari"] || ""; const teamIcon = logoUrl ? '<img src="' + getDriveDirectLink(logoUrl) + '" class="podium-avatar">' : '';
       podiumHtml += '<div class="podium-card ' + p.c + '" onclick="showPlayerStats(decodeURIComponent(\'' + encodeURIComponent(String(p.d[1])) + '\'))"><div class="podium-rank">' + p.r + '</div>' + teamIcon + '<div class="podium-name">' + p.d[1] + '</div><div class="podium-pts">' + p.d[2] + ' PTS</div></div>';
     });
     if(podiumContainer) podiumContainer.innerHTML = podiumHtml;
 
-    if(tbody) {
-      tbody.innerHTML = rest.map(function(row) {
-        const lastPts = Number(row[3]) || 0; const lastBadge = lastPts > 0 ? '<span class="last-pts-badge pts-gain">+' + lastPts + '</span>' : '<span class="last-pts-badge pts-zero">0</span>';
-        const logoUrl = TEAM_LOGOS[row[4] || "Ferrari"] || ""; const teamIconHtml = logoUrl ? '<img src="' + logoUrl + '" class="team-logo-icon">' : '';
-        return '<tr class="player-row" onclick="showPlayerStats(decodeURIComponent(\'' + encodeURIComponent(String(row[1])) + '\'))"><td><span class="rank-circle rank-other">' + row[0] + '</span></td><td class="text-start fw-bold text-white">' + row[1] + ' ' + teamIconHtml + '</td><td>' + lastBadge + '</td><td class="text-warning fw-black fs-5 f1-font">' + row[2] + '</td></tr>';
+    // ส่วนอัปเดตสร้างการ์ดรายชื่อแนวยาว
+    if(lbContainer) {
+      lbContainer.innerHTML = rest.map(function(row) {
+        const rank = row[0];
+        const name = row[1];
+        const totalPts = row[2];
+        const lastPts = Number(row[3]) || 0;
+        const team = row[4] || "F1";
+        
+        const teamColor = TEAM_COLORS[team] || "#555555";
+        const logoUrl = TEAM_LOGOS[team] || "";
+        const teamIconHtml = logoUrl ? '<img src="' + getDriveDirectLink(logoUrl) + '" class="player-list-logo" alt="">' : '';
+        const gainBadge = lastPts > 0 ? '<span class="pts-gain-badge">+' + lastPts + '</span>' : '<span class="pts-zero-badge">0</span>';
+        
+        return '<div class="player-list-card" style="--team-color: ' + teamColor + ';" onclick="showPlayerStats(decodeURIComponent(\'' + encodeURIComponent(String(name)) + '\'))">' +
+                 '<div class="d-flex align-items-center">' +
+                   '<div class="player-list-rank">' + rank + '</div>' +
+                   '<div class="ms-3 text-start">' +
+                     '<div class="player-list-name">' + name + '</div>' +
+                     '<div class="mt-1">' + teamIconHtml + '<span class="player-list-team">' + team + '</span></div>' +
+                   '</div>' +
+                 '</div>' +
+                 '<div class="text-end">' +
+                   '<div class="mb-1">' + gainBadge + '</div>' +
+                   '<div class="player-list-total">' + totalPts + ' <span class="pts-lbl">PTS</span></div>' +
+                 '</div>' +
+               '</div>';
       }).join('');
     }
   }
