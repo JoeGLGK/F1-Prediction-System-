@@ -33,16 +33,28 @@ const TEAM_LOGOS = {
   "Williams": "https://lh3.googleusercontent.com/d/18mn901TW_w5SW4Fg5Ke0WBKgxyt-5ICN", 
   "VCARB": "https://lh3.googleusercontent.com/d/1AfEAprJx9b4ivULrg41CCYiVUnBi6ps2", 
   "Audi": "https://lh3.googleusercontent.com/d/1w0dvPdMVK2b09liK6G-XEt2LXu6S-Mt0", 
+  "Sauber": "https://lh3.googleusercontent.com/d/1w0dvPdMVK2b09liK6G-XEt2LXu6S-Mt0", 
   "Haas": "https://lh3.googleusercontent.com/d/1i7aUDygqHB5Qf0ySyWIUSzy0F-YW8jHz", 
   "Cadilac": "https://lh3.googleusercontent.com/d/1GIArchbZm5K7bmSNfpkGNi8bHae5G1w0",
   "Cadillac": "https://lh3.googleusercontent.com/d/1GIArchbZm5K7bmSNfpkGNi8bHae5G1w0"
 };
+
 const TEAM_COLORS = { 
-  "Ferrari": "#e10600", "Red Bull Racing": "#3671c6", "McLaren": "#ff8000", 
-  "Mercedes": "#27f4d2", "Aston Martin": "#229971", "Alpine": "#ff87bc", 
-  "Williams": "#005aff", "VCARB": "#6692ff", "Audi": "#00e701", 
-  "Haas": "#ffffff", "Cadillac": "#ffd700" 
+  "Ferrari": "#e10600", 
+  "Red Bull Racing": "#3671c6", 
+  "McLaren": "#ff8000", 
+  "Mercedes": "#27f4d2", 
+  "Aston Martin": "#229971", 
+  "Alpine": "#ff87bc", 
+  "Williams": "#005aff", 
+  "VCARB": "#6692ff", 
+  "Audi": "#00e701", 
+  "Sauber": "#00e701", 
+  "Haas": "#ffffff", 
+  "Cadilac": "#ffd700",
+  "Cadillac": "#ffd700" 
 };
+
 // ลิงก์รูปรถ F1 ของแต่ละทีม
 const TEAM_CARS = {
   "Ferrari": "https://lh3.googleusercontent.com/d/16fGNY2kTdnXIoDRjzkXmpbZwOn27xAAR",
@@ -54,9 +66,12 @@ const TEAM_CARS = {
   "Williams": "https://lh3.googleusercontent.com/d/1CyrgK3KDX9C__EYuUwr9o5Qj-_LRnaQh",
   "VCARB": "https://lh3.googleusercontent.com/d/11EsP5GQrWqpBv68QWc3UPahhHuWydoMX",
   "Audi": "https://lh3.googleusercontent.com/d/1lqDE-G4e6rTrFXybJi2BH2NwBrWUm8X3",
+  "Sauber": "https://lh3.googleusercontent.com/d/1lqDE-G4e6rTrFXybJi2BH2NwBrWUm8X3",
   "Haas": "https://lh3.googleusercontent.com/d/1dNjNrpTi-BznASYs9cRjjQmnILOdfhxK",
+  "Cadilac": "https://lh3.googleusercontent.com/d/109l7yKIfGsfABg0R5sSh35yu3aq2DAwq",
   "Cadillac": "https://lh3.googleusercontent.com/d/109l7yKIfGsfABg0R5sSh35yu3aq2DAwq"
 };
+
 const DEFAULT_DRIVER_IMG = "https://cdn-icons-png.flaticon.com/512/1995/1995470.png";
 
 const DRIVER_INFO = {
@@ -112,15 +127,15 @@ window.onload = function() {
   regModalInstance = new bootstrap.Modal(document.getElementById('regModal')); 
   loginGateModalInstance = new bootstrap.Modal(document.getElementById('loginGateModal')); 
   imagePreviewModalInstance = new bootstrap.Modal(document.getElementById('imagePreviewModal'));
-  
+
   const driverModalEl = document.getElementById('driverSelectorModal');
   if (driverModalEl) {
     driverSelectorModalInstance = new bootstrap.Modal(driverModalEl);
   }
-  
+
   const optHtml = '<option value="" disabled selected>-- เลือกนักแข่ง --</option>' + DRIVERS.map(function(d) { return '<option value="' + d + '">' + d + '</option>'; }).join('');
   document.querySelectorAll('.driver-opt').forEach(function(el) { el.innerHTML = optHtml; });
-  
+
   buildDriverGrid();
   loadData();
 };
@@ -176,28 +191,27 @@ function updateCardUI(slotId, driverName) {
   if (!card) return;
   const emptyState = card.querySelector('.slot-empty-state');
   const filledState = card.querySelector('.slot-filled-state');
-  
+
   if (!driverName) {
     card.classList.remove('filled');
     emptyState.classList.remove('d-none');
     filledState.classList.add('d-none');
     return;
   }
-  
+
   const info = DRIVER_INFO[driverName] || { team: "F1", color: "#e10600", img: DEFAULT_DRIVER_IMG };
   card.classList.add('filled');
   card.style.setProperty('--team-color', info.color);
-  
+
   document.getElementById('name-' + slotId).innerText = driverName;
   document.getElementById('team-' + slotId).innerText = info.team;
   document.getElementById('img-' + slotId).src = getDriveDirectLink(info.img);
-  
-  // ✅ ส่วนดึงโลโก้ลายน้ำ
+
   const watermarkEl = document.getElementById('watermark-' + slotId);
   if (watermarkEl) {
-    watermarkEl.src = TEAM_LOGOS[info.team] || "";
+    watermarkEl.src = getDriveDirectLink(TEAM_LOGOS[info.team] || "");
   }
-  
+
   emptyState.classList.add('d-none');
   filledState.classList.remove('d-none');
 }
@@ -293,10 +307,10 @@ function confirmLoginGate() {
   const selected = document.getElementById('loginPlayerSelect').value; 
   const pinEl = document.getElementById('loginPin');
   const pin = pinEl ? pinEl.value : "";
-  
+
   if (!selected) { showToast('กรุณาเลือกชื่อก่อน', 'error'); return; } 
   if (pinEl && (!pin || pin.length !== 4)) { showToast('กรุณากรอก PIN 4 หลัก', 'error'); return; }
-  
+
   const btn = document.querySelector('#loginGateModal .btn-race');
   const oldText = btn.innerHTML;
   btn.disabled = true;
@@ -337,11 +351,13 @@ function forceRefreshData() {
 }
 
 function renderUI(data) {
-  globalLeaderboard = data.leaderboard || []; globalPlayers = data.players || []; globalRaces = data.races || [];
-  
+  globalLeaderboard = data.leaderboard || []; 
+  globalPlayers = data.players || []; 
+  globalRaces = data.races || [];
+
   const pGate = document.getElementById('loginPlayerSelect');
   if(pGate) pGate.innerHTML = '<option value="" disabled selected>-- เลือกชื่อ --</option>' + globalPlayers.map(function(p) { return '<option value="' + p + '">' + p + '</option>'; }).join('');
-  
+
   const savedPlayer = localStorage.getItem('f1_player_name');
   if (!savedPlayer || !globalPlayers.includes(savedPlayer)) { 
     const loginEl = document.getElementById('loginGateModal');
@@ -364,9 +380,13 @@ function renderUI(data) {
   // --- ส่วนสร้างตารางคะแนน (Leaderboard) ---
   const lbContainer = document.getElementById('lbListContainer'); 
   const podiumContainer = document.getElementById('podiumContainer');
-  
+
+  // ✅ แก้ไขเงื่อนไข if / else ให้ถูกต้อง
   if (!globalLeaderboard || globalLeaderboard.length === 0) {
-   let podiumHtml = '<div class="premium-podium-container">'; 
+    if (podiumContainer) podiumContainer.innerHTML = ''; 
+    if (lbContainer) lbContainer.innerHTML = '<div class="text-center text-muted py-3">ยังไม่มีคะแนนสะสม</div>';
+  } else {
+    let podiumHtml = '<div class="premium-podium-container">'; 
     const top1 = globalLeaderboard[0];
     const top2 = globalLeaderboard[1];
     const top3 = globalLeaderboard[2];
@@ -409,7 +429,7 @@ function renderUI(data) {
         const teamIcon = logoUrl ? '<img src="' + getDriveDirectLink(logoUrl) + '" class="team-logo-small" alt="">' : '';
         const carImg = carUrl ? '<img src="' + getDriveDirectLink(carUrl) + '" alt="">' : '';
         const borderColor = rank === 2 ? '#cbd5e1' : '#d97706';
-        
+
         podiumHtml += '<div class="premium-card prince" style="--team-color: ' + teamColor + '; --border-color: ' + borderColor + ';" onclick="showPlayerStats(decodeURIComponent(\'' + encodeURIComponent(String(p[1])) + '\'))">' +
                         '<div class="bg-glow"></div>' +
                         '<img src="' + getDriveDirectLink(logoUrl) + '" class="watermark-logo" alt="">' +
@@ -426,11 +446,11 @@ function renderUI(data) {
       });
       podiumHtml += '</div>';
     }
-    
+
     podiumHtml += '</div>';
 
     if(podiumContainer) podiumContainer.innerHTML = podiumHtml;
-    
+
     // ส่วนประกอบร่างการ์ดรูปรถ (อันดับ 4 เป็นต้นไป)
     if(lbContainer) {
       lbContainer.innerHTML = rest.map(function(row) {
@@ -439,13 +459,13 @@ function renderUI(data) {
         const totalPts = row[2];
         const lastPts = Number(row[3]) || 0;
         const team = row[4] || "F1";
-        
+
         const teamColor = TEAM_COLORS[team] || "#555555";
         const logoUrl = TEAM_LOGOS[team] || "";
         const carUrl = TEAM_CARS[team] || "";
-        
+
         const gainBadge = lastPts > 0 ? '<div class="pts-gain-badge">+' + lastPts + '</div>' : '';
-        
+
         return '<div class="player-list-card" style="--team-color: ' + teamColor + ';" onclick="showPlayerStats(decodeURIComponent(\'' + encodeURIComponent(String(name)) + '\'))">' +
                  '<img src="' + getDriveDirectLink(logoUrl) + '" class="player-list-watermark" alt="">' +
                  (carUrl ? '<img src="' + getDriveDirectLink(carUrl) + '" class="player-list-car-img" alt="Car">' : '') +
@@ -464,12 +484,19 @@ function renderUI(data) {
     }
   }
 
-  const calcRaces = globalRaces.filter(function(r) { return r.status === 'CALCULATED'; }); const finishedSelect = document.getElementById('selFinishedRace');
+  const calcRaces = globalRaces.filter(function(r) { return r.status === 'CALCULATED'; }); 
+  const finishedSelect = document.getElementById('selFinishedRace');
   if(finishedSelect) {
-    if (calcRaces.length === 0) { finishedSelect.innerHTML = '<option value="" disabled selected>-- ยังไม่มีสนามที่สรุปผล --</option>'; finishedSelect.disabled = true; } 
-    else { finishedSelect.disabled = false; finishedSelect.innerHTML = '<option value="" disabled selected>-- เลือกสนาม --</option>' + calcRaces.map(function(r) { return '<option value="' + r.id + '">🏁 ' + r.name + '</option>'; }).join(''); }
+    if (calcRaces.length === 0) { 
+      finishedSelect.innerHTML = '<option value="" disabled selected>-- ยังไม่มีสนามที่สรุปผล --</option>'; 
+      finishedSelect.disabled = true; 
+    } else { 
+      finishedSelect.disabled = false; 
+      finishedSelect.innerHTML = '<option value="" disabled selected>-- เลือกสนาม --</option>' + calcRaces.map(function(r) { return '<option value="' + r.id + '">🏁 ' + r.name + '</option>'; }).join(''); 
+    }
   }
 }
+
 function loadData(ignoreCache = false) {
   if (!ignoreCache) {
     const cachedStr = localStorage.getItem('f1_cached_data');
@@ -491,16 +518,23 @@ function loadData(ignoreCache = false) {
     renderUI(data);
     document.getElementById('globalLoader').classList.add('hidden');
   }).catch(function(err) { 
-    isRefreshing = false; showToast('Error: ' + err, 'error'); document.getElementById('globalLoader').classList.add('hidden'); 
+    isRefreshing = false; 
+    showToast('Error: ' + err, 'error'); 
+    document.getElementById('globalLoader').classList.add('hidden'); 
   });
 }
 
-function handleCheckFinishedRace() { triggerHaptic(); const raceId = document.getElementById('selFinishedRace').value; if (!raceId) { showToast('กรุณาเลือกสนามก่อน', 'error'); return; } openBreakdownModal(raceId); }
+function handleCheckFinishedRace() { 
+  triggerHaptic(); 
+  const raceId = document.getElementById('selFinishedRace').value; 
+  if (!raceId) { showToast('กรุณาเลือกสนามก่อน', 'error'); return; } 
+  openBreakdownModal(raceId); 
+}
 
 function updateUserSessionUI() {
   const player = localStorage.getItem('f1_player_name');
   const formDisplay = document.getElementById('formPlayerDisplay');
-  
+
   if (!player) { 
     document.getElementById('myPlayerName').innerText = '--'; 
     document.getElementById('myCurrentRank').innerText = '-'; 
@@ -508,10 +542,10 @@ function updateUserSessionUI() {
     if (formDisplay) formDisplay.innerText = '-';
     return; 
   }
-  
+
   document.getElementById('myPlayerName').innerText = player; 
   if (formDisplay) formDisplay.innerText = player;
-  
+
   const match = globalLeaderboard.find(function(row) { return String(row[1]).toLowerCase() === player.toLowerCase(); });
   if (match) { 
     document.getElementById('myCurrentRank').innerText = 'อันดับที่ ' + match[0]; 
@@ -523,9 +557,14 @@ function updateUserSessionUI() {
 }
 
 function onRaceChange() {
-  const rSel = document.getElementById('selRace'); const opt = rSel.options[rSel.selectedIndex]; if (!opt || !opt.value) return;
-  const raceId = opt.value; const isSprint = opt.dataset.type === 'Sprint'; document.getElementById('flWrapper').style.display = isSprint ? 'none' : 'block';
-  let rawDl = (opt.dataset.dl || "").trim(); if (!rawDl) { currentDeadline = null; } else { currentDeadline = new Date(rawDl.replace(' ', 'T')); }
+  const rSel = document.getElementById('selRace'); 
+  const opt = rSel.options[rSel.selectedIndex]; 
+  if (!opt || !opt.value) return;
+  const raceId = opt.value; 
+  const isSprint = opt.dataset.type === 'Sprint'; 
+  document.getElementById('flWrapper').style.display = isSprint ? 'none' : 'block';
+  let rawDl = (opt.dataset.dl || "").trim(); 
+  if (!rawDl) { currentDeadline = null; } else { currentDeadline = new Date(rawDl.replace(' ', 'T')); }
   startCountdown();
 
   const raceObj = globalRaces.find(function(r) { return r.id === raceId; });
@@ -547,14 +586,15 @@ function onRaceChange() {
     updateCardUI(id, ''); 
   });
 
-  const player = localStorage.getItem('f1_player_name'); const histAlert = document.getElementById('savedPredAlert');
+  const player = localStorage.getItem('f1_player_name'); 
+  const histAlert = document.getElementById('savedPredAlert');
   if (player) {
     callGAS("getUserSavedPrediction", { raceId: raceId, playerName: player }).then(function(res) {
       if (res.found) {
         histAlert.style.display = 'block'; 
         document.getElementById('savedPredTime').innerText = 'บันทึกเมื่อ: ' + res.submittedAt; 
         document.getElementById('savedPredContent').innerHTML = '<strong>P1:</strong> ' + res.p1 + ' | <strong>P2:</strong> ' + res.p2 + '<br><strong>P3:</strong> ' + res.p3 + ' | <strong>P4:</strong> ' + res.p4 + (res.fl ? ' | <strong>FL:</strong> ' + res.fl : '');
-        
+
         const savedVals = [res.p1, res.p2, res.p3, res.p4, res.fl];
         ['pos1','pos2','pos3','pos4','posFL'].forEach(function(id, i) { 
           const val = savedVals[i] || '';
@@ -591,7 +631,7 @@ function onCenterRaceChange() {
       thumbPrac.style.display = 'none';
     }
   }
-  
+
   const oddsBtn = document.getElementById('rcExtLinkBtn');
   if (oddsBtn) { 
     if (m.extLink && m.extLink.trim() !== "") { 
@@ -602,7 +642,7 @@ function onCenterRaceChange() {
       oddsBtn.onclick = function() { showToast("ไม่มีลิงก์", "error"); }; 
     } 
   }
-  
+
   const info = currentRace.trackInfo || {};
   document.getElementById('rcTrackType').innerText = info.trackType || '-'; 
   document.getElementById('rcTires').innerText = info.tires || '-'; 
@@ -637,7 +677,7 @@ function on2025RaceChange() {
     const el = document.getElementById(badgeId); 
     const thumb = document.getElementById(thumbId);
     const hasImg = !!imgUrl;
-    
+
     if (el) { 
       el.className = hasImg ? 'rc-btn-badge bg-success text-white' : 'rc-btn-badge bg-secondary text-white'; 
       el.innerText = hasImg ? '🔍 แตะเพื่อขยาย' : 'ไม่มีภาพ'; 
@@ -652,28 +692,46 @@ function on2025RaceChange() {
       }
     }
   }
-  
+
   updateCard2025('badgeQuali2025', 'thumbQuali2025', m.quali2025); 
   updateCard2025('badgeRace2025', 'thumbRace2025', m.race2025);
 }
 
 function startCountdown() {
-  clearInterval(countdownInterval); const box = document.getElementById('countdownBox'); const submitBtn = document.getElementById('btnPred');
-  if (!currentDeadline || isNaN(currentDeadline.getTime())) { box.style.display = 'block'; box.innerHTML = '<div class="text-secondary small py-1"><i class="fa-solid fa-clock me-1"></i>ยังไม่ได้กำหนดเวลาปิดรับ</div>'; return; }
+  clearInterval(countdownInterval); 
+  const box = document.getElementById('countdownBox'); 
+  const submitBtn = document.getElementById('btnPred');
+  if (!currentDeadline || isNaN(currentDeadline.getTime())) { 
+    box.style.display = 'block'; 
+    box.innerHTML = '<div class="text-secondary small py-1"><i class="fa-solid fa-clock me-1"></i>ยังไม่ได้กำหนดเวลาปิดรับ</div>'; 
+    return; 
+  }
   box.style.display = 'block';
   function updateTimer() {
     const diff = currentDeadline - new Date();
-    if (diff <= 0) { box.innerHTML = '<div class="text-danger fw-bold py-1">⏰ หมดเวลาทายผล</div>'; if (submitBtn) { submitBtn.disabled = true; submitBtn.innerText = 'CLOSED'; } clearInterval(countdownInterval); return; }
+    if (diff <= 0) { 
+      box.innerHTML = '<div class="text-danger fw-bold py-1">⏰ หมดเวลาทายผล</div>'; 
+      if (submitBtn) { submitBtn.disabled = true; submitBtn.innerText = 'CLOSED'; } 
+      clearInterval(countdownInterval); 
+      return; 
+    }
     if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane me-2"></i>SUBMIT PREDICTION'; }
-    const d = Math.floor(diff / 86400000); const h = Math.floor((diff / 3600000) % 24); const m = Math.floor((diff / 60000) % 60); const s = Math.floor((diff / 1000) % 60);
+    const d = Math.floor(diff / 86400000); 
+    const h = Math.floor((diff / 3600000) % 24); 
+    const m = Math.floor((diff / 60000) % 60); 
+    const s = Math.floor((diff / 1000) % 60);
     const pad = function(n) { return String(n).padStart(2, '0'); };
     box.innerHTML = '<div class="timer-units"><div><div class="timer-num">' + pad(d) + '</div><div class="timer-lbl">DAY</div></div><div><div class="timer-num">' + pad(h) + '</div><div class="timer-lbl">HRS</div></div><div><div class="timer-num">' + pad(m) + '</div><div class="timer-lbl">MIN</div></div><div><div class="timer-num">' + pad(s) + '</div><div class="timer-lbl">SEC</div></div></div>';
   }
-  updateTimer(); countdownInterval = setInterval(updateTimer, 1000);
+  updateTimer(); 
+  countdownInterval = setInterval(updateTimer, 1000);
 }
 
 function openBreakdownModal(raceId) {
-  triggerHaptic(); breakdownModalInstance.show(); const body = document.getElementById('breakdownBody'); body.innerHTML = '<div class="text-center py-3"><i class="fa-solid fa-spinner fa-spin me-2"></i>กำลังตรวจสอบผล...</div>';
+  triggerHaptic(); 
+  breakdownModalInstance.show(); 
+  const body = document.getElementById('breakdownBody'); 
+  body.innerHTML = '<div class="text-center py-3"><i class="fa-solid fa-spinner fa-spin me-2"></i>กำลังตรวจสอบผล...</div>';
   callGAS("getRaceBreakdown", { raceId: raceId, playerName: localStorage.getItem('f1_player_name') || '' }).then(function(res) {
     if (!res.actual) { body.innerHTML = '<div class="text-danger text-center">ไม่พบข้อมูล</div>'; return; }
     const act = res.actual, pred = res.userPred;
@@ -693,7 +751,9 @@ function openBreakdownModal(raceId) {
 }
 
 function loadCommunityPredictions() {
-  const raceId = document.getElementById('selCommRace').value; const box = document.getElementById('commContent'); box.innerHTML = '<div class="text-center text-secondary py-3"><i class="fa-solid fa-spinner fa-spin me-2"></i>กำลังตรวจสอบข้อมูล...</div>';
+  const raceId = document.getElementById('selCommRace').value; 
+  const box = document.getElementById('commContent'); 
+  box.innerHTML = '<div class="text-center text-secondary py-3"><i class="fa-solid fa-spinner fa-spin me-2"></i>กำลังตรวจสอบข้อมูล...</div>';
   callGAS("getCommunityPredictions", { raceId: raceId }).then(function(res) {
     if (!res.locked) { box.innerHTML = '<div class="p-3 rounded text-center bg-black border border-warning"><div class="text-warning fw-bold fs-5 mb-2"><i class="fa-solid fa-lock me-2"></i>ยังไม่เปิดเผยข้อมูล</div><div class="small text-secondary">' + res.msg + '</div></div>'; return; }
     if (res.predictions.length === 0) { box.innerHTML = '<div class="text-center text-muted py-3">ไม่มีใครส่งคำทายในสนามนี้</div>'; return; }
@@ -704,7 +764,9 @@ function loadCommunityPredictions() {
 }
 
 function showPlayerStats(playerName) {
-  triggerHaptic(); statsModalInstance.show(); document.getElementById('statsBody').innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>กำลังคำนวณสถิติ...';
+  triggerHaptic(); 
+  statsModalInstance.show(); 
+  document.getElementById('statsBody').innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>กำลังคำนวณสถิติ...';
   callGAS("getPlayerStats", { playerName: playerName }).then(function(res) {
     document.getElementById('statsBody').innerHTML = '<div class="mb-3"><div class="fs-4 fw-bold text-white mb-1"><i class="fa-solid fa-user-astronaut text-danger me-2"></i>' + res.playerName + '</div><span class="badge bg-warning text-dark fs-6">อันดับที่ ' + res.rank + '</span> <span class="badge bg-danger fs-6">' + res.totalScore + ' คะแนน</span></div><div class="row g-2 mb-3"><div class="col-6"><div class="p-2 rounded bg-black border border-secondary"><div class="text-secondary small">ทายเป๊ะ (P1-P4)</div><div class="fs-4 fw-bold text-info">' + res.exactHits + ' ครั้ง</div></div></div><div class="col-6"><div class="p-2 rounded bg-black border border-secondary"><div class="text-secondary small">ทาย FL ถูก</div><div class="fs-4 fw-bold text-purple">' + res.flHits + ' ครั้ง</div></div></div></div><h6 class="text-secondary small fw-bold text-start text-uppercase mb-2">ประวัติคะแนนแต่ละสนาม</h6><div class="p-2 rounded bg-black border border-secondary" style="max-height: 180px; overflow-y: auto;">' + (res.history.length === 0 ? '<div class="text-muted small">ยังไม่มีประวัติ</div>' : res.history.map(function(h) { return '<div class="d-flex justify-content-between small py-1 border-bottom border-dark text-start"><span>' + h.race + '</span><span class="text-warning fw-bold">' + h.score + ' pts</span></div>'; }).join('')) + '</div>';
   });
@@ -746,7 +808,22 @@ function handleAdminSaveMediaLinks() {
   }); 
 }
 
-function matchDriverOption(selectId, apiName) { if (!apiName) return; const select = document.getElementById(selectId); const cleanApi = apiName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim(); for (let i = 0; i < select.options.length; i++) if (select.options[i].value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() === cleanApi) { select.selectedIndex = i; return; } const lastName = cleanApi.split(" ").pop(); for (let i = 0; i < select.options.length; i++) if (select.options[i].value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().includes(lastName)) { select.selectedIndex = i; return; } }
+function matchDriverOption(selectId, apiName) { 
+  if (!apiName) return; 
+  const select = document.getElementById(selectId); 
+  const cleanApi = apiName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim(); 
+  for (let i = 0; i < select.options.length; i++) {
+    if (select.options[i].value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() === cleanApi) { 
+      select.selectedIndex = i; return; 
+    } 
+  }
+  const lastName = cleanApi.split(" ").pop(); 
+  for (let i = 0; i < select.options.length; i++) {
+    if (select.options[i].value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().includes(lastName)) { 
+      select.selectedIndex = i; return; 
+    } 
+  }
+}
 
 function handleFetchOfficialResults() { 
   const pin = document.getElementById('adminPin').value, raceId = document.getElementById('adminRace').value, btn = document.getElementById('btnApiFetch'); 
@@ -778,7 +855,11 @@ function checkAdminSubmissions() {
   }); 
 }
 
-function copyPendingList() { if (!lastPendingList || lastPendingList.length === 0) return; const text = '🏁 ทวงคำทายผล F1\n⚠️ คนที่ยังไม่ได้ส่ง (' + lastPendingList.length + ' คน):\n' + lastPendingList.map(function(n, i) { return (i + 1) + '. ' + n; }).join('\n') + '\n\nรีบส่งก่อนหมดเวลานะครับ!'; navigator.clipboard.writeText(text).then(function() { showToast('คัดลอกเรียบร้อย!', 'success'); }); }
+function copyPendingList() { 
+  if (!lastPendingList || lastPendingList.length === 0) return; 
+  const text = '🏁 ทวงคำทายผล F1\n⚠️ คนที่ยังไม่ได้ส่ง (' + lastPendingList.length + ' คน):\n' + lastPendingList.map(function(n, i) { return (i + 1) + '. ' + n; }).join('\n') + '\n\nรีบส่งก่อนหมดเวลานะครับ!'; 
+  navigator.clipboard.writeText(text).then(function() { showToast('คัดลอกเรียบร้อย!', 'success'); }); 
+}
 
 function handleRegister(e) { 
   e.preventDefault(); triggerHaptic(); 
@@ -824,7 +905,12 @@ function handlePrediction(e) {
   btn.disabled = true; 
   callGAS("submitPrediction", { data: { playerName: player, raceId: rSel.value, type: rSel.options[rSel.selectedIndex].dataset.type, p1: p1, p2: p2, p3: p3, p4: p4, fl: document.getElementById('posFL').value } }).then(function(res) { 
     btn.disabled = false; showToast(res.msg, res.success ? 'success' : 'error'); 
-    if (res.success) { document.getElementById('savedPredAlert').style.display = 'block'; document.getElementById('savedPredTime').innerText = 'บันทึกเมื่อ: ' + res.submittedAt; document.getElementById('savedPredContent').innerHTML = '<strong>P1:</strong> ' + res.data.p1 + ' | <strong>P2:</strong> ' + res.data.p2 + '<br><strong>P3:</strong> ' + res.data.p3 + ' | <strong>P4:</strong> ' + res.data.p4 + (res.data.fl ? ' | <strong>FL:</strong> ' + res.data.fl : ''); forceRefreshData(); } 
+    if (res.success) { 
+      document.getElementById('savedPredAlert').style.display = 'block'; 
+      document.getElementById('savedPredTime').innerText = 'บันทึกเมื่อ: ' + res.submittedAt; 
+      document.getElementById('savedPredContent').innerHTML = '<strong>P1:</strong> ' + res.data.p1 + ' | <strong>P2:</strong> ' + res.data.p2 + '<br><strong>P3:</strong> ' + res.data.p3 + ' | <strong>P4:</strong> ' + res.data.p4 + (res.data.fl ? ' | <strong>FL:</strong> ' + res.data.fl : ''); 
+      forceRefreshData(); 
+    } 
   }); 
 }
 
