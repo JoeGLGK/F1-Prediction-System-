@@ -201,48 +201,92 @@
     <!-- 3. Race Center Tab -->
     <div id="tab-center" class="tab-pane-custom" style="display: none;">
       <div class="f1-card p-3 mb-3">
-        <div class="d-flex justify-content-between align-items-center mb-2"><h6 class="fw-bold m-0 text-white f1-font"><i class="fa-solid fa-flag-checkered text-danger me-2"></i>RACE CENTER</h6><span class="small text-secondary" style="font-size:0.75rem;">ผลการฝึกซ้อม & ข้อมูลแทร็ก</span></div>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h6 class="fw-bold m-0 text-white f1-font"><i class="fa-solid fa-gauge-high text-danger me-2"></i>RACE TELEMETRY</h6>
+          <span class="small text-secondary" style="font-size:0.75rem;">ข้อมูลสนาม & สถิติเชิงลึก</span>
+        </div>
+        
         <div class="mb-3">
-          <label class="form-label">เลือกสนามเพื่อดูข้อมูล</label>
+          <label class="form-label">เลือกสนามแข่งขัน</label>
           <select id="selCenterRace" class="form-select" onchange="onCenterRaceChange()"><option value="" disabled selected>-- เลือกสนาม --</option></select>
         </div>
+
         <div id="rcContent" style="display: none;">
           
+          <!-- 1. ระบบวิดเจ็ตสไตล์ iPhone (Telemetry Dashboard Widgets) -->
+          <div class="telemetry-grid mb-3">
+            <div class="telemetry-widget">
+              <div class="widget-icon text-danger"><i class="fa-solid fa-road"></i></div>
+              <div class="widget-label">ประเภทแทร็ก</div>
+              <div class="widget-value" id="rcTrackType">-</div>
+            </div>
+            <div class="telemetry-widget">
+              <div class="widget-icon text-warning"><i class="fa-solid fa-vest"></i></div>
+              <div class="widget-label">ยาง Pirelli</div>
+              <div class="widget-value" id="rcTires">-</div>
+            </div>
+            <div class="telemetry-widget">
+              <div class="widget-icon text-info"><i class="fa-solid fa-triangle-exclamation"></i></div>
+              <div class="widget-label">Safety Car</div>
+              <div class="widget-value" id="rcSafetyCar">-</div>
+            </div>
+            <div class="telemetry-widget">
+              <div class="widget-icon text-success"><i class="fa-solid fa-cloud-sun"></i></div>
+              <div class="widget-label">พยากรณ์อากาศ</div>
+              <div class="widget-value weather-icon-animated" id="rcWeather">-</div>
+            </div>
+          </div>
+
+          <!-- กล่องสรุปสถิติเพิ่มเติม (แชมป์เก่า & Key Note) -->
+          <div class="telemetry-summary-card mb-3">
+            <div class="summary-row mb-2">
+              <span class="text-secondary"><i class="fa-solid fa-trophy text-warning me-1"></i> แชมป์ 3 ปีย้อนหลัง:</span>
+              <span class="text-white fw-bold text-end" id="rcPrevWinners">-</span>
+            </div>
+            <div class="summary-note">
+              <i class="fa-solid fa-lightbulb text-warning me-1"></i><span id="rcKeyNote">-</span>
+            </div>
+          </div>
+
+          <!-- 2. การ์ดแผนผังสนาม (Track Map Card ลาย Carbon Fiber) -->
+          <div id="rcTrackLayoutWrapper" class="track-map-card mb-3" style="display: none;" onclick="previewTrackImageById('rcTrackLayoutImg')">
+            <div class="track-map-header">
+              <span><i class="fa-solid fa-map-location-dot text-danger me-1"></i> ผังสนามแข่ง (TRACK LAYOUT)</span>
+              <span class="badge bg-dark text-danger border border-danger px-2 py-1" style="font-size:0.6rem;">🔍 แตะเพื่อขยาย</span>
+            </div>
+            <div class="track-map-body">
+              <img id="rcTrackLayoutImg" src="" alt="Circuit Layout">
+            </div>
+          </div>
+
+          <!-- ปุ่มดูอัตราต่อรอง -->
+          <div class="mb-3" id="rcExtLinkArea">
+            <a href="#" target="_blank" id="rcExtLinkBtn" class="btn-odds-menu">
+              <div class="d-flex align-items-center gap-2">
+                <i class="fa-solid fa-percent fs-5"></i>
+                <span class="fs-6">อัตราต่อรองการแข่งขัน</span>
+              </div>
+              <span class="badge bg-white text-success px-3 py-2 fw-bold" style="font-size:0.75rem;">เปิดดูราคา <i class="fa-solid fa-arrow-up-right-from-square ms-1"></i></span>
+            </a>
+          </div>
+
+          <!-- 3. ปุ่มดูภาพถ่ายแบบ Thumbnail Cards (ผลซ้อมรวม) -->
           <div class="rc-section-title"><i class="fa-solid fa-stopwatch text-warning"></i>ผลการฝึกซ้อม (Practice Sessions)</div>
           <div class="mb-3">
-            <div class="rc-card-btn p-3 flex-column text-center justify-content-center" onclick="openMediaPreview('practiceImg')">
-              <div class="d-flex justify-content-between align-items-center w-100">
-                <span class="fw-bold text-white"><i class="fa-solid fa-image text-warning me-2"></i>ผลการฝึกซ้อมรวม (FP1 - FP3)</span>
+            <div class="thumbnail-card" id="thumbCardPractice" onclick="openMediaPreview('practiceImg')">
+              <div class="thumb-bg-blur" id="thumbBgPractice"></div>
+              <div class="thumb-overlay"></div>
+              <div class="thumb-content">
+                <div class="thumb-title"><i class="fa-solid fa-image text-warning me-2"></i>ผลการฝึกซ้อมรวม (FP1 - FP3)</div>
                 <span class="badge bg-secondary" id="badgePractice">ไม่มีภาพ</span>
               </div>
-              <img id="thumbPractice" src="" class="img-fluid rounded mt-2 border border-secondary" style="display: none; width: 100%; height: auto; object-fit: contain;">
+              <div class="thumb-icon-action"><i class="fa-solid fa-magnifying-glass-plus"></i></div>
             </div>
           </div>
-          
-          <div class="rc-section-title"><i class="fa-solid fa-chart-line text-success"></i>อัตราต่อรองการแข่งขัน</div>
-          <div class="mb-3" id="rcExtLinkArea"><a href="#" target="_blank" id="rcExtLinkBtn" class="btn-odds-menu"><div class="d-flex align-items-center gap-2"><i class="fa-solid fa-percent fs-5"></i><span class="fs-6">อัตราต่อรองการแข่งขัน</span></div><span class="badge bg-white text-success px-3 py-2 fw-bold" style="font-size:0.75rem;">เปิดดูราคา <i class="fa-solid fa-arrow-up-right-from-square ms-1"></i></span></a></div>
-          
-          <div class="rc-section-title"><i class="fa-solid fa-circle-info text-warning"></i>ลักษณะสนาม & ข้อมูลยาง PIRELLI</div>
-          <div class="p-3 rounded bg-black border border-secondary text-start mb-2">
-            <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom border-secondary"><span class="small text-secondary">ประเภทแทร็ก:</span><span class="badge bg-danger" id="rcTrackType">-</span></div>
-            <div class="small text-secondary mb-1">🛞 ยางที่ Pirelli จัดสรร: <strong class="text-white" id="rcTires">-</strong></div>
-            <div class="small text-secondary mb-1">🚨 สถิติเกิด Safety Car: <strong class="text-warning" id="rcSafetyCar">-</strong></div>
-            <div class="small text-secondary mb-1">🌤️ พยากรณ์อากาศ: <strong class="text-info weather-icon-animated" id="rcWeather">-</strong></div>
-            <div class="small text-secondary mb-2">🏆 แชมป์ 3 ปีย้อนหลัง: <span class="text-white" id="rcPrevWinners">-</span></div>
-            <div class="p-2 rounded bg-dark border border-secondary text-secondary mb-2" style="font-size:0.72rem;"><i class="fa-solid fa-lightbulb text-warning me-1"></i><span id="rcKeyNote">-</span></div>
-            
-            <!-- รูปภาพแผนผังสนามแข่งขัน (พื้นหลังดำ ขอบแดง) -->
-            <div id="rcTrackLayoutWrapper" class="text-center mt-3 pt-3 border-top border-secondary" style="display: none;" onclick="previewTrackImageById('rcTrackLayoutImg')">
-              <span class="small text-secondary d-block mb-2 text-start"><i class="fa-solid fa-map-location-dot text-info me-1"></i> ผังสนามแข่ง (TRACK LAYOUT)</span>
-              <img id="rcTrackLayoutImg" src="" class="img-fluid rounded" style="width: 100%; height: auto; object-fit: contain; cursor: pointer; background-color: #000000; border: 1px solid #e10600; box-shadow: 0 4px 15px rgba(225, 6, 0, 0.2);">
-              <div class="small mt-2 text-muted"><i class="fa-solid fa-magnifying-glass-plus"></i> แตะเพื่อขยายรูปแทร็ก</div>
-            </div>
 
-          </div>
         </div>
       </div>
     </div>
-
     <!-- 4. Race Archive Tab -->
     <div id="tab-2025" class="tab-pane-custom" style="display: none;">
       <div class="f1-card p-3 mb-3">
