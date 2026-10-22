@@ -655,21 +655,32 @@ body {
   background: rgba(30, 33, 45, 0.8);
   border-color: var(--f1-red);
 }
+/* --- สถานะเมื่อเลือกนักแข่งแล้ว (การ์ดเรืองแสง) --- */
 .driver-slot-card.filled {
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-bottom: 4px solid var(--team-color, #555);
-  background: linear-gradient(145deg, rgba(20,22,30,1) 0%, rgba(30,33,45,1) 100%);
+  /* ลบขอบทึบออก เปลี่ยนเป็นขอบใสนิดๆ */
+  border: 1px solid rgba(255, 255, 255, 0.08); 
+  
+  /* พื้นหลังโปร่งแสง ไล่ระดับสีให้ดูมีมิติ */
+  background: linear-gradient(145deg, rgba(30, 33, 45, 0.6) 0%, rgba(13, 14, 18, 0.9) 100%);
+  
+  /* หัวใจสำคัญ: แสงเรืองรอง (Glow) ด้านล่างของการ์ดตามสีประจำทีม */
+  box-shadow: 0 10px 25px -8px var(--team-color, rgba(0,0,0,0.5)),
+              inset 0 -3px 10px -5px var(--team-color, transparent);
+  
   justify-content: flex-start;
   align-items: flex-start;
   padding: 12px;
 }
+
+/* แสง Backlight สาดเบาๆ จากมุมขวาล่างไปด้านหลังนักแข่ง */
 .driver-slot-card.filled::before {
   content: ''; 
   position: absolute; 
   inset: 0;
-  background: radial-gradient(circle at top right, var(--team-color, transparent) 0%, transparent 60%);
-  opacity: 0.15; 
+  background: radial-gradient(circle at bottom right, var(--team-color, transparent) 0%, transparent 70%);
+  opacity: 0.12; /* ปรับความสว่างของแสงหลังนักแข่งตรงนี้ (แนะนำ 0.1 ถึง 0.2) */
   z-index: 0;
+  mix-blend-mode: screen; /* ช่วยให้แสงดูนุ่มนวลขึ้น */
 }
 .fl-card { height: 90px; }
 .slot-badge-ui {
