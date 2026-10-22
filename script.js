@@ -616,22 +616,27 @@ function onCenterRaceChange() {
   currentActiveMedia = currentRace.media || null; 
   const m = currentActiveMedia || {};
 
+  // 1. ควบคุมการแสดงผล Thumbnail Card (ผลการฝึกซ้อมรวม)
   const badgePrac = document.getElementById('badgePractice'); 
-  const thumbPrac = document.getElementById('thumbPractice');
+  const thumbCardPrac = document.getElementById('thumbCardPractice');
+  const thumbBgPrac = document.getElementById('thumbBgPractice');
+  
   if (badgePrac) { 
     badgePrac.className = m.practiceImg ? 'badge bg-success' : 'badge bg-secondary'; 
-    badgePrac.innerText = m.practiceImg ? '🔍 แตะเพื่อขยาย' : 'ไม่มีภาพ'; 
+    badgePrac.innerText = m.practiceImg ? '🔍 มีรูปภาพแล้ว' : 'ไม่มีภาพ'; 
   }
-  if (thumbPrac) {
+  
+  if (thumbCardPrac && thumbBgPrac) {
     if (m.practiceImg && m.practiceImg.trim() !== "") {
-      thumbPrac.src = getDriveDirectLink(m.practiceImg);
-      thumbPrac.style.display = 'block';
+      const directImgUrl = getDriveDirectLink(m.practiceImg);
+      thumbBgPrac.style.backgroundImage = 'url("' + directImgUrl + '")';
+      thumbCardPrac.style.display = 'flex';
     } else {
-      thumbPrac.src = '';
-      thumbPrac.style.display = 'none';
+      thumbBgPrac.style.backgroundImage = 'none';
     }
   }
-
+  
+  // 2. ปุ่มดูอัตราต่อรอง
   const oddsBtn = document.getElementById('rcExtLinkBtn');
   if (oddsBtn) { 
     if (m.extLink && m.extLink.trim() !== "") { 
@@ -642,7 +647,8 @@ function onCenterRaceChange() {
       oddsBtn.onclick = function() { showToast("ไม่มีลิงก์", "error"); }; 
     } 
   }
-
+  
+  // 3. ข้อมูล Widget Telemetry
   const info = currentRace.trackInfo || {};
   document.getElementById('rcTrackType').innerText = info.trackType || '-'; 
   document.getElementById('rcTires').innerText = info.tires || '-'; 
@@ -651,6 +657,7 @@ function onCenterRaceChange() {
   document.getElementById('rcPrevWinners').innerText = info.prevWinners || '-'; 
   document.getElementById('rcKeyNote').innerText = info.keyNote || '-';
 
+  // 4. ควบคุมการแสดงผล "รูปแผนผังแทร็ก" (ลาย Carbon Fiber)
   const layoutWrapper = document.getElementById('rcTrackLayoutWrapper');
   const layoutImg = document.getElementById('rcTrackLayoutImg');
   if (layoutWrapper && layoutImg) {
