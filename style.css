@@ -112,221 +112,139 @@ body {
   line-height: 1; 
 }
 
-/* --- โพเดียมสไตล์ King of the Hill (อันดับ 1 เด่นสุด) --- */
-.king-of-hill-container {
+/* --- โพเดียมโฉมใหม่ (Premium Trading Card Design) --- */
+.premium-podium-container {
   display: flex;
   flex-direction: column;
   gap: 12px;
   margin: 15px 0 25px 0;
 }
 
-/* 👑 การ์ดอันดับ 1 (แนวนอน Hero Banner) */
-.king-card {
-  background: #11131a;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-top: 4px solid #ffdf00; /* ขอบบนสีทอง */
-  border-radius: 16px;
+.premium-card {
   position: relative;
+  background: #11131a;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: 3px solid var(--border-color);
   overflow: hidden;
+  padding: 16px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.5);
-  min-height: 120px;
+  transition: all 0.2s ease;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
-.king-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 30px rgba(255, 223, 0, 0.15);
+.premium-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.7);
 }
-.king-bg-glow {
+
+/* แสงพื้นหลัง สาดจากตรงกลางขึ้นมา */
+.premium-card .bg-glow {
   position: absolute;
-  top: 0; left: 0; bottom: 0; right: 30%;
-  background: linear-gradient(90deg, var(--team-color) 0%, transparent 100%);
-  opacity: 0.3; /* แสงพื้นหลังซ้ายมือ */
+  bottom: 0; left: 0; right: 0; height: 100%;
+  background: radial-gradient(circle at bottom center, var(--team-color) 0%, transparent 65%);
+  opacity: 0.15;
   pointer-events: none;
+  z-index: 0;
   mix-blend-mode: screen;
 }
-.king-rank-badge {
+
+/* ลายน้ำโลโก้ทีม (อยู่กึ่งกลางการ์ด) */
+.premium-card .watermark-logo {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  height: 120%;
+  opacity: 0.03;
+  filter: grayscale(100%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ส่วนหัว: อันดับ และ คะแนน */
+.premium-card .card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  position: relative;
+  z-index: 2;
+}
+.rank-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Share Tech Mono', monospace;
+  font-weight: 900;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.6);
+}
+.rank-badge.rank-1 {
   background: linear-gradient(135deg, #ffdf00, #d4af37);
   color: #000;
-  font-family: 'Share Tech Mono', monospace;
-  font-weight: 900;
-  font-size: 1.1rem;
-  padding: 4px 12px;
+  padding: 4px 16px;
   border-radius: 20px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-  z-index: 5;
+  font-size: 1.2rem;
 }
-.king-content {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px;
-  position: relative;
-  z-index: 2;
-  height: 100%;
-}
-.king-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
-}
-.king-name {
-  font-size: 1.5rem;
-  font-weight: 900;
-  color: #fff;
-  text-transform: uppercase;
-  text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
-  line-height: 1;
-  margin-bottom: 6px;
-}
-.king-team-logo {
-  height: 20px;
-  object-fit: contain;
-  object-position: left;
-  margin-bottom: 12px;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
-}
-.king-pts {
+.rank-badge.rank-2 { background: linear-gradient(135deg, #e2e8f0, #94a3b8); color: #000; width: 34px; height: 34px; border-radius: 50%; font-size: 1.1rem; }
+.rank-badge.rank-3 { background: linear-gradient(135deg, #f59e0b, #b45309); color: #fff; width: 34px; height: 34px; border-radius: 50%; font-size: 1.1rem; }
+
+.pts-display {
   font-family: 'Titillium Web', sans-serif;
-  font-size: 1.9rem;
   font-weight: 900;
-  color: #ffb703;
-  text-shadow: 0 3px 6px rgba(0,0,0,0.6);
+  text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+  text-align: right;
   line-height: 1;
 }
-.king-pts .small-pts {
-  font-size: 0.85rem;
-  color: #cbd5e1;
-  margin-left: 4px;
-}
-/* รูปรถอันดับ 1 (อยู่ฝั่งขวา ไม่ทะลุกรอบ) */
-.king-car-box {
-  flex: 1.3;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  height: 100%;
-}
-.king-car-img {
-  width: 100%;
-  max-height: 85px; /* คุมความสูงไม่ให้ล้นการ์ด */
-  object-fit: contain;
-  object-position: right center;
-  filter: drop-shadow(0 8px 10px rgba(0,0,0,0.6));
-}
+.king .pts-display { font-size: 1.8rem; color: #ffb703; }
+.prince .pts-display { font-size: 1.5rem; color: #fff; }
+.pts-label { font-size: 0.75rem; color: #cbd5e1; margin-left: 2px; }
 
-/* 🥈🥉 การ์ดอันดับ 2 และ 3 (แนวตั้งคู่กัน) */
-.princes-wrapper {
-  display: flex;
-  gap: 12px;
-}
-.prince-card {
-  flex: 1;
-  background: #151820;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 14px;
+/* ตรงกลาง: โชว์รูปรถ */
+.car-showcase {
   position: relative;
-  overflow: hidden;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 16px 12px;
-  box-shadow: 0 6px 15px rgba(0,0,0,0.4);
-}
-.prince-card:nth-child(1) { border-top: 3px solid #94a3b8; } /* เส้นขอบสีเงิน */
-.prince-card:nth-child(2) { border-top: 3px solid #d97706; } /* เส้นขอบสีทองแดง */
-.prince-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-}
-.prince-bg-glow {
-  position: absolute;
-  bottom: 0; left: 0; right: 0; height: 60%;
-  background: linear-gradient(0deg, var(--team-color) 0%, transparent 100%);
-  opacity: 0.2;
-  pointer-events: none;
-  mix-blend-mode: screen;
-}
-.prince-rank-badge {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: 'Share Tech Mono', monospace;
-  font-weight: 900;
-  font-size: 1rem;
-  color: #000;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-  z-index: 5;
-}
-.prince-card:nth-child(1) .prince-rank-badge { background: linear-gradient(135deg, #e2e8f0, #94a3b8); }
-.prince-card:nth-child(2) .prince-rank-badge { background: linear-gradient(135deg, #f59e0b, #b45309); color: #fff; }
-
-/* รูปรถอันดับ 2 และ 3 (จัดอยู่ตรงกลาง) */
-.prince-car-box {
-  width: 100%;
-  height: 55px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 12px;
-  margin-top: 18px;
   z-index: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
-.prince-car-img {
-  width: 100%;
+.king .car-showcase { height: 85px; margin: 12px 0; }
+.prince .car-showcase { height: 60px; margin: 12px 0; }
+.car-showcase img {
   height: 100%;
+  width: auto;
   object-fit: contain;
-  filter: drop-shadow(0 5px 6px rgba(0,0,0,0.6));
+  filter: drop-shadow(0 6px 8px rgba(0,0,0,0.6));
 }
 
-.prince-info {
-  width: 100%;
+/* ส่วนท้าย: ชื่อ และ โลโก้ทีม */
+.card-footer {
+  position: relative;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
-  z-index: 2;
   text-align: center;
 }
-.prince-name {
-  font-size: 1.15rem;
+.player-name {
   font-weight: 800;
   color: #fff;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
-.prince-team-logo {
-  height: 16px;
+.king .player-name { font-size: 1.4rem; }
+.prince .player-name { font-size: 1.1rem; }
+
+.team-logo-small {
+  height: 20px;
   object-fit: contain;
-  margin-bottom: 8px;
   filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
 }
-.prince-pts {
-  font-family: 'Titillium Web', sans-serif;
-  font-size: 1.5rem;
-  font-weight: 900;
-  color: #fff;
-  line-height: 1;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-}
-.prince-pts .small-pts {
-  font-size: 0.75rem;
-  color: #94a3b8;
-  margin-left: 2px;
+.princes-row {
+  display: flex;
+  gap: 12px;
 }
 
 .table-responsive { background: transparent !important; }
