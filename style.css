@@ -201,12 +201,30 @@ body {
 .pts-label { font-size: 0.75rem; color: #cbd5e1; margin-left: 2px; }
 
 /* ตรงกลาง: โชว์รูปรถ */
+/* ตรงกลาง: โชว์รูปรถ */
 .car-showcase {
   position: relative;
   z-index: 2;
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 100%;
+}
+.king .car-showcase { height: 85px; margin: 12px 0; }
+.prince .car-showcase { height: 50px; margin: 10px 0; }
+
+.car-showcase img {
+  max-height: 100%;
+  max-width: 100%; /* บังคับไม่ให้รถยาวเกินความกว้างของการ์ด */
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 8px rgba(0,0,0,0.6));
+}
+
+/* ปรับขนาดรถของอันดับ 2 และ 3 ให้เล็กลงและมีระยะห่างจากขอบการ์ด */
+.prince .car-showcase img {
+  max-width: 92%; /* ถ้ารู้สึกว่ายังใหญ่ไป ปรับลดเป็น 85% หรือ 88% ได้เลยครับ */
 }
 .king .car-showcase { height: 85px; margin: 12px 0; }
 .prince .car-showcase { height: 60px; margin: 12px 0; }
