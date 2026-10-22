@@ -112,13 +112,13 @@ body {
   line-height: 1; 
 }
 
-/* --- โพเดียมโฉมใหม่ (3D Car Burst Design) --- */
+/* --- โพเดียมโฉมใหม่ (จัดตำแหน่งรถไว้ตรงกลางการ์ด) --- */
 .podium-container { 
   display: flex; 
   align-items: flex-end; 
   justify-content: center; 
   gap: 12px; 
-  margin: 40px 0 35px 0; /* เพิ่ม margin ด้านบนให้รูปรถทะลุขอบได้พอดี */
+  margin: 30px 0 25px 0; 
 }
 
 .new-podium-card { 
@@ -129,10 +129,11 @@ body {
   display: flex; 
   flex-direction: column; 
   align-items: center; 
-  justify-content: flex-end; 
+  justify-content: space-between; /* จัดพื้นที่ให้กระจาย บน-กลาง-ล่าง */
   transition: transform 0.3s ease; 
   cursor: pointer; 
   position: relative;
+  padding-top: 25px; /* ดันเนื้อหาลงมาหลบวงกลมอันดับที่ลอยอยู่ด้านบน */
   padding-bottom: 12px;
 }
 .new-podium-card:hover { transform: translateY(-4px); }
@@ -149,11 +150,11 @@ body {
 }
 
 /* ความสูงการ์ด และเส้นขอบสีเมทัลลิกด้านบน */
-.podium-1 { height: 200px; border-top: 4px solid #ffb703; box-shadow: 0 -5px 20px rgba(255, 183, 3, 0.15); z-index: 3; }
-.podium-2 { height: 170px; border-top: 4px solid #94a3b8; box-shadow: 0 -5px 15px rgba(148, 163, 184, 0.1); z-index: 2; }
-.podium-3 { height: 155px; border-top: 4px solid #d97706; box-shadow: 0 -5px 15px rgba(217, 119, 6, 0.1); z-index: 1; }
+.podium-1 { height: 215px; border-top: 4px solid #ffb703; box-shadow: 0 -5px 20px rgba(255, 183, 3, 0.15); z-index: 3; }
+.podium-2 { height: 185px; border-top: 4px solid #94a3b8; box-shadow: 0 -5px 15px rgba(148, 163, 184, 0.1); z-index: 2; }
+.podium-3 { height: 170px; border-top: 4px solid #d97706; box-shadow: 0 -5px 15px rgba(217, 119, 6, 0.1); z-index: 1; }
 
-/* ป้ายวงกลมอันดับ (ลอยทับขอบบน) */
+/* ป้ายวงกลมอันดับ (ลอยทับขอบบนสุด) */
 .new-podium-rank { 
   position: absolute;
   top: -18px; 
@@ -169,17 +170,18 @@ body {
 .podium-2 .new-podium-rank { background: linear-gradient(135deg, #e2e8f0, #94a3b8); } 
 .podium-3 .new-podium-rank { background: linear-gradient(135deg, #f59e0b, #b45309); color: #fff; }
 
-/* จุดจัดวางรูปรถให้ทะลุขอบ */
+/* จุดจัดวางรูปรถ (ให้อยู่ตรงกลางการ์ด) */
 .new-podium-car-wrap {
-  position: absolute;
-  top: -30px; 
-  width: 140%; /* ขยายรูปรถให้ใหญ่กว่าตัวการ์ด */
+  width: 140%; /* ขยายให้รถใหญ่กว่าการ์ดนิดนึง จะได้ดูทะลุขอบข้างซ้ายขวา */
   display: flex;
+  flex: 1; /* ดันให้พื้นที่ตรงกลางขยายตัว */
+  align-items: center;
   justify-content: center;
   pointer-events: none;
   z-index: 3;
+  margin: 5px 0; /* เพิ่มระยะห่างบนล่างเล็กน้อย */
 }
-.podium-1 .new-podium-car-wrap { top: -45px; width: 160%; } /* อันดับ 1 รถใหญ่และลอยสูงกว่า */
+.podium-1 .new-podium-car-wrap { width: 160%; } /* อันดับ 1 รถจะใหญ่กว่าเพื่อน */
 
 /* รูปรถ */
 .new-podium-car {
@@ -189,14 +191,13 @@ body {
   filter: drop-shadow(0 10px 8px rgba(0,0,0,0.6));
 }
 
-/* ข้อมูลผู้เล่นด้านล่าง */
+/* ข้อมูลผู้เล่นด้านล่างสุด */
 .new-podium-info {
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   z-index: 2;
-  margin-top: auto; 
 }
 
 .new-podium-name {
