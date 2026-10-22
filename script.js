@@ -366,43 +366,39 @@ function renderUI(data) {
   const podiumContainer = document.getElementById('podiumContainer');
   
   if (!globalLeaderboard || globalLeaderboard.length === 0) {
-    if(podiumContainer) podiumContainer.innerHTML = ''; 
-    if(lbContainer) lbContainer.innerHTML = '<div class="text-center text-muted py-3">ยังไม่มีคะแนนสะสม</div>';
-  } else {
-    let podiumHtml = ''; 
+   let podiumHtml = '<div class="premium-podium-container">'; 
     const top1 = globalLeaderboard[0];
     const top2 = globalLeaderboard[1];
     const top3 = globalLeaderboard[2];
     const rest = globalLeaderboard.slice(3);
 
-    podiumHtml += '<div class="king-of-hill-container">';
-    
-    // --- การ์ดอันดับ 1 (Hero Banner แนวนอน) ---
+    // --- 🥇 การ์ดอันดับ 1 (King Card) ---
     if (top1) {
       const team = top1[4] || "F1";
       const teamColor = TEAM_COLORS[team] || "#555555";
       const logoUrl = TEAM_LOGOS[team] || ""; 
       const carUrl = TEAM_CARS[team] || "";
-      const teamIcon = logoUrl ? '<img src="' + getDriveDirectLink(logoUrl) + '" class="king-team-logo" alt="">' : '';
-      const carImg = carUrl ? '<img src="' + getDriveDirectLink(carUrl) + '" class="king-car-img" alt="">' : '';
+      const teamIcon = logoUrl ? '<img src="' + getDriveDirectLink(logoUrl) + '" class="team-logo-small" alt="">' : '';
+      const carImg = carUrl ? '<img src="' + getDriveDirectLink(carUrl) + '" alt="">' : '';
 
-      podiumHtml += '<div class="king-card" style="--team-color: ' + teamColor + ';" onclick="showPlayerStats(decodeURIComponent(\'' + encodeURIComponent(String(top1[1])) + '\'))">' +
-                      '<div class="king-bg-glow"></div>' +
-                      '<div class="king-rank-badge"><i class="fa-solid fa-crown text-dark me-1"></i>1</div>' +
-                      '<div class="king-content">' +
-                        '<div class="king-info">' +
-                          '<div class="king-name">' + top1[1] + '</div>' +
-                          teamIcon +
-                          '<div class="king-pts">' + top1[2] + '<span class="small-pts">PTS</span></div>' +
-                        '</div>' +
-                        '<div class="king-car-box">' + carImg + '</div>' +
+      podiumHtml += '<div class="premium-card king" style="--team-color: ' + teamColor + '; --border-color: #ffb703;" onclick="showPlayerStats(decodeURIComponent(\'' + encodeURIComponent(String(top1[1])) + '\'))">' +
+                      '<div class="bg-glow"></div>' +
+                      '<img src="' + getDriveDirectLink(logoUrl) + '" class="watermark-logo" alt="">' +
+                      '<div class="card-header">' +
+                        '<div class="rank-badge rank-1"><i class="fa-solid fa-crown me-1"></i>1</div>' +
+                        '<div class="pts-display">' + top1[2] + ' <span class="pts-label">PTS</span></div>' +
+                      '</div>' +
+                      '<div class="car-showcase">' + carImg + '</div>' +
+                      '<div class="card-footer">' +
+                        '<div class="player-name">' + top1[1] + '</div>' +
+                        teamIcon +
                       '</div>' +
                     '</div>';
     }
 
-    // --- การ์ดอันดับ 2 และ 3 (แนวตั้งวางคู่กันด้านล่าง) ---
+    // --- 🥈🥉 การ์ดอันดับ 2 และ 3 (Prince Cards) ---
     if (top2 || top3) {
-      podiumHtml += '<div class="princes-wrapper">';
+      podiumHtml += '<div class="princes-row">';
       [top2, top3].forEach(function(p, idx) {
         if(!p) return;
         const rank = idx + 2; 
@@ -410,24 +406,28 @@ function renderUI(data) {
         const teamColor = TEAM_COLORS[team] || "#555555";
         const logoUrl = TEAM_LOGOS[team] || ""; 
         const carUrl = TEAM_CARS[team] || "";
-        const teamIcon = logoUrl ? '<img src="' + getDriveDirectLink(logoUrl) + '" class="prince-team-logo" alt="">' : '';
-        const carImg = carUrl ? '<img src="' + getDriveDirectLink(carUrl) + '" class="prince-car-img" alt="">' : '';
+        const teamIcon = logoUrl ? '<img src="' + getDriveDirectLink(logoUrl) + '" class="team-logo-small" alt="">' : '';
+        const carImg = carUrl ? '<img src="' + getDriveDirectLink(carUrl) + '" alt="">' : '';
+        const borderColor = rank === 2 ? '#cbd5e1' : '#d97706';
         
-        podiumHtml += '<div class="prince-card" style="--team-color: ' + teamColor + ';" onclick="showPlayerStats(decodeURIComponent(\'' + encodeURIComponent(String(p[1])) + '\'))">' +
-                        '<div class="prince-bg-glow"></div>' +
-                        '<div class="prince-rank-badge">' + rank + '</div>' +
-                        '<div class="prince-car-box">' + carImg + '</div>' +
-                        '<div class="prince-info">' +
-                          '<div class="prince-name">' + p[1] + '</div>' +
+        podiumHtml += '<div class="premium-card prince" style="--team-color: ' + teamColor + '; --border-color: ' + borderColor + ';" onclick="showPlayerStats(decodeURIComponent(\'' + encodeURIComponent(String(p[1])) + '\'))">' +
+                        '<div class="bg-glow"></div>' +
+                        '<img src="' + getDriveDirectLink(logoUrl) + '" class="watermark-logo" alt="">' +
+                        '<div class="card-header">' +
+                          '<div class="rank-badge rank-' + rank + '">' + rank + '</div>' +
+                          '<div class="pts-display">' + p[2] + ' <span class="pts-label">PTS</span></div>' +
+                        '</div>' +
+                        '<div class="car-showcase">' + carImg + '</div>' +
+                        '<div class="card-footer">' +
+                          '<div class="player-name">' + p[1] + '</div>' +
                           teamIcon +
-                          '<div class="prince-pts">' + p[2] + '<span class="small-pts">PTS</span></div>' +
                         '</div>' +
                       '</div>';
       });
       podiumHtml += '</div>';
     }
     
-    podiumHtml += '</div>'; // ปิดคอนเทนเนอร์หลัก
+    podiumHtml += '</div>';
 
     if(podiumContainer) podiumContainer.innerHTML = podiumHtml;
     
