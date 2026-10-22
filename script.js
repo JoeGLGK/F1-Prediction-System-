@@ -616,23 +616,17 @@ function onCenterRaceChange() {
   currentActiveMedia = currentRace.media || null; 
   const m = currentActiveMedia || {};
 
-  // 1. ควบคุมการแสดงผล Thumbnail Card (ผลการฝึกซ้อมรวม)
-  const badgePrac = document.getElementById('badgePractice'); 
-  const thumbCardPrac = document.getElementById('thumbCardPractice');
-  const thumbBgPrac = document.getElementById('thumbBgPractice');
+  // 1. ควบคุมการแสดงผล "ผลการฝึกซ้อมรวม" (แสดงภาพทันที / ซ่อนถ้าไม่มีลิงก์)
+  const practiceWrapper = document.getElementById('practiceSectionWrapper');
+  const thumbPrac = document.getElementById('thumbPractice');
   
-  if (badgePrac) { 
-    badgePrac.className = m.practiceImg ? 'badge bg-success' : 'badge bg-secondary'; 
-    badgePrac.innerText = m.practiceImg ? '🔍 มีรูปภาพแล้ว' : 'ไม่มีภาพ'; 
-  }
-  
-  if (thumbCardPrac && thumbBgPrac) {
+  if (practiceWrapper && thumbPrac) {
     if (m.practiceImg && m.practiceImg.trim() !== "") {
-      const directImgUrl = getDriveDirectLink(m.practiceImg);
-      thumbBgPrac.style.backgroundImage = 'url("' + directImgUrl + '")';
-      thumbCardPrac.style.display = 'flex';
+      thumbPrac.src = getDriveDirectLink(m.practiceImg);
+      practiceWrapper.style.display = 'block';
     } else {
-      thumbBgPrac.style.backgroundImage = 'none';
+      thumbPrac.src = '';
+      practiceWrapper.style.display = 'none';
     }
   }
   
@@ -657,7 +651,7 @@ function onCenterRaceChange() {
   document.getElementById('rcPrevWinners').innerText = info.prevWinners || '-'; 
   document.getElementById('rcKeyNote').innerText = info.keyNote || '-';
 
-  // 4. ควบคุมการแสดงผล "รูปแผนผังแทร็ก" (ลาย Carbon Fiber)
+  // 4. ควบคุมการแสดงผล "รูปแผนผังแทร็ก"
   const layoutWrapper = document.getElementById('rcTrackLayoutWrapper');
   const layoutImg = document.getElementById('rcTrackLayoutImg');
   if (layoutWrapper && layoutImg) {
