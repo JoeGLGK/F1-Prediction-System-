@@ -198,7 +198,7 @@
       </div>
     </div>
 
-    <!-- 3. Race Center Tab -->
+   <!-- 3. Race Center Tab -->
     <div id="tab-center" class="tab-pane-custom" style="display: none;">
       <div class="f1-card p-3 mb-3">
         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -213,7 +213,7 @@
 
         <div id="rcContent" style="display: none;">
           
-          <!-- 1. ระบบวิดเจ็ตสไตล์ iPhone (Telemetry Dashboard Widgets) -->
+          <!-- ระบบวิดเจ็ต (ปรับไอคอนยาง Pirelli เป็นรูปล้อรถ) -->
           <div class="telemetry-grid mb-3">
             <div class="telemetry-widget">
               <div class="widget-icon text-danger"><i class="fa-solid fa-road"></i></div>
@@ -221,8 +221,8 @@
               <div class="widget-value" id="rcTrackType">-</div>
             </div>
             <div class="telemetry-widget">
-              <div class="widget-icon text-warning"><i class="fa-solid fa-vest"></i></div>
-              <div class="widget-label">ยาง Pirelli</div>
+              <div class="widget-icon text-warning"><i class="fa-solid fa-circle-notch"></i></div>
+              <div class="widget-label">ยาง PIRELLI</div>
               <div class="widget-value" id="rcTires">-</div>
             </div>
             <div class="telemetry-widget">
@@ -237,7 +237,7 @@
             </div>
           </div>
 
-          <!-- กล่องสรุปสถิติเพิ่มเติม (แชมป์เก่า & Key Note) -->
+          <!-- กล่องสรุปสถิติเพิ่มเติม -->
           <div class="telemetry-summary-card mb-3">
             <div class="summary-row mb-2">
               <span class="text-secondary"><i class="fa-solid fa-trophy text-warning me-1"></i> แชมป์ 3 ปีย้อนหลัง:</span>
@@ -248,7 +248,7 @@
             </div>
           </div>
 
-          <!-- 2. การ์ดแผนผังสนาม (Track Map Card ลาย Carbon Fiber) -->
+          <!-- การ์ดแผนผังสนาม (Track Map Card) -->
           <div id="rcTrackLayoutWrapper" class="track-map-card mb-3" style="display: none;" onclick="previewTrackImageById('rcTrackLayoutImg')">
             <div class="track-map-header">
               <span><i class="fa-solid fa-map-location-dot text-danger me-1"></i> ผังสนามแข่ง (TRACK LAYOUT)</span>
@@ -270,17 +270,17 @@
             </a>
           </div>
 
-          <!-- 3. ปุ่มดูภาพถ่ายแบบ Thumbnail Cards (ผลซ้อมรวม) -->
-          <div class="rc-section-title"><i class="fa-solid fa-stopwatch text-warning"></i>ผลการฝึกซ้อม (Practice Sessions)</div>
-          <div class="mb-3">
-            <div class="thumbnail-card" id="thumbCardPractice" onclick="openMediaPreview('practiceImg')">
-              <div class="thumb-bg-blur" id="thumbBgPractice"></div>
-              <div class="thumb-overlay"></div>
-              <div class="thumb-content">
-                <div class="thumb-title"><i class="fa-solid fa-image text-warning me-2"></i>ผลการฝึกซ้อมรวม (FP1 - FP3)</div>
-                <span class="badge bg-secondary" id="badgePractice">ไม่มีภาพ</span>
+          <!-- ส่วนผลการฝึกซ้อมรวม (แสดงภาพทันที ไม่ต้องกดเข้า / ซ่อนอัตโนมัติถ้าไม่มีลิงก์) -->
+          <div id="practiceSectionWrapper" style="display: none;">
+            <div class="rc-section-title"><i class="fa-solid fa-stopwatch text-warning"></i>ผลการฝึกซ้อม (Practice Sessions)</div>
+            <div class="mb-3">
+              <div class="rc-card-img-preview" onclick="previewTrackImageById('thumbPractice')">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="fw-bold text-white small"><i class="fa-solid fa-image text-warning me-2"></i>ผลการฝึกซ้อมรวม (FP1 - FP3)</span>
+                  <span class="badge bg-danger text-white px-2 py-1" style="font-size: 0.65rem;"><i class="fa-solid fa-magnifying-glass-plus me-1"></i> แตะเพื่อขยาย</span>
+                </div>
+                <img id="thumbPractice" src="" class="img-fluid rounded border border-secondary w-100" alt="Practice Results">
               </div>
-              <div class="thumb-icon-action"><i class="fa-solid fa-magnifying-glass-plus"></i></div>
             </div>
           </div>
 
