@@ -818,3 +818,23 @@ body {
   z-index: 1; 
 }
 .text-purple { color: #a855f7 !important; }
+/* --- โลโก้ลายน้ำ (Watermark) --- */
+.team-watermark-ui {
+  position: absolute;
+  top: 50%;
+  left: 5%; /* ขยับโลโก้ชิดซ้ายนิดนึง */
+  transform: translateY(-50%) rotate(-15deg); /* จับโลโก้เอียง -15 องศาให้ดูสปอร์ต */
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  opacity: 0.12; /* โปร่งแสงมากๆ ให้ดูเป็นลายน้ำแพงๆ */
+  z-index: 0; /* ดันไปอยู่หลังสุด */
+  pointer-events: none;
+  filter: grayscale(100%) contrast(150%) brightness(1.5); /* ทำให้โลโก้กลายเป็นสีเทาสว่าง จะได้ไม่แย่งซีนการ์ด */
+}
+
+/* ดันข้อความชื่อและทีมให้ลอยขึ้นมาอยู่เหนือลายน้ำ */
+.driver-name-ui, .driver-team-ui {
+  position: relative;
+  z-index: 2;
+}
