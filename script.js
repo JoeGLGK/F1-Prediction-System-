@@ -32,7 +32,7 @@ const TEAM_LOGOS = {
   "Alpine": "https://lh3.googleusercontent.com/d/1CAPj3vwXe7cWOuxBPhOX-ciiJ8FlGqFG", 
   "Williams": "https://lh3.googleusercontent.com/d/18mn901TW_w5SW4Fg5Ke0WBKgxyt-5ICN", 
   "VCARB": "https://lh3.googleusercontent.com/d/1AfEAprJx9b4ivULrg41CCYiVUnBi6ps2", 
-  "Sauber": "https://lh3.googleusercontent.com/d/1w0dvPdMVK2b09liK6G-XEt2LXu6S-Mt0", 
+  "Audi": "https://lh3.googleusercontent.com/d/1w0dvPdMVK2b09liK6G-XEt2LXu6S-Mt0", 
   "Haas": "https://lh3.googleusercontent.com/d/1i7aUDygqHB5Qf0ySyWIUSzy0F-YW8jHz", 
   "Cadilac": "https://lh3.googleusercontent.com/d/1GIArchbZm5K7bmSNfpkGNi8bHae5G1w0",
   "Cadillac": "https://lh3.googleusercontent.com/d/1GIArchbZm5K7bmSNfpkGNi8bHae5G1w0"
