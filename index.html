@@ -225,26 +225,33 @@
           </div>
 
           <!-- 2. ระบบวิดเจ็ต (Telemetry Dashboard 2x2) -->
+         <!-- 2. ระบบวิดเจ็ต (Bento Box Telemetry) -->
           <div class="telemetry-grid mb-3">
-            <div class="telemetry-widget">
-              <div class="widget-icon text-danger"><i class="fa-solid fa-road"></i></div>
-              <div class="widget-label">ประเภทแทร็ก</div>
+            <div class="telemetry-widget border-red">
+              <div class="widget-head">
+                <i class="fa-solid fa-road text-danger"></i><span>ประเภทแทร็ก</span>
+              </div>
               <div class="widget-value" id="rcTrackType">-</div>
             </div>
-            <div class="telemetry-widget">
-              <!-- เปลี่ยนเป็นไอคอนยางรถ พร้อมคลาสยาง Pirelli -->
-              <div class="widget-icon text-warning pirelli-tire"><i class="fa-solid fa-tire"></i></div>
-              <div class="widget-label">ยาง PIRELLI</div>
+            
+            <div class="telemetry-widget border-yellow">
+              <div class="widget-head">
+                <i class="fa-solid fa-tire text-warning"></i><span>ยาง PIRELLI</span>
+              </div>
               <div class="widget-value" id="rcTires">-</div>
             </div>
-            <div class="telemetry-widget">
-              <div class="widget-icon text-info"><i class="fa-solid fa-triangle-exclamation"></i></div>
-              <div class="widget-label">Safety Car</div>
+            
+            <div class="telemetry-widget border-blue">
+              <div class="widget-head">
+                <i class="fa-solid fa-triangle-exclamation text-info"></i><span>Safety Car</span>
+              </div>
               <div class="widget-value" id="rcSafetyCar">-</div>
             </div>
-            <div class="telemetry-widget">
-              <div class="widget-icon text-success"><i class="fa-solid fa-cloud-sun"></i></div>
-              <div class="widget-label">พยากรณ์อากาศ</div>
+            
+            <div class="telemetry-widget border-green">
+              <div class="widget-head">
+                <i class="fa-solid fa-cloud-sun text-success"></i><span>พยากรณ์อากาศ</span>
+              </div>
               <div class="widget-value weather-icon-animated" id="rcWeather">-</div>
             </div>
           </div>
