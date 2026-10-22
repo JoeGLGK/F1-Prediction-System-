@@ -838,19 +838,20 @@ body {
 }
 /* --- Player List Cards (Leaderboard อันดับ 4 เป็นต้นไป) --- */
 /* --- Player List Cards (ดีไซน์มีรูปรถ) --- */
+/* --- Player List Cards (ดีไซน์มีรูปรถ - ปรับความสูงให้กระชับ) --- */
 .player-list-card {
-  background: #151820; /* พื้นหลังสีดำเข้ม */
+  background: #151820; 
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
-  padding: 12px 18px;
+  border-radius: 12px; /* ปรับมุมมนให้เข้ากับความสูงใหม่ */
+  padding: 8px 16px;   /* ลด padding บน-ล่าง ให้การ์ดเตี้ยลง */
   display: flex;
   align-items: center;
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
   overflow: hidden;
-  min-height: 95px; /* ความสูงการ์ดสำหรับวางรูปรถ */
-  margin-bottom: 4px;
+  min-height: 70px;    /* ลดความสูงขั้นต่ำลงจาก 95px เหลือ 70px */
+  margin-bottom: 6px;
 }
 .player-list-card:hover {
   transform: translateY(-2px);
@@ -864,7 +865,7 @@ body {
   position: absolute; 
   top: 0; left: 0; bottom: 0; right: 40%;
   background: linear-gradient(90deg, var(--team-color) 0%, rgba(0,0,0,0) 100%);
-  opacity: 0.5; /* ความสว่างของสีทีมที่ซ้อนอยู่พื้นหลัง */
+  opacity: 0.5; 
   z-index: 0;
   mix-blend-mode: screen;
 }
@@ -875,7 +876,7 @@ body {
   right: 25%;
   top: 50%;
   transform: translateY(-50%);
-  height: 90%;
+  height: 80%; /* ลดขนาดลายน้ำลงนิดหน่อยให้สมส่วน */
   opacity: 0.06;
   z-index: 1;
   filter: grayscale(100%);
@@ -885,9 +886,9 @@ body {
 /* รูปรถ F1 */
 .player-list-car-img {
   position: absolute;
-  left: 10%; /* จัดตำแหน่งรูปรถให้อยู่กลางๆ ชื่อ */
-  bottom: 5px;
-  height: 55px; /* ขยายหรือลดขนาดรถตรงนี้ */
+  left: 12%; 
+  bottom: 2px;  /* ขยับรถให้ชิดขอบล่างการ์ดมากขึ้น */
+  height: 46px; /* ลดขนาดรถลงให้พอดีกับการ์ดที่เตี้ยลง (เดิม 55px) */
   width: auto;
   z-index: 2;
   filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6));
@@ -908,16 +909,16 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 25px; /* ดันข้อความขึ้นข้างบนเพื่อหลบรูปรถ */
+  margin-bottom: 15px; /* ลดระยะดันข้อความขึ้น (เดิม 25px) เพื่อให้ข้อความอยู่กลางขึ้น */
 }
 .player-list-rank {
-  font-size: 1.4rem;
+  font-size: 1.3rem;
   font-weight: 900;
   color: #fff;
   text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
 }
 .player-list-name {
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   font-weight: 800;
   color: #fff;
   text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
@@ -931,12 +932,12 @@ body {
   flex-direction: column;
   align-items: flex-end;
   justify-content: center;
-  gap: 4px;
+  gap: 2px; /* ลดช่องว่างระหว่างคะแนนกับป้าย +pts */
 }
 .pts-gain-badge {
-  font-size: 0.75rem;
-  padding: 2px 8px;
-  border-radius: 6px;
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 4px;
   background: rgba(34, 197, 94, 0.2);
   color: #4ade80;
   font-weight: 800;
@@ -944,14 +945,13 @@ body {
 }
 .player-list-total {
   font-family: 'Titillium Web', sans-serif;
-  font-size: 1.6rem;
+  font-size: 1.5rem;
   font-weight: 900;
   color: #ffb703;
   line-height: 1;
   text-shadow: 0 2px 5px rgba(0,0,0,0.5);
 }
 .player-list-total .pts-lbl {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: #cbd5e1;
-}
 }
