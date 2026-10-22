@@ -916,9 +916,24 @@ body {
   min-height: 70px;    /* ลดความสูงขั้นต่ำลงจาก 95px เหลือ 70px */
   margin-bottom: 6px;
 }
+/* --- Player List Cards (ทรงเพรียว จัดกึ่งกลาง รถอยู่ถัดจากชื่อ) --- */
+.player-list-card {
+  background: #151820; 
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 6px 16px;   /* บีบพื้นที่บน-ล่างให้แคบลง */
+  display: flex;
+  align-items: center; /* จัดทุกอย่างให้อยู่กึ่งกลางแนวตั้ง */
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  height: 58px;        /* ล็อกความสูงการ์ดให้เตี้ยและเพรียวลง (ปรับเลขนี้ได้ถ้าอยากให้เตี้ยลงอีก) */
+  margin-bottom: 4px;
+}
 .player-list-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.5);
   border-color: rgba(255, 255, 255, 0.2);
 }
 
@@ -926,35 +941,38 @@ body {
 .player-list-card::before {
   content: ''; 
   position: absolute; 
-  top: 0; left: 0; bottom: 0; right: 40%;
+  top: 0; left: 0; bottom: 0; right: 35%;
   background: linear-gradient(90deg, var(--team-color) 0%, rgba(0,0,0,0) 100%);
-  opacity: 0.5; 
+  opacity: 0.45; 
   z-index: 0;
   mix-blend-mode: screen;
 }
 
-/* ลายน้ำโลโก้ทีม (จางๆ ตรงกลาง) */
+/* ลายน้ำโลโก้ทีม (จางๆ ฝั่งขวาของรถ) */
 .player-list-watermark {
   position: absolute;
-  right: 25%;
+  right: 22%;
   top: 50%;
   transform: translateY(-50%);
-  height: 80%; /* ลดขนาดลายน้ำลงนิดหน่อยให้สมส่วน */
+  height: 85%;
   opacity: 0.06;
   z-index: 1;
   filter: grayscale(100%);
   pointer-events: none;
 }
 
-/* รูปรถ F1 */
+/* รูปรถ F1 (ย้ายไปอยู่ตรงกลาง ถัดจากชื่อผู้เล่น) */
 .player-list-car-img {
   position: absolute;
-  left: 12%; 
-  bottom: 2px;  /* ขยับรถให้ชิดขอบล่างการ์ดมากขึ้น */
-  height: 46px; /* ลดขนาดรถลงให้พอดีกับการ์ดที่เตี้ยลง (เดิม 55px) */
+  left: 52%; /* จัดตำแหน่งให้อยู่กึ่งกลางการ์ด (ถัดจากชื่อ) */
+  top: 50%;
+  transform: translate(-50%, -50%); /* ดึงให้อยู่ตรงกลางระหว่างขอบบน-ล่างเป๊ะๆ */
+  height: 36px; /* ลดขนาดรถให้เล็กลง พอเหมาะกับการ์ด */
+  max-width: 42%; /* ป้องกันรถยาวไปชนชื่อหรือคะแนน */
   width: auto;
+  object-fit: contain;
   z-index: 2;
-  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6));
+  filter: drop-shadow(0 3px 5px rgba(0,0,0,0.6));
   pointer-events: none;
 }
 
@@ -964,57 +982,65 @@ body {
   z-index: 3;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: center; /* ดึงชื่อและคะแนนให้อยู่กึ่งกลางขอบบน-ล่าง */
   width: 100%;
   height: 100%;
 }
+
+/* ฝั่งซ้าย: อันดับและชื่อผู้เล่น */
 .player-list-left {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 15px; /* ลดระยะดันข้อความขึ้น (เดิม 25px) เพื่อให้ข้อความอยู่กลางขึ้น */
+  margin-bottom: 0; /* เอาตัวดันข้อความออก เพื่อให้ชื่ออยู่ตรงกลางการ์ดพอดี */
+  max-width: 35%;   /* กั้นพื้นที่ไว้ไม่ให้ชื่อยาวไปทับหน้ารถ */
 }
 .player-list-rank {
-  font-size: 1.3rem;
+  font-size: 1.15rem;
   font-weight: 900;
   color: #fff;
   text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+  min-width: 18px;
 }
 .player-list-name {
-  font-size: 1.2rem;
+  font-size: 1.05rem;
   font-weight: 800;
   color: #fff;
   text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* ฝั่งแสดงคะแนนด้านขวา */
+/* ฝั่งขวา: คะแนนรวมและป้ายบวกคะแนน */
 .player-list-right {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   justify-content: center;
-  gap: 2px; /* ลดช่องว่างระหว่างคะแนนกับป้าย +pts */
+  gap: 1px;
 }
 .pts-gain-badge {
-  font-size: 0.7rem;
-  padding: 2px 6px;
+  font-size: 0.65rem;
+  padding: 1px 5px;
   border-radius: 4px;
   background: rgba(34, 197, 94, 0.2);
   color: #4ade80;
   font-weight: 800;
   border: 1px solid rgba(34, 197, 94, 0.4);
+  line-height: 1.1;
 }
 .player-list-total {
   font-family: 'Titillium Web', sans-serif;
-  font-size: 1.5rem;
+  font-size: 1.35rem;
   font-weight: 900;
   color: #ffb703;
   line-height: 1;
   text-shadow: 0 2px 5px rgba(0,0,0,0.5);
 }
 .player-list-total .pts-lbl {
-  font-size: 0.75rem;
+  font-size: 0.65rem;
   color: #cbd5e1;
 }
