@@ -43,7 +43,20 @@ const TEAM_COLORS = {
   "Williams": "#005aff", "VCARB": "#6692ff", "Audi": "#00e701", 
   "Haas": "#ffffff", "Cadillac": "#ffd700" 
 };
-
+// ลิงก์รูปรถ F1 ของแต่ละทีม
+const TEAM_CARS = {
+  "Ferrari": "https://lh3.googleusercontent.com/d/16fGNY2kTdnXIoDRjzkXmpbZwOn27xAAR",
+  "Red Bull Racing": "https://lh3.googleusercontent.com/d/1MUwr4Pi3TbBAKIYefrPpVcmfqdqfe-OW",
+  "McLaren": "https://lh3.googleusercontent.com/d/1ZFP_jPxbzfRLknkRWj_GhEHRbkBK-l6g",
+  "Mercedes": "https://lh3.googleusercontent.com/d/1y_4syJ21I8PbkQ5-O8VCnkKfNMO8_t0d",
+  "Aston Martin": "https://lh3.googleusercontent.com/d/17A9qzj-jYzgwDwxZxsUyhj3aZZr9XHSn",
+  "Alpine": "https://lh3.googleusercontent.com/d/1VB8NbkZMwYaQpXAskv98bSpaZ97zRR3b",
+  "Williams": "https://lh3.googleusercontent.com/d/1CyrgK3KDX9C__EYuUwr9o5Qj-_LRnaQh",
+  "VCARB": "https://lh3.googleusercontent.com/d/11EsP5GQrWqpBv68QWc3UPahhHuWydoMX",
+  "Audi": "https://lh3.googleusercontent.com/d/1lqDE-G4e6rTrFXybJi2BH2NwBrWUm8X3",
+  "Haas": "https://lh3.googleusercontent.com/d/1dNjNrpTi-BznASYs9cRjjQmnILOdfhxK",
+  "Cadillac": "https://lh3.googleusercontent.com/d/109l7yKIfGsfABg0R5sSh35yu3aq2DAwq"
+};
 const DEFAULT_DRIVER_IMG = "https://cdn-icons-png.flaticon.com/512/1995/1995470.png";
 
 const DRIVER_INFO = {
