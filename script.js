@@ -173,6 +173,12 @@ function updateCardUI(slotId, driverName) {
   document.getElementById('team-' + slotId).innerText = info.team;
   document.getElementById('img-' + slotId).src = getDriveDirectLink(info.img);
   
+  // ✅ ส่วนดึงโลโก้ลายน้ำ
+  const watermarkEl = document.getElementById('watermark-' + slotId);
+  if (watermarkEl) {
+    watermarkEl.src = TEAM_LOGOS[info.team] || "";
+  }
+  
   emptyState.classList.add('d-none');
   filledState.classList.remove('d-none');
 }
