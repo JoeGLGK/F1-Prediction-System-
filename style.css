@@ -1044,84 +1044,66 @@ body {
   font-size: 0.65rem;
   color: #cbd5e1;
 }
-/* --- Telemetry Dashboard Widgets (มีมิติแสง Ambient Corner Glow) --- */
+/* --- Telemetry Dashboard Widgets (Bento Box / Data-First Design) --- */
 .telemetry-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+  gap: 10px;
 }
+
 .telemetry-widget {
-  position: relative;
-  background: #11131a; /* พื้นดำเข้มเรียบหรู */
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 14px;
-  padding: 18px 10px;
+  background: #0f1118; /* ดำด้านเข้มสนิท ดูดุดัน */
+  border-radius: 12px;
+  padding: 14px 14px 16px 16px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
-  overflow: hidden;
-  box-shadow: 0 6px 15px rgba(0,0,0,0.4);
-  transition: transform 0.2s ease;
-}
-.telemetry-widget:hover {
-  transform: translateY(-2px);
-  border-color: rgba(255, 255, 255, 0.15);
-}
-
-/* สร้างดวงไฟ Gradient ซ่อนที่มุมขวาบนของแต่ละกล่อง */
-.telemetry-widget:nth-child(1)::before {
-  content: ''; position: absolute; top: -30px; right: -30px; width: 80px; height: 80px;
-  background: radial-gradient(circle, rgba(225,6,0,0.2) 0%, transparent 70%);
-  pointer-events: none;
-}
-.telemetry-widget:nth-child(2)::before {
-  content: ''; position: absolute; top: -30px; right: -30px; width: 80px; height: 80px;
-  background: radial-gradient(circle, rgba(255,183,3,0.2) 0%, transparent 70%);
-  pointer-events: none;
-}
-.telemetry-widget:nth-child(3)::before {
-  content: ''; position: absolute; top: -30px; right: -30px; width: 80px; height: 80px;
-  background: radial-gradient(circle, rgba(14,165,233,0.2) 0%, transparent 70%);
-  pointer-events: none;
-}
-.telemetry-widget:nth-child(4)::before {
-  content: ''; position: absolute; top: -30px; right: -30px; width: 80px; height: 80px;
-  background: radial-gradient(circle, rgba(34,197,94,0.2) 0%, transparent 70%);
-  pointer-events: none;
-}
-
-.widget-icon {
-  font-size: 1.6rem;
-  margin-bottom: 8px;
+  justify-content: space-between;
   position: relative;
-  z-index: 2;
-  filter: drop-shadow(0 2px 5px rgba(0,0,0,0.6));
-}
-/* ลูกเล่นให้ยาง Pirelli ดูเป็นยาง Medium (สีเหลือง) */
-.pirelli-tire i {
-  text-shadow: 0 0 10px rgba(255, 183, 3, 0.6);
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  min-height: 85px; /* ล็อกความสูงให้เท่ากันทุกกล่อง */
+  border: 1px solid rgba(255, 255, 255, 0.03); /* ขอบบางเฉียบสุดๆ */
 }
 
-.widget-label {
+/* เส้นไฟ LED คาดด้านซ้าย (Left Accent Bar) */
+.telemetry-widget::before {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0; left: 0; width: 3px;
+}
+.border-red::before { background: #ef4444; box-shadow: 2px 0 8px rgba(239, 68, 68, 0.4); }
+.border-yellow::before { background: #f59e0b; box-shadow: 2px 0 8px rgba(245, 158, 11, 0.4); }
+.border-blue::before { background: #0ea5e9; box-shadow: 2px 0 8px rgba(14, 165, 233, 0.4); }
+.border-green::before { background: #22c55e; box-shadow: 2px 0 8px rgba(34, 197, 94, 0.4); }
+
+/* หัวข้อและไอคอน จัดวางชิดกันแบบมินิมอล */
+.widget-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.widget-head i {
+  font-size: 0.85rem;
+}
+.widget-head span {
   font-size: 0.65rem;
-  color: #94a3b8;
+  color: #64748b; /* สีเทาเข้ม ลดความเด่นของหัวข้อ */
   text-transform: uppercase;
   font-weight: 700;
-  margin-bottom: 4px;
   letter-spacing: 0.5px;
-  position: relative;
-  z-index: 2;
-}
-.widget-value {
-  font-size: 0.9rem;
-  font-weight: 800;
-  color: #fff;
-  line-height: 1.2;
-  position: relative;
-  z-index: 2;
 }
 
+/* ข้อมูล ดึงให้เด่นที่สุด จัดชิดซ้าย */
+.widget-value {
+  font-family: 'Kanit', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #f1f5f9; /* ขาวสว่าง */
+  line-height: 1.25;
+  text-align: left;
+  word-break: break-word;
+}
 /* --- กล่องสรุปข้อมูล (Race Intel) --- */
 .telemetry-summary-card {
   background: #11131a;
