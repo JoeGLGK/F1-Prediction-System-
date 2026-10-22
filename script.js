@@ -369,32 +369,68 @@ function renderUI(data) {
     if(podiumContainer) podiumContainer.innerHTML = ''; 
     if(lbContainer) lbContainer.innerHTML = '<div class="text-center text-muted py-3">ยังไม่มีคะแนนสะสม</div>';
   } else {
-    let podiumHtml = ''; const top3 = globalLeaderboard.slice(0, 3); const rest = globalLeaderboard.slice(3); const podiumOrder = [];
-    if(top3[1]) podiumOrder.push({ d: top3[1], r: 2, c: 'podium-2' });
-    if(top3[0]) podiumOrder.push({ d: top3[0], r: 1, c: 'podium-1' });
-    if(top3[2]) podiumOrder.push({ d: top3[2], r: 3, c: 'podium-3' });
+    let podiumHtml = ''; 
+    const top1 = globalLeaderboard[0];
+    const top2 = globalLeaderboard[1];
+    const top3 = globalLeaderboard[2];
+    const rest = globalLeaderboard.slice(3);
 
-    podiumOrder.forEach(function(p) {
-      const team = p.d[4] || "F1";
+    podiumHtml += '<div class="king-of-hill-container">';
+    
+    // --- การ์ดอันดับ 1 (Hero Banner แนวนอน) ---
+    if (top1) {
+      const team = top1[4] || "F1";
       const teamColor = TEAM_COLORS[team] || "#555555";
       const logoUrl = TEAM_LOGOS[team] || ""; 
       const carUrl = TEAM_CARS[team] || "";
-      
-      const teamIcon = logoUrl ? '<img src="' + getDriveDirectLink(logoUrl) + '" class="new-podium-logo" alt="">' : '';
-      const carImg = carUrl ? '<img src="' + getDriveDirectLink(carUrl) + '" class="new-podium-car" alt="">' : '';
-      
-      podiumHtml += '<div class="new-podium-card ' + p.c + '" style="--team-color: ' + teamColor + ';" onclick="showPlayerStats(decodeURIComponent(\'' + encodeURIComponent(String(p.d[1])) + '\'))">' +
-                      '<div class="new-podium-rank">' + p.r + '</div>' + 
-                      '<div class="new-podium-car-wrap">' + carImg + '</div>' +
-                      '<div class="new-podium-info">' +
-                        '<div class="new-podium-name">' + p.d[1] + '</div>' + 
-                        teamIcon + 
-                        '<div class="new-podium-pts">' + p.d[2] + '<span class="small-pts">PTS</span></div>' +
+      const teamIcon = logoUrl ? '<img src="' + getDriveDirectLink(logoUrl) + '" class="king-team-logo" alt="">' : '';
+      const carImg = carUrl ? '<img src="' + getDriveDirectLink(carUrl) + '" class="king-car-img" alt="">' : '';
+
+      podiumHtml += '<div class="king-card" style="--team-color: ' + teamColor + ';" onclick="showPlayerStats(decodeURIComponent(\'' + encodeURIComponent(String(top1[1])) + '\'))">' +
+                      '<div class="king-bg-glow"></div>' +
+                      '<div class="king-rank-badge"><i class="fa-solid fa-crown text-dark me-1"></i>1</div>' +
+                      '<div class="king-content">' +
+                        '<div class="king-info">' +
+                          '<div class="king-name">' + top1[1] + '</div>' +
+                          teamIcon +
+                          '<div class="king-pts">' + top1[2] + '<span class="small-pts">PTS</span></div>' +
+                        '</div>' +
+                        '<div class="king-car-box">' + carImg + '</div>' +
                       '</div>' +
                     '</div>';
-    });
-    if(podiumContainer) podiumContainer.innerHTML = podiumHtml;
+    }
 
+    // --- การ์ดอันดับ 2 และ 3 (แนวตั้งวางคู่กันด้านล่าง) ---
+    if (top2 || top3) {
+      podiumHtml += '<div class="princes-wrapper">';
+      [top2, top3].forEach(function(p, idx) {
+        if(!p) return;
+        const rank = idx + 2; 
+        const team = p[4] || "F1";
+        const teamColor = TEAM_COLORS[team] || "#555555";
+        const logoUrl = TEAM_LOGOS[team] || ""; 
+        const carUrl = TEAM_CARS[team] || "";
+        const teamIcon = logoUrl ? '<img src="' + getDriveDirectLink(logoUrl) + '" class="prince-team-logo" alt="">' : '';
+        const carImg = carUrl ? '<img src="' + getDriveDirectLink(carUrl) + '" class="prince-car-img" alt="">' : '';
+        
+        podiumHtml += '<div class="prince-card" style="--team-color: ' + teamColor + ';" onclick="showPlayerStats(decodeURIComponent(\'' + encodeURIComponent(String(p[1])) + '\'))">' +
+                        '<div class="prince-bg-glow"></div>' +
+                        '<div class="prince-rank-badge">' + rank + '</div>' +
+                        '<div class="prince-car-box">' + carImg + '</div>' +
+                        '<div class="prince-info">' +
+                          '<div class="prince-name">' + p[1] + '</div>' +
+                          teamIcon +
+                          '<div class="prince-pts">' + p[2] + '<span class="small-pts">PTS</span></div>' +
+                        '</div>' +
+                      '</div>';
+      });
+      podiumHtml += '</div>';
+    }
+    
+    podiumHtml += '</div>'; // ปิดคอนเทนเนอร์หลัก
+
+    if(podiumContainer) podiumContainer.innerHTML = podiumHtml;
+    
     // ส่วนประกอบร่างการ์ดรูปรถ (อันดับ 4 เป็นต้นไป)
     if(lbContainer) {
       lbContainer.innerHTML = rest.map(function(row) {
