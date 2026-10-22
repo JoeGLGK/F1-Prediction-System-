@@ -361,6 +361,7 @@ function renderUI(data) {
   if (globalRaces.length > 0) { document.getElementById('adMediaRace').value = globalRaces[0].id; onAdminMediaRaceChange(); }
   if (openRaces.length > 0) { document.getElementById('selCenterRace').value = openRaces[0].id; document.getElementById('sel2025Race').value = openRaces[0].id; onCenterRaceChange(); on2025RaceChange(); }
 
+  // --- ส่วนสร้างตารางคะแนน (Leaderboard) ---
   const lbContainer = document.getElementById('lbListContainer'); 
   const podiumContainer = document.getElementById('podiumContainer');
   
@@ -379,7 +380,7 @@ function renderUI(data) {
     });
     if(podiumContainer) podiumContainer.innerHTML = podiumHtml;
 
-    // ส่วนอัปเดตสร้างการ์ดรายชื่อแนวยาว
+    // ส่วนประกอบร่างการ์ดรูปรถ (อันดับ 4 เป็นต้นไป)
     if(lbContainer) {
       lbContainer.innerHTML = rest.map(function(row) {
         const rank = row[0];
@@ -390,20 +391,22 @@ function renderUI(data) {
         
         const teamColor = TEAM_COLORS[team] || "#555555";
         const logoUrl = TEAM_LOGOS[team] || "";
-        const teamIconHtml = logoUrl ? '<img src="' + getDriveDirectLink(logoUrl) + '" class="player-list-logo" alt="">' : '';
-        const gainBadge = lastPts > 0 ? '<span class="pts-gain-badge">+' + lastPts + '</span>' : '<span class="pts-zero-badge">0</span>';
+        const carUrl = TEAM_CARS[team] || "";
+        
+        const gainBadge = lastPts > 0 ? '<div class="pts-gain-badge">+' + lastPts + '</div>' : '';
         
         return '<div class="player-list-card" style="--team-color: ' + teamColor + ';" onclick="showPlayerStats(decodeURIComponent(\'' + encodeURIComponent(String(name)) + '\'))">' +
-                 '<div class="d-flex align-items-center">' +
-                   '<div class="player-list-rank">' + rank + '</div>' +
-                   '<div class="ms-3 text-start">' +
+                 '<img src="' + getDriveDirectLink(logoUrl) + '" class="player-list-watermark" alt="">' +
+                 (carUrl ? '<img src="' + getDriveDirectLink(carUrl) + '" class="player-list-car-img" alt="Car">' : '') +
+                 '<div class="player-list-content">' +
+                   '<div class="player-list-left">' +
+                     '<div class="player-list-rank">' + rank + '</div>' +
                      '<div class="player-list-name">' + name + '</div>' +
-                     '<div class="mt-1">' + teamIconHtml + '<span class="player-list-team">' + team + '</span></div>' +
                    '</div>' +
-                 '</div>' +
-                 '<div class="text-end">' +
-                   '<div class="mb-1">' + gainBadge + '</div>' +
-                   '<div class="player-list-total">' + totalPts + ' <span class="pts-lbl">PTS</span></div>' +
+                   '<div class="player-list-right">' +
+                     gainBadge +
+                     '<div class="player-list-total">' + totalPts + ' <span class="pts-lbl">PTS</span></div>' +
+                   '</div>' +
                  '</div>' +
                '</div>';
       }).join('');
@@ -416,7 +419,6 @@ function renderUI(data) {
     else { finishedSelect.disabled = false; finishedSelect.innerHTML = '<option value="" disabled selected>-- เลือกสนาม --</option>' + calcRaces.map(function(r) { return '<option value="' + r.id + '">🏁 ' + r.name + '</option>'; }).join(''); }
   }
 }
-
 function loadData(ignoreCache = false) {
   if (!ignoreCache) {
     const cachedStr = localStorage.getItem('f1_cached_data');
