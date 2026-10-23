@@ -1474,44 +1474,100 @@ body {
   font-family: 'Rajdhani', sans-serif !important;
   letter-spacing: 0.5px;
 }
-/* --- Frosted Glass Bottom Navigation --- */
-/* ปรับพื้นหลังแถบเมนูด้านล่างเป็นกระจกฝ้า */
-.bottom-nav, 
-.navbar-bottom,
-.nav-menu { /* หากคลาสเมนูของคุณชื่ออื่น ให้เปลี่ยนให้ตรงกัน */
-  background: rgba(10, 11, 15, 0.75) !important;
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
-  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
-}
+/* =========================================================
+   FROSTED GLASS FLOATING NAVIGATION (F1 Steering Wheel Style)
+   ========================================================= */
 
-/* ปรับปุ่มที่กำลังใช้งาน (Active) ให้โปร่งใสและเปลี่ยนสีตัวอักษร/ไอคอนเป็นสีแดง */
-.nav-link.active,
-.nav-item.active {
-  background: transparent !important;
-  color: #e10600 !important;
-  position: relative;
-}
-
-/* สร้างเส้นไฟ LED สีแดงคาดด้านบนปุ่ม Active */
-.nav-link.active::before,
-.nav-item.active::before {
-  content: '';
-  position: absolute;
-  top: 0;
+/* 1. แถบเมนูลอยตัว (Floating) + กระจกฝ้า (Frosted Glass) + เงา */
+.f1-nav-tabs {
+  position: fixed;
+  bottom: 20px !important; /* ยกลอยขึ้นมาจากขอบจอล่าง 20px */
   left: 50%;
   transform: translateX(-50%);
-  width: 35px;
-  height: 3px;
-  background: #e10600;
-  border-radius: 0 0 4px 4px;
-  box-shadow: 0 2px 10px rgba(225, 6, 0, 0.6);
+  width: 92% !important; /* ความกว้างของแถบ */
+  max-width: 500px;
+  background: rgba(15, 17, 24, 0.75) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 24px !important; /* ขอบโค้งมน */
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.8), 0 0 15px rgba(225, 6, 0, 0.1) !important;
+  padding: 8px 10px;
+  z-index: 1050;
+  justify-content: space-between;
 }
 
-/* สีไอคอนและข้อความของปุ่มปกติ (ลดความสว่างลงเพื่อไม่ให้แย่งซีน) */
-.nav-link:not(.active),
-.nav-item:not(.active) {
+/* 2. จัดการระยะห่างปุ่ม */
+.f1-nav-item {
+  flex: 1;
+  text-align: center;
+}
+.f1-nav-link {
+  background: transparent !important;
+  border: none !important;
   color: #64748b !important;
+  padding: 5px 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+/* 3. แอนิเมชันไอคอนและข้อความ */
+.f1-nav-link i {
+  font-size: 1.2rem;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* เอฟเฟกต์เด้งสปริง */
+}
+.f1-nav-link span {
+  font-size: 0.65rem;
+  font-weight: 700;
+  font-family: 'Rajdhani', sans-serif;
+  transition: all 0.3s ease;
+}
+
+/* 4. เมื่อปุ่มถูกเลือก (Active) */
+.f1-nav-link.active {
+  color: #e10600 !important; /* เปลี่ยนเป็นสีแดง F1 */
+}
+
+/* ไอคอนเด้งขึ้นด้านบนพร้อมแสงเงาสีแดง */
+.f1-nav-link.active i {
+  transform: translateY(-4px); 
+  filter: drop-shadow(0 4px 6px rgba(225,6,0,0.5));
+}
+.f1-nav-link.active span {
+  transform: translateY(2px);
+  color: #ffffff !important; /* ข้อความเปลี่ยนเป็นสีขาวให้เด่นขึ้น */
+}
+
+/* 5. จุดไฟ LED สีแดงใต้ไอคอน (ซ่อนไว้ก่อน และจะสว่างขึ้นเมื่อ Active) */
+.f1-nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%) scale(0);
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #e10600;
+  box-shadow: 0 0 8px #e10600, 0 0 15px #e10600;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  opacity: 0;
+}
+
+/* จุดไฟ LED เด้งขึ้นมาเมื่อ Active */
+.f1-nav-link.active::after {
+  transform: translateX(-50%) scale(1);
+  opacity: 1;
+}
+
+/* ลบเส้นขอบสีแดงเดิมทิ้ง (ถ้ามีค้างอยู่) */
+.f1-nav-link.active::before {
+  display: none !important;
 }
 /* =========================================================
    SKELETON LOADERS (แทนที่ Spinner หมุนๆ)
