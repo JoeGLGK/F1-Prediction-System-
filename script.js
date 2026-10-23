@@ -371,7 +371,7 @@ function renderUI(data) {
   const selRace = document.getElementById('selRace');
   if(selRace) selRace.innerHTML = '<option value="" disabled selected>-- เลือกสนาม --</option>' + openRaces.map(function(r) { return '<option value="' + r.id + '" data-type="' + r.type + '" data-dl="' + r.deadline + '">🟢 ' + r.name + '</option>'; }).join('');
 
-  const allRaceOpts = '<option value="" disabled selected>-- เลือกสนาม --</option>' + globalRaces.map(function(r) { return '<option value="' + r.id + '" data-type="' + r.type + '">' + (r.status === 'OPEN' ? '🟢' : (r.status === 'CALCULATED' ? '🏁' : '🟡')) + ' ' + r.name + '</option>'; }).join('');
+  const allRaceOpts = '<option value="" disabled selected>-- เลือกสนาม --</option>' + globalRaces.map(function(r) { return '<option value="' + r.id + '" data-type="' + r.type + '">' + (r.status === 'OPEN' ? '🔴' : (r.status === 'CALCULATED' ? '🏁' : '⚡')) + ' ' + r.name + '</option>'; }).join('');
   ['selCommRace','adminRace','adRaceDead','adRaceCheck','adMediaRace','selCenterRace','sel2025Race'].forEach(function(id) { let el = document.getElementById(id); if(el) el.innerHTML = allRaceOpts; });
 
   if (globalRaces.length > 0) { document.getElementById('adMediaRace').value = globalRaces[0].id; onAdminMediaRaceChange(); }
@@ -699,6 +699,8 @@ function onCenterRaceChange() {
   }
 }
 
+let currentArchiveMode = 'quali2025';
+
 function on2025RaceChange() {
   const raceId = document.getElementById('sel2025Race').value; 
   const currentRace = globalRaces.find(function(r) { return r.id === raceId; }); 
@@ -708,28 +710,73 @@ function on2025RaceChange() {
   currentActiveMedia = currentRace.media || null; 
   const m = currentActiveMedia || {};
 
-  function updateCard2025(badgeId, thumbId, imgUrl) { 
-    const el = document.getElementById(badgeId); 
-    const thumb = document.getElementById(thumbId);
-    const hasImg = !!imgUrl;
+  // อัปเดตจุดไฟสถานะสีเขียวบนปุ่มสวิตช์ว่าโหมดไหนมีรูปบ้าง
+  const dotQuali = document.getElementById('dotQuali2025');
+  const dotRace = document.getElementById('dotRace2025');
+  const hasQuali = !!(m.quali2025 && m.quali2025.trim() !== "");
+  const hasRace = !!(m.race2025 && m.race2025.trim() !== "");
 
-    if (el) { 
-      el.className = hasImg ? 'rc-btn-badge bg-success text-white' : 'rc-btn-badge bg-secondary text-white'; 
-      el.innerText = hasImg ? '🔍 แตะเพื่อขยาย' : 'ไม่มีภาพ'; 
-    }
-    if (thumb) {
-      if (hasImg) {
-        thumb.src = getDriveDirectLink(imgUrl);
-        thumb.style.display = 'block';
-      } else {
-        thumb.src = '';
-        thumb.style.display = 'none';
-      }
-    }
+  if (dotQuali) dotQuali.className = hasQuali ? 'seg-dot ready' : 'seg-dot';
+  if (dotRace) dotRace.className = hasRace ? 'seg-dot ready' : 'seg-dot';
+
+  // Smart Auto-Fallback: ถ้าโหมดที่เปิดค้างไว้ไม่มีรูป แต่โหมดอื่นมีรูป ให้สลับไปโหมดที่มีรูปอัตโนมัติ
+  if (currentArchiveMode === 'quali2025' && !hasQuali && hasRace) {
+    currentArchiveMode = 'race2025';
+  } else if (currentArchiveMode === 'race2025' && !hasRace && hasQuali) {
+    currentArchiveMode = 'quali2025';
   }
 
-  updateCard2025('badgeQuali2025', 'thumbQuali2025', m.quali2025); 
-  updateCard2025('badgeRace2025', 'thumbRace2025', m.race2025);
+  switchArchiveMode(currentArchiveMode, true);
+}
+
+function switchArchiveMode(mode, skipHaptic) {
+  if (!skipHaptic) triggerHaptic();
+  currentArchiveMode = mode;
+
+  const btnQuali = document.getElementById('segBtnQuali');
+  const btnRace = document.getElementById('segBtnRace');
+  const headerTitle = document.getElementById('archiveHeaderTitle');
+  const mainImg = document.getElementById('archiveMainImg');
+  const badge = document.getElementById('archiveFloatingBadge');
+  const emptyState = document.getElementById('archiveEmptyState');
+
+  // เปลี่ยนสีปุ่มสวิตช์และข้อความหัวข้อ Sci-Fi
+  if (mode === 'quali2025') {
+    if (btnQuali) btnQuali.className = 'archive-seg-btn active-quali';
+    if (btnRace) btnRace.className = 'archive-seg-btn';
+    if (headerTitle) headerTitle.innerHTML = '<i class="fa-solid fa-stopwatch text-info me-2"></i>QUALIFYING CLASSIFICATION';
+  } else {
+    if (btnQuali) btnQuali.className = 'archive-seg-btn';
+    if (btnRace) btnRace.className = 'archive-seg-btn active-race';
+    if (headerTitle) headerTitle.innerHTML = '<i class="fa-solid fa-flag-checkered text-warning me-2"></i>OFFICIAL RACE CLASSIFICATION';
+  }
+
+  const m = currentActiveMedia || {};
+  const imgUrl = m[mode];
+
+  if (imgUrl && imgUrl.trim() !== "") {
+    if (mainImg) {
+      mainImg.style.opacity = '0.3';
+      mainImg.src = getDriveDirectLink(imgUrl);
+      mainImg.style.display = 'block';
+      setTimeout(function() { mainImg.style.opacity = '1'; }, 50);
+    }
+    if (badge) badge.style.display = 'block';
+    if (emptyState) emptyState.style.display = 'none';
+  } else {
+    if (mainImg) {
+      mainImg.src = '';
+      mainImg.style.display = 'none';
+    }
+    if (badge) badge.style.display = 'none';
+    if (emptyState) emptyState.style.display = 'block';
+  }
+}
+
+function openActiveArchivePreview() {
+  const m = currentActiveMedia || {};
+  if (!m[currentArchiveMode] || m[currentArchiveMode].trim() === "") return;
+  openMediaPreview2025(currentArchiveMode);
 }
 
 function startCountdown() {
