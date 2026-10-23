@@ -2012,35 +2012,7 @@ body {
   text-align: left;
 }
 
-/* เส้นขีดล่างเรืองแสงสีทีม (Glowing Bottom Accent) */
-.driver-pick-btn::before {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 75%; /* ความยาวเส้น 75% ของการ์ด */
-  height: 2px;
-  background: linear-gradient(90deg, var(--team-color, #fff) 0%, transparent 100%);
-  box-shadow: 0 -2px 10px var(--team-color, rgba(255,255,255,0.4));
-  z-index: 2;
-}
-
-/* เส้นขีดขวา (Right Edge Tick) */
-.driver-pick-btn::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  bottom: 12px;
-  width: 2px;
-  height: 18px;
-  background: rgba(255, 255, 255, 0.2);
-}
-
-/* จัดการนักแข่งที่เลือกไปแล้วให้ดูดรอปลงนิดนึง แต่ยังเห็นเส้นทีมอยู่ */
-.driver-pick-btn.already-selected {
-  background: rgba(10, 10, 12, 0.8);
-  opacity: 0.5; 
-}
+/* (ข้ามส่วนของ ::before และ ::after ไว้เหมือนเดิม) */
 
 /* --- รูปนักแข่ง (เว้นสเปซด้านซ้าย) --- */
 .driver-pick-img {
@@ -2051,19 +2023,6 @@ body {
   max-width: 60px;
   object-fit: contain;
   z-index: 1;
-}
-
-/* --- ป้ายบอกตำแหน่ง (ย้ายมาขวาล่าง) --- */
-.driver-pick-badges {
-  position: absolute;
-  bottom: 12px;
-  right: 15px;
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-end;
-  gap: 4px;
-  z-index: 5;
-  align-items: center;
 }
 /* --- ปรับขนาดป้ายให้เล็กลง --- */
 .pick-badge {
