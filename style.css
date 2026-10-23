@@ -2055,3 +2055,7 @@ body {
   font-size: 2rem;
   color: #475569;
 }
+@keyframes spinTire {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
