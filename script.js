@@ -1131,3 +1131,40 @@ function handleAdminSubmit(e) {
     if (res.success) { document.getElementById('adminPin').value = ''; adminModalInstance.hide(); forceRefreshData(); } 
   }); 
 }
+// ฟังก์ชันรีเฟรชข้อมูลเฉพาะหน้า Race Center และ Race Archive โดยไม่ทำให้สนามที่เลือกไว้หลุด
+function refreshRaceCenter() {
+  triggerHaptic();
+  
+  // บันทึกสนามที่กำลังเลือกดูอยู่ปัจจุบันไว้ก่อน
+  const currentCenterRaceId = document.getElementById('selCenterRace').value;
+  const current2025RaceId = document.getElementById('sel2025Race').value;
+  
+  document.getElementById('globalLoader').classList.remove('hidden'); 
+  
+  callGAS("getInitData").then(function(data) {
+    if(!data) {
+      document.getElementById('globalLoader').classList.add('hidden');
+      return;
+    }
+    
+    // อัปเดตแคชและเรนเดอร์ข้อมูลใหม่
+    localStorage.setItem('f1_cached_data', JSON.stringify(data));
+    renderUI(data);
+    
+    // คืนค่าสนามเดิมที่ผู้ใช้เลือกค้างไว้ เพื่อไม่ให้หน้าจอเด้งเปลี่ยนสนาม
+    if (currentCenterRaceId && document.getElementById('selCenterRace')) {
+      document.getElementById('selCenterRace').value = currentCenterRaceId;
+      onCenterRaceChange();
+    }
+    if (current2025RaceId && document.getElementById('sel2025Race')) {
+      document.getElementById('sel2025Race').value = current2025RaceId;
+      on2025RaceChange();
+    }
+    
+    document.getElementById('globalLoader').classList.add('hidden');
+    showToast('อัปเดตข้อมูลและรูปภาพล่าสุดแล้ว!', 'success');
+  }).catch(function(err) { 
+    document.getElementById('globalLoader').classList.add('hidden'); 
+    showToast('Error: ' + err, 'error'); 
+  });
+}
