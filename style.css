@@ -1474,3 +1474,42 @@ body {
   font-family: 'Rajdhani', sans-serif !important;
   letter-spacing: 0.5px;
 }
+/* --- Frosted Glass Bottom Navigation --- */
+/* ปรับพื้นหลังแถบเมนูด้านล่างเป็นกระจกฝ้า */
+.bottom-nav, 
+.navbar-bottom,
+.nav-menu { /* หากคลาสเมนูของคุณชื่ออื่น ให้เปลี่ยนให้ตรงกัน */
+  background: rgba(10, 11, 15, 0.75) !important;
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+/* ปรับปุ่มที่กำลังใช้งาน (Active) ให้โปร่งใสและเปลี่ยนสีตัวอักษร/ไอคอนเป็นสีแดง */
+.nav-link.active,
+.nav-item.active {
+  background: transparent !important;
+  color: #e10600 !important;
+  position: relative;
+}
+
+/* สร้างเส้นไฟ LED สีแดงคาดด้านบนปุ่ม Active */
+.nav-link.active::before,
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 35px;
+  height: 3px;
+  background: #e10600;
+  border-radius: 0 0 4px 4px;
+  box-shadow: 0 2px 10px rgba(225, 6, 0, 0.6);
+}
+
+/* สีไอคอนและข้อความของปุ่มปกติ (ลดความสว่างลงเพื่อไม่ให้แย่งซีน) */
+.nav-link:not(.active),
+.nav-item:not(.active) {
+  color: #64748b !important;
+}
