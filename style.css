@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&display=swap');
 :root { 
   --f1-red: #e10600; 
   --f1-dark-red: #9e0400; 
@@ -1451,4 +1452,25 @@ body {
 }
 .utc-keynote-box i {
   margin-top: 2px;
+}
+/* --- Sci-Fi Typography (ฟอนต์หัวข้อและชื่อผู้เล่น) --- */
+.player-name, 
+.king-name, 
+.prince-name, 
+.player-list-name,
+.driver-pick-name,
+#myPlayerName {
+  font-family: 'Rajdhani', sans-serif !important;
+  letter-spacing: 1px; /* เพิ่มระยะห่างตัวอักษรนิดๆ ให้ดูสปอร์ตขึ้น */
+}
+
+.f1-font, 
+.utc-specs-title, 
+.rc-section-title,
+.utc-map-header,
+.widget-label,
+.spec-label span,
+.track-map-header {
+  font-family: 'Rajdhani', sans-serif !important;
+  letter-spacing: 0.5px;
 }
