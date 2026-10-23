@@ -96,14 +96,18 @@ body {
 }
 
 .user-score-banner { 
-  background: linear-gradient(90deg, #181a24 0%, #221217 100%); 
-  border: 1px solid rgba(225, 6, 0, 0.35); 
+  background: linear-gradient(90deg, #181a24 0%, #15161d 100%); 
+  /* ดึงค่าสีจาก --theme-color มาเป็นสีขอบ ถ้าไม่มีให้ใช้สีแดง F1 */
+  border: 1px solid var(--theme-color, rgba(225, 6, 0, 0.35)); 
   border-radius: 12px; 
   padding: 10px 14px; 
   display: flex; 
   justify-content: space-between; 
   align-items: center; 
   margin-bottom: 12px; 
+  /* สร้างเอฟเฟกต์ไฟเรืองแสง (Glow) ทั้งด้านนอกและด้านในของกรอบ */
+  box-shadow: 0 4px 15px -5px var(--theme-color, rgba(225, 6, 0, 0.4)), inset 0 0 10px -5px var(--theme-color, transparent);
+  transition: all 0.3s ease;
 }
 
 .user-score-pts { 
