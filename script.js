@@ -147,7 +147,9 @@ function buildDriverGrid() {
   DRIVERS.forEach(function(name) {
     const info = DRIVER_INFO[name] || { team: "F1", color: "#888888", img: DEFAULT_DRIVER_IMG };
     const safeName = name.replace(/'/g, "\\'");
-    html += '<div class="driver-pick-btn" style="--team-color: ' + info.color + '" onclick="confirmSelectDriver(\'' + safeName + '\')">' +
+    // เพิ่ม data-drivername และ กล่องใส่ badges
+    html += '<div class="driver-pick-btn" data-drivername="' + name.replace(/"/g, '&quot;') + '" style="--team-color: ' + info.color + '" onclick="confirmSelectDriver(\'' + safeName + '\')">' +
+              '<div class="driver-pick-badges"></div>' +
               '<div class="driver-pick-name">' + name + '</div>' +
               '<div class="driver-pick-team">' + info.team + '</div>' +
               '<img src="' + getDriveDirectLink(info.img) + '" class="driver-pick-img" alt="' + name + '">' +
@@ -170,6 +172,40 @@ function openDriverSelector(slotId) {
   if (titleEl) {
     titleEl.innerHTML = '<i class="fa-solid fa-helmet-safety text-danger me-2"></i>เลือกนักแข่งสำหรับ ' + (titles[slotId] || '');
   }
+
+  // 1. ล้างสถานะไฮไลต์และป้ายเดิมทั้งหมดออกก่อน
+  document.querySelectorAll('.driver-pick-btn').forEach(function(btn) {
+    btn.classList.remove('already-selected');
+    const badgeContainer = btn.querySelector('.driver-pick-badges');
+    if (badgeContainer) badgeContainer.innerHTML = '';
+  });
+
+  // 2. ดึงค่าปัจจุบันจากระบบว่านักแข่งคนไหนอยู่ตำแหน่งไหนบ้าง
+  const currentPicks = {
+    'p1': document.getElementById('pos1') ? document.getElementById('pos1').value : '',
+    'p2': document.getElementById('pos2') ? document.getElementById('pos2').value : '',
+    'p3': document.getElementById('pos3') ? document.getElementById('pos3').value : '',
+    'p4': document.getElementById('pos4') ? document.getElementById('pos4').value : '',
+    'pfl': document.getElementById('posFL') ? document.getElementById('posFL').value : ''
+  };
+  
+  const posLabels = { 'p1': 'P1', 'p2': 'P2', 'p3': 'P3', 'p4': 'P4', 'pfl': 'FL' };
+
+  // 3. วนลูปสร้างป้ายแปะทับลงไปบนการ์ดนักแข่งที่ถูกเลือกไปแล้ว
+  Object.keys(currentPicks).forEach(function(pos) {
+    const driverName = currentPicks[pos];
+    if (driverName) {
+      const btn = document.querySelector('.driver-pick-btn[data-drivername="' + driverName.replace(/"/g, '\\"') + '"]');
+      if (btn) {
+        btn.classList.add('already-selected');
+        const badgeContainer = btn.querySelector('.driver-pick-badges');
+        if (badgeContainer) {
+          badgeContainer.innerHTML += '<span class="pick-badge ' + pos + '">' + posLabels[pos] + '</span>';
+        }
+      }
+    }
+  });
+
   if (driverSelectorModalInstance) {
     driverSelectorModalInstance.show();
   }
