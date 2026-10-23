@@ -147,11 +147,15 @@ function buildDriverGrid() {
   DRIVERS.forEach(function(name) {
     const info = DRIVER_INFO[name] || { team: "F1", color: "#888888", img: DEFAULT_DRIVER_IMG };
     const safeName = name.replace(/'/g, "\\'");
-    // เพิ่ม data-drivername และ กล่องใส่ badges
+    
+    // ดึงลิงก์โลโก้ทีม
+    const logoUrl = TEAM_LOGOS[info.team] ? getDriveDirectLink(TEAM_LOGOS[info.team]) : '';
+    const logoHtml = logoUrl ? '<img src="' + logoUrl + '" class="driver-pick-team-logo" alt="">' : '';
+
     html += '<div class="driver-pick-btn" data-drivername="' + name.replace(/"/g, '&quot;') + '" style="--team-color: ' + info.color + '" onclick="confirmSelectDriver(\'' + safeName + '\')">' +
               '<div class="driver-pick-badges"></div>' +
               '<div class="driver-pick-name">' + name + '</div>' +
-              '<div class="driver-pick-team">' + info.team + '</div>' +
+              '<div class="driver-pick-team">' + info.team + logoHtml + '</div>' +
               '<img src="' + getDriveDirectLink(info.img) + '" class="driver-pick-img" alt="' + name + '">' +
             '</div>';
   });
