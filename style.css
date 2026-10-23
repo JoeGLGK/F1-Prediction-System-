@@ -201,41 +201,6 @@ body {
 .prince .pts-display { font-size: 1.5rem; color: #fff; }
 .pts-label { font-size: 0.75rem; color: #cbd5e1; margin-left: 2px; }
 
-/* ตรงกลาง: โชว์รูปรถ */
-/* ตรงกลาง: โชว์รูปรถ */
-.car-showcase {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-}
-.king .car-showcase { height: 85px; margin: 12px 0; }
-.prince .car-showcase { height: 50px; margin: 10px 0; }
-
-.car-showcase img {
-  max-height: 100%;
-  max-width: 100%; /* บังคับไม่ให้รถยาวเกินความกว้างของการ์ด */
-  width: auto;
-  height: auto;
-  object-fit: contain;
-  filter: drop-shadow(0 6px 8px rgba(0,0,0,0.6));
-}
-
-/* ปรับขนาดรถของอันดับ 2 และ 3 ให้เล็กลงและมีระยะห่างจากขอบการ์ด */
-.prince .car-showcase img {
-  max-width: 92%; /* ถ้ารู้สึกว่ายังใหญ่ไป ปรับลดเป็น 85% หรือ 88% ได้เลยครับ */
-}
-.king .car-showcase { height: 85px; margin: 12px 0; }
-.prince .car-showcase { height: 60px; margin: 12px 0; }
-.car-showcase img {
-  height: 100%;
-  width: auto;
-  object-fit: contain;
-  filter: drop-shadow(0 6px 8px rgba(0,0,0,0.6));
-}
-
 /* ส่วนท้าย: ชื่อ และ โลโก้ทีม */
 .card-footer {
   position: relative;
@@ -314,47 +279,6 @@ body {
 
 .pts-gain { background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); } 
 .pts-zero { background: rgba(148, 163, 184, 0.1); color: #64748b; }
-
-.f1-nav-tabs { 
-  position: fixed; 
-  bottom: 20px; 
-  left: 50%; 
-  transform: translateX(-50%); 
-  width: calc(100% - 30px); 
-  max-width: 500px; 
-  z-index: 1050; 
-  background: rgba(13, 14, 18, 0.85) !important; 
-  backdrop-filter: blur(16px); 
-  -webkit-backdrop-filter: blur(16px); 
-  border-radius: 20px !important; 
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8) !important; 
-  padding: 8px 5px !important; 
-  border: 1px solid rgba(255, 255, 255, 0.1) !important; 
-  display: flex; 
-  justify-content: space-around; 
-  gap: 4px; 
-}
-
-.f1-nav-item { flex: 1; }
-
-.f1-nav-link { 
-  color: #94a3b8; 
-  font-weight: 600; 
-  padding: 9px 2px; 
-  border-radius: 12px; 
-  border: none; 
-  background: transparent; 
-  width: 100%; 
-  transition: all 0.2s ease; 
-  display: flex; 
-  flex-direction: column; 
-  align-items: center; 
-  gap: 4px; 
-  font-size: 0.70rem; 
-}
-
-.f1-nav-link i { font-size: 1.1rem; } 
-.f1-nav-link.active { background: var(--f1-red); color: #fff; box-shadow: 0 4px 15px rgba(225, 6, 0, 0.4); }
 
 .form-label { 
   font-size: 0.8rem; 
@@ -900,36 +824,20 @@ body {
   position: relative;
   z-index: 2;
 }
-/* --- Player List Cards (Leaderboard อันดับ 4 เป็นต้นไป) --- */
-/* --- Player List Cards (ดีไซน์มีรูปรถ) --- */
-/* --- Player List Cards (ดีไซน์มีรูปรถ - ปรับความสูงให้กระชับ) --- */
-.player-list-card {
-  background: #151820; 
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px; /* ปรับมุมมนให้เข้ากับความสูงใหม่ */
-  padding: 8px 16px;   /* ลด padding บน-ล่าง ให้การ์ดเตี้ยลง */
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  position: relative;
-  overflow: hidden;
-  min-height: 70px;    /* ลดความสูงขั้นต่ำลงจาก 95px เหลือ 70px */
-  margin-bottom: 6px;
-}
 /* --- Player List Cards (ทรงเพรียว จัดกึ่งกลาง รถอยู่ถัดจากชื่อ) --- */
 .player-list-card {
   background: #151820; 
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
-  padding: 6px 16px;   /* บีบพื้นที่บน-ล่างให้แคบลง */
+  padding: 6px 16px;
   display: flex;
-  align-items: center; /* จัดทุกอย่างให้อยู่กึ่งกลางแนวตั้ง */
+  align-items: center;
+  justify-content: space-between;
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
   overflow: hidden;
-  height: 58px;        /* ล็อกความสูงการ์ดให้เตี้ยและเพรียวลง (ปรับเลขนี้ได้ถ้าอยากให้เตี้ยลงอีก) */
+  height: 58px;
   margin-bottom: 4px;
 }
 .player-list-card:hover {
