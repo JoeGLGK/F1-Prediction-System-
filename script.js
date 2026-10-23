@@ -387,8 +387,26 @@ function forceRefreshData() {
   if (isRefreshing) return;
   isRefreshing = true;
   triggerHaptic();
-  document.getElementById('globalLoader').classList.remove('hidden'); 
-  loadData(true); 
+  
+  // ทำให้ปุ่มรีเฟรชหมุนแทนการขึ้นหน้าดำเต็มจอ
+  const refreshBtns = document.querySelectorAll('.fa-rotate');
+  refreshBtns.forEach(btn => btn.classList.add('fa-spin'));
+  
+  showToast('กำลังซิงค์ข้อมูลล่าสุด...', 'success');
+
+  callGAS("getInitData").then(function(data) {
+    isRefreshing = false; 
+    refreshBtns.forEach(btn => btn.classList.remove('fa-spin'));
+    if(!data) return;
+    
+    localStorage.setItem('f1_cached_data', JSON.stringify(data));
+    renderUI(data);
+    showToast('อัปเดตข้อมูลเรียบร้อย!', 'success');
+  }).catch(function(err) { 
+    isRefreshing = false; 
+    refreshBtns.forEach(btn => btn.classList.remove('fa-spin'));
+    showToast('Error: ' + err, 'error'); 
+  });
 }
 
 function renderUI(data) {
@@ -1216,27 +1234,26 @@ function handleAdminSubmit(e) {
     if (res.success) { document.getElementById('adminPin').value = ''; adminModalInstance.hide(); forceRefreshData(); } 
   }); 
 }
-// ฟังก์ชันรีเฟรชข้อมูลเฉพาะหน้า Race Center และ Race Archive โดยไม่ทำให้สนามที่เลือกไว้หลุด
+// ฟังก์ชันรีเฟรชข้อมูลเฉพาะหน้า Race Center และ Race Archive แบบไม่แสดงหน้าจอดำ (Silent Refresh)
 function refreshRaceCenter() {
   triggerHaptic();
-  
-  // บันทึกสนามที่กำลังเลือกดูอยู่ปัจจุบันไว้ก่อน
+  if (isRefreshing) return;
+  isRefreshing = true;
+
   const currentCenterRaceId = document.getElementById('selCenterRace').value;
   const current2025RaceId = document.getElementById('sel2025Race').value;
   
-  document.getElementById('globalLoader').classList.remove('hidden'); 
-  
+  const refreshBtns = document.querySelectorAll('.fa-rotate');
+  refreshBtns.forEach(btn => btn.classList.add('fa-spin'));
+
   callGAS("getInitData").then(function(data) {
-    if(!data) {
-      document.getElementById('globalLoader').classList.add('hidden');
-      return;
-    }
+    isRefreshing = false;
+    refreshBtns.forEach(btn => btn.classList.remove('fa-spin'));
+    if(!data) return;
     
-    // อัปเดตแคชและเรนเดอร์ข้อมูลใหม่
     localStorage.setItem('f1_cached_data', JSON.stringify(data));
     renderUI(data);
     
-    // คืนค่าสนามเดิมที่ผู้ใช้เลือกค้างไว้ เพื่อไม่ให้หน้าจอเด้งเปลี่ยนสนาม
     if (currentCenterRaceId && document.getElementById('selCenterRace')) {
       document.getElementById('selCenterRace').value = currentCenterRaceId;
       onCenterRaceChange();
@@ -1246,10 +1263,10 @@ function refreshRaceCenter() {
       on2025RaceChange();
     }
     
-    document.getElementById('globalLoader').classList.add('hidden');
     showToast('อัปเดตข้อมูลและรูปภาพล่าสุดแล้ว!', 'success');
   }).catch(function(err) { 
-    document.getElementById('globalLoader').classList.add('hidden'); 
+    isRefreshing = false;
+    refreshBtns.forEach(btn => btn.classList.remove('fa-spin'));
     showToast('Error: ' + err, 'error'); 
   });
 }
