@@ -1258,8 +1258,8 @@ body {
   background-color: #000;
 }
 .pirelli-tire-img {
-  width: 40px !important; 
-  height: 40px !important;
+  width: 50px !important; 
+  height: 50px !important;
   object-fit: contain;
   display: block;
   margin: 0 auto;
