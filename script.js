@@ -218,14 +218,44 @@ function openDriverSelector(slotId) {
 function confirmSelectDriver(driverName) {
   triggerHaptic();
   if (!currentSelectingSlot) return;
+
+  // 1. บันทึกค่าและอัปเดต UI ของการ์ดที่กำลังเลือกอยู่
   const selectEl = document.getElementById(currentSelectingSlot);
   if (selectEl) selectEl.value = driverName;
   updateCardUI(currentSelectingSlot, driverName);
-  if (driverSelectorModalInstance) {
-    driverSelectorModalInstance.hide();
+
+  // 2. กำหนดลำดับการเลือก (Flow)
+  const slotSequence = ['pos1', 'pos2', 'pos3', 'pos4', 'posFL'];
+  const currentIndex = slotSequence.indexOf(currentSelectingSlot);
+
+  // เช็กว่าซ่อนช่อง FL อยู่หรือไม่ (กรณีเป็น Sprint Race)
+  const flWrapper = document.getElementById('flWrapper');
+  const isSprint = flWrapper && flWrapper.style.display === 'none';
+
+  let nextSlot = null;
+  // ถ้าไม่ใช่ช่องสุดท้าย ให้หาช่องถัดไป
+  if (currentIndex !== -1 && currentIndex < slotSequence.length - 1) {
+    nextSlot = slotSequence[currentIndex + 1];
+    
+    // ถ้าช่องถัดไปคือ FL และเป็นรอบ Sprint ให้ถือว่าจบการเลือก (ไม่มี nextSlot)
+    if (isSprint && nextSlot === 'posFL') {
+      nextSlot = null; 
+    }
+  }
+
+  // 3. ไปช่องถัดไป หรือ ปิดหน้าต่าง
+  if (nextSlot) {
+    // หน่วงเวลา 150ms ให้ผู้เล่นเห็นว่าเลือกสำเร็จ ก่อนโหลดป้ายสลับไปตำแหน่งถัดไป
+    setTimeout(function() {
+      openDriverSelector(nextSlot);
+    }, 150);
+  } else {
+    // ถ้าจบ Flow แล้ว (ครบ P4 ใน Sprint หรือครบ FL ในรอบปกติ) ให้ปิด Modal
+    if (driverSelectorModalInstance) {
+      driverSelectorModalInstance.hide();
+    }
   }
 }
-
 function updateCardUI(slotId, driverName) {
   const card = document.getElementById('card-' + slotId);
   if (!card) return;
