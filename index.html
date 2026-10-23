@@ -213,61 +213,83 @@
 
         <div id="rcContent" style="display: none;">
           
-          <!-- 1. ย้ายการ์ดแผนผังสนาม (Track Map) มาไว้ใต้ชื่อสนามทันที -->
-          <div id="rcTrackLayoutWrapper" class="track-map-card mb-3" style="display: none;" onclick="previewTrackImageById('rcTrackLayoutImg')">
-            <div class="track-map-header">
-              <span><i class="fa-solid fa-map-location-dot text-danger me-1"></i> ผังสนามแข่ง (CIRCUIT LAYOUT)</span>
-              <span class="badge bg-dark text-danger border border-danger px-2 py-1" style="font-size:0.65rem;"><i class="fa-solid fa-magnifying-glass-plus me-1"></i> แตะเพื่อขยาย</span>
+          <!-- แผงหน้าปัดรวม (Unified Telemetry Card: ผังสนาม + สเปกไร้เส้นคั่น) -->
+          <div class="unified-telemetry-card mb-3">
+            
+            <!-- โซนบน: แผนผังสนาม (แตะเพื่อขยายรูปได้เฉพาะส่วนนี้) -->
+            <div id="rcTrackLayoutWrapper" class="utc-map-section" style="display: none;" onclick="previewTrackImageById('rcTrackLayoutImg')">
+              <div class="utc-map-header">
+                <span><i class="fa-solid fa-location-crosshairs text-danger me-1"></i> CIRCUIT LAYOUT</span>
+                <span class="badge bg-dark text-danger border border-danger px-2 py-1" style="font-size:0.62rem;"><i class="fa-solid fa-magnifying-glass-plus me-1"></i> ขยายแผนผัง</span>
+              </div>
+              <div class="utc-map-body">
+                <img id="rcTrackLayoutImg" src="" alt="Circuit Layout">
+              </div>
             </div>
-            <div class="track-map-body">
-              <img id="rcTrackLayoutImg" src="" alt="Circuit Layout">
+
+            <!-- โซนล่าง: ตารางข้อมูลแบบ F1 Broadcast Spec Sheet (ไร้เส้นคั่น สลับสี Gradient) -->
+            <div class="utc-specs-section">
+              <div class="utc-specs-title">
+                <i class="fa-solid fa-microchip text-danger me-1"></i> CIRCUIT TELEMETRY & SPECS
+              </div>
+
+              <div class="spec-list">
+                <!-- แถวที่ 1 (มีแถบ Gradient สีแดงจางๆ) -->
+                <div class="spec-row tint-red">
+                  <div class="spec-label">
+                    <i class="fa-solid fa-road text-danger spec-icon"></i>
+                    <span>ประเภทแทร็ก</span>
+                  </div>
+                  <div class="spec-val" id="rcTrackType">-</div>
+                </div>
+
+                <!-- แถวที่ 2 (พื้นโปร่งใส + ป้ายวงกลมสียาง Pirelli) -->
+                <div class="spec-row">
+                  <div class="spec-label">
+                    <img src="https://i.postimg.cc/WbQ2Qv1X/pirelli-medium.png" class="spec-tire-icon" alt="Tire">
+                    <span>ยาง PIRELLI</span>
+                  </div>
+                  <div class="spec-val" id="rcTires">-</div>
+                </div>
+
+                <!-- แถวที่ 3 (มีแถบ Gradient สีฟ้าจางๆ) -->
+                <div class="spec-row tint-blue">
+                  <div class="spec-label">
+                    <i class="fa-solid fa-triangle-exclamation text-info spec-icon"></i>
+                    <span>โอกาสเกิด Safety Car</span>
+                  </div>
+                  <div class="spec-val" id="rcSafetyCar">-</div>
+                </div>
+
+                <!-- แถวที่ 4 (พื้นโปร่งใส) -->
+                <div class="spec-row">
+                  <div class="spec-label">
+                    <i class="fa-solid fa-cloud-sun text-success spec-icon"></i>
+                    <span>พยากรณ์อากาศ</span>
+                  </div>
+                  <div class="spec-val weather-icon-animated" id="rcWeather">-</div>
+                </div>
+
+                <!-- แถวที่ 5 (มีแถบ Gradient สีทองจางๆ) -->
+                <div class="spec-row tint-gold">
+                  <div class="spec-label">
+                    <i class="fa-solid fa-trophy text-warning spec-icon"></i>
+                    <span>แชมป์ 3 ปีย้อนหลัง</span>
+                  </div>
+                  <div class="spec-val text-warning" id="rcPrevWinners">-</div>
+                </div>
+              </div>
+
+              <!-- กล่อง Key Note ปิดท้ายด้านล่างสุด -->
+              <div class="utc-keynote-box">
+                <i class="fa-solid fa-lightbulb text-warning me-2"></i>
+                <span id="rcKeyNote">-</span>
+              </div>
             </div>
+
           </div>
 
-          <!-- 2. ระบบวิดเจ็ต (Telemetry Dashboard 2x2) -->
-         <!-- 2. ระบบวิดเจ็ต (Bento Box Telemetry) -->
-          <div class="telemetry-grid mb-3">
-            <div class="telemetry-widget border-red">
-              <div class="widget-head">
-                <i class="fa-solid fa-road text-danger"></i><span>ประเภทแทร็ก</span>
-              </div>
-              <div class="widget-value" id="rcTrackType">-</div>
-            </div>
-            
-            <div class="telemetry-widget border-yellow">
-              <div class="widget-icon">
-                <img src="https://lh3.googleusercontent.com/d/14Cnuyr3XdFdDrCFFgTJXRQL495THDx5T" class="pirelli-tire-img" alt="Tire">
-              </div>
-              <div class="widget-label">ยาง PIRELLI</div>
-              <div class="widget-value" id="rcTires">-</div>
-            </div>
-            
-            <div class="telemetry-widget border-blue">
-              <div class="widget-head">
-                <i class="fa-solid fa-triangle-exclamation text-info"></i><span>Safety Car</span>
-              </div>
-              <div class="widget-value" id="rcSafetyCar">-</div>
-            </div>
-            
-            <div class="telemetry-widget border-green">
-              <div class="widget-head">
-                <i class="fa-solid fa-cloud-sun text-success"></i><span>พยากรณ์อากาศ</span>
-              </div>
-              <div class="widget-value weather-icon-animated" id="rcWeather">-</div>
-            </div>
-          </div>
-
-          <!-- 3. กล่องสรุปสถิติเพิ่มเติม (Race Intel) -->
-          <div class="telemetry-summary-card mb-3">
-            <div class="summary-row mb-2">
-              <span class="text-secondary"><i class="fa-solid fa-trophy text-warning me-1"></i> แชมป์ 3 ปีย้อนหลัง:</span>
-              <span class="text-white fw-bold text-end" id="rcPrevWinners">-</span>
-            </div>
-            <div class="summary-note">
-              <i class="fa-solid fa-lightbulb text-warning me-1"></i><span id="rcKeyNote">-</span>
-            </div>
-          </div>
-          <!-- 4. ปุ่มดูอัตราต่อรอง -->
+          <!-- ปุ่มดูอัตราต่อรอง -->
           <div class="mb-3" id="rcExtLinkArea">
             <a href="#" target="_blank" id="rcExtLinkBtn" class="btn-odds-menu">
               <div class="d-flex align-items-center gap-2">
@@ -278,7 +300,7 @@
             </a>
           </div>
 
-          <!-- 5. ส่วนผลการฝึกซ้อมรวม -->
+          <!-- ส่วนผลการฝึกซ้อมรวม (แสดงภาพทันที / ซ่อนอัตโนมัติถ้าไม่มีลิงก์) -->
           <div id="practiceSectionWrapper" style="display: none;">
             <div class="rc-section-title"><i class="fa-solid fa-stopwatch text-warning"></i>ผลการฝึกซ้อม (PRACTICE SESSIONS)</div>
             <div class="mb-3">
