@@ -1998,31 +1998,63 @@ body {
 }
 /* --- ปุ่มการ์ดนักแข่ง (ดีไซน์ไร้กรอบแบบ F1 HUD) --- */
 .driver-pick-btn {
-  background: rgba(20, 20, 25, 0.6); /* สีพื้นหลังดำโปร่งแสงนิดๆ */
-  border: none; /* เอาเส้นขอบออกทั้งหมด */
-  border-radius: 4px; /* ปรับมุมให้คมขึ้น */
-  padding: 12px 15px 16px 85px !important; /* เว้นพื้นที่ด้านซ้าย 85px ให้รูปนักแข่ง */
+  background: rgba(20, 20, 25, 0.6); 
+  border: none; 
+  border-radius: 4px; 
+  /* ปรับ padding บน-ล่างให้เท่ากัน (14px) เพื่อให้ข้อความอยู่กึ่งกลางแนวตั้งพอดี และขยายซ้ายเป็น 100px */
+  padding: 14px 15px 14px 100px !important; 
   cursor: pointer;
   position: relative;
   overflow: hidden;
   transition: all 0.3s ease;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: center; /* จัดกลุ่มข้อความ ชื่อ และทีม ให้อยู่กึ่งกลางแนวตั้ง */
   text-align: left;
 }
 
-/* (ข้ามส่วนของ ::before และ ::after ไว้เหมือนเดิม) */
-
-/* --- รูปนักแข่ง (เว้นสเปซด้านซ้าย) --- */
-.driver-pick-img {
+/* เส้นขีดล่างเรืองแสงสีทีม (Glowing Bottom Accent) */
+.driver-pick-btn::before {
+  content: '';
   position: absolute;
   bottom: 0;
-  left: 15px; /* ดันเข้ามาจากขอบซ้าย 15px ไม่ให้อึดอัด */
-  height: 85%; /* ปรับความสูงให้มีพื้นที่เหนือหัวนักแข่ง */
-  max-width: 60px;
+  left: 0;
+  width: 75%; 
+  height: 2px;
+  background: linear-gradient(90deg, var(--team-color, #fff) 0%, transparent 100%);
+  box-shadow: 0 -2px 10px var(--team-color, rgba(255,255,255,0.4));
+  z-index: 2;
+}
+
+/* จัดการนักแข่งที่เลือกไปแล้วให้ดูดรอปลงนิดนึง แต่ยังเห็นเส้นทีมอยู่ */
+.driver-pick-btn.already-selected {
+  background: rgba(10, 10, 12, 0.8);
+  opacity: 0.5; 
+}
+
+/* --- รูปนักแข่ง (ขยายใหญ่และจัดให้อยู่กึ่งกลางแนวตั้ง) --- */
+.driver-pick-img {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%); /* ดึงรูปให้อยู่กึ่งกลางแนวตั้งของบล็อกเสมอ */
+  left: 15px; 
+  height: 96%; /* ขยายความสูงให้เกือบชนขอบบนและล่าง */
+  max-width: 80px; /* เพิ่มพื้นที่ความกว้างสูงสุดเผื่อไว้ไม่ให้รูปล้นหรือถูกบีบ */
   object-fit: contain;
   z-index: 1;
+}
+
+/* --- ป้ายบอกตำแหน่ง (อยู่มุมขวาล่าง) --- */
+.driver-pick-badges {
+  position: absolute;
+  bottom: 10px; 
+  right: 12px;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  gap: 4px;
+  z-index: 5;
+  align-items: center;
 }
 /* --- ปรับขนาดป้ายให้เล็กลง --- */
 .pick-badge {
