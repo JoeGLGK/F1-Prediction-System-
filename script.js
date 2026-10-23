@@ -368,8 +368,24 @@ function renderUI(data) {
   }
   updateUserSessionUI();
 
-  const openRaces = globalRaces.filter(function(r) { return r.status === 'OPEN'; });
+ const openRaces = globalRaces.filter(function(r) { return r.status === 'OPEN'; });
   const selRace = document.getElementById('selRace');
+  
+  if (selRace) {
+    // 1. จำค่าสนามที่ผู้ใช้กำลังเลือกอยู่ตอนนี้
+    const currentSelected = selRace.value; 
+    
+    // 2. สร้างตัวเลือกสนามใหม่
+    selRace.innerHTML = '<option value="" disabled selected>-- เลือกสนาม --</option>' + openRaces.map(function(r) { return '<option value="' + r.id + '" data-type="' + r.type + '" data-dl="' + r.deadline + '">🟢 ' + r.name + '</option>'; }).join('');
+    
+    // 3. คืนค่าสนามเดิมที่เลือกไว้ หรือ Auto-select ถ้ามีเปิดแค่สนามเดียว
+    if (currentSelected && openRaces.some(function(r) { return r.id === currentSelected; })) {
+      selRace.value = currentSelected;
+    } else if (!currentSelected && openRaces.length === 1) {
+      selRace.value = openRaces[0].id;
+      setTimeout(onRaceChange, 100); // อัปเดต UI หน้าจอทันที
+    }
+  }
   
   if(selRace) {
     // 1. จำค่าสนามที่ผู้ใช้กำลังเลือกอยู่ตอนนี้
