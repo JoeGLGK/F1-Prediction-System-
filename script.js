@@ -998,18 +998,26 @@ function handleAdminSetupNewSeason() {
 }
 
 function handleAdminSaveMediaLinks() { 
-  const pin = document.getElementById('adminPin').value, raceId = document.getElementById('adMediaRace').value; 
+  const pin = document.getElementById('adminPin').value;
+  const raceId = document.getElementById('adMediaRace').value; 
   if (!pin || !raceId) { showToast('กรุณากรอก Admin PIN', 'error'); return; } 
+
+  // ดึงค่าผังสนาม (trackLayoutImg) เดิมที่โหลดมาจาก Google Sheet เพื่อส่งค่าเดิมกลับไป 
+  // ทำให้ข้อมูลที่คุณวางไว้ใน Sheet ไม่ถูกเขียนทับ
+  const currentRace = globalRaces.find(function(r) { return r.id === raceId; });
+  const existingLayoutImg = (currentRace && currentRace.media && currentRace.media.trackLayoutImg) ? currentRace.media.trackLayoutImg : "";
+
   const payload = { 
     raceId: raceId, 
-    trackImg: document.getElementById('adTrackImgUrl').value.trim(),
-    trackLayoutImg: document.getElementById('adTrackImgUrl').value.trim(), // เพิ่มบรรทัดนี้เพื่อให้ส่งค่าไปพร้อมกันทั้ง 2 ชื่อ
+    trackImg: document.getElementById('adTrackImgUrl').value.trim(), // รูปปกสนาม (จากช่องกรอกแอดมิน)
+    trackLayoutImg: existingLayoutImg, // รูปผังสนาม (ดึงค่าเดิมจาก Sheet เสมอ)
     practiceImg: document.getElementById('adPracticeUrl').value.trim(), 
     quali2025: document.getElementById('adQuali2025Url').value.trim(), 
     race2025: document.getElementById('adRace2025Url').value.trim(), 
     extLink: document.getElementById('adExtLink').value.trim(), 
     extTitle: "อัตราต่อรอง" 
   };
+
   callGAS("adminSaveTrackMediaLinks", { pin: pin, data: payload }).then(function(res) { 
     showToast(res.msg, res.success ? 'success' : 'error'); 
     if(res.success) forceRefreshData(); 
