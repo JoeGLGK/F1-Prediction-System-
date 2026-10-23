@@ -62,10 +62,11 @@
     <!-- 1. Leaderboard Tab -->
     <div id="tab-lb" class="tab-pane-custom">
       <div class="f1-card p-3 mb-3">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-          <h6 class="m-0 fw-bold f1-font text-white"><i class="fa-solid fa-ranking-star text-warning me-2"></i>STANDINGS</h6>
-          <span class="small text-secondary" style="font-size: 0.75rem;">(แตะชื่อเพื่อดูสถิติ)</span>
-          <button class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="forceRefreshData()"><i class="fa-solid fa-rotate me-1"></i>รีเฟรช</button>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h2 class="section-header-f1 m-0"><i class="fa-solid fa-ranking-star me-2"></i>STANDINGS</h2>
+          <div>
+            <button class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="forceRefreshData()"><i class="fa-solid fa-rotate me-1"></i>รีเฟรช</button>
+          </div>
         </div>
         <div id="podiumContainer" class="podium-container"></div>
         <!-- เปลี่ยนจากตารางเดิม เป็น List Container สำหรับใส่การ์ด -->
@@ -84,7 +85,7 @@
     <!-- 2. Prediction Tab -->
     <div id="tab-pred" class="tab-pane-custom" style="display: none;">
       <div class="f1-card p-4">
-        <h6 class="fw-bold mb-3 text-white f1-font"><i class="fa-solid fa-gamepad text-danger me-2"></i>PREDICTION FORM</h6>
+        <h2 class="section-header-f1"><i class="fa-solid fa-gamepad me-2"></i>PREDICTION FORM</h2>
         <div class="p-2 mb-3 rounded bg-dark border border-warning text-secondary" style="font-size: 0.75rem;"><i class="fa-solid fa-circle-info text-warning me-1"></i> <strong>กติกา:</strong> ทายตำแหน่งเป๊ะ (P1-P4) ได้ <strong>2 คะแนน/ตำแหน่ง</strong> | ทาย Fastest Lap ถูก ได้ <strong>1 คะแนน</strong></div>
         
         <div id="savedPredAlert" class="history-card" style="display: none;">
@@ -201,10 +202,10 @@
    <!-- 3. Race Center Tab -->
     <div id="tab-center" class="tab-pane-custom" style="display: none;">
       <div class="f1-card p-3 mb-3">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h6 class="fw-bold m-0 text-white f1-font"><i class="fa-solid fa-gauge-high text-danger me-2"></i>RACE TELEMETRY</h6>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h2 class="section-header-f1 m-0"><i class="fa-solid fa-gauge-high me-2"></i>RACE TELEMETRY</h2>
           <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="refreshRaceCenter()">
-            <i class="fa-solid fa-rotate me-1"></i>รีเฟรชข้อมูล
+            <i class="fa-solid fa-rotate me-1"></i>รีเฟรช
           </button>
         </div>
         
@@ -324,9 +325,9 @@
     <!-- 4. Race Archive Tab (Cinematic + Segmented Switcher) -->
     <div id="tab-2025" class="tab-pane-custom" style="display: none;">
       <div class="f1-card p-3 mb-3">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-          <h6 class="fw-bold m-0 text-white f1-font"><i class="fa-solid fa-clock-rotate-left text-info me-2"></i>RACE ARCHIVE</h6>
-          <span class="small text-secondary" style="font-size:0.75rem;">ผลการแข่งขันฤดูกาลก่อนหน้า</span>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h2 class="section-header-f1 m-0"><i class="fa-solid fa-clock-rotate-left me-2"></i>RACE ARCHIVE</h2>
+          <span class="small text-secondary" style="font-size:0.75rem;">ผลฤดูกาลก่อนหน้า</span>
         </div>
         
         <div class="mb-3">
@@ -379,7 +380,7 @@
     <!-- 5. Community Tab -->
     <div id="tab-community" class="tab-pane-custom" style="display: none;">
       <div class="f1-card p-3">
-        <h6 class="fw-bold mb-3 text-white f1-font"><i class="fa-solid fa-users-viewfinder text-info me-2"></i>RACE GRID & CONSENSUS</h6>
+        <h2 class="section-header-f1"><i class="fa-solid fa-users-viewfinder me-2"></i>RACE GRID & CONSENSUS</h2>
         <div class="mb-3"><label class="form-label">เลือกสนามเพื่อดูโพยเพื่อน</label><select id="selCommRace" class="form-select" onchange="loadCommunityPredictions()"><option value="" disabled selected>-- เลือกสนาม --</option></select></div>
         <div id="commContent"><div class="text-secondary text-center small py-4">แตะเลือกสนามเพื่อตรวจสอบคำทายและสถิติของกลุ่ม</div></div>
       </div>
