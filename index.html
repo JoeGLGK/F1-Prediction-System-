@@ -317,40 +317,61 @@
         </div>
       </div>
     </div>
-    <!-- 4. Race Archive Tab -->
+    <!-- 4. Race Archive Tab (Cinematic + Segmented Switcher) -->
     <div id="tab-2025" class="tab-pane-custom" style="display: none;">
       <div class="f1-card p-3 mb-3">
         <div class="d-flex justify-content-between align-items-center mb-2">
           <h6 class="fw-bold m-0 text-white f1-font"><i class="fa-solid fa-clock-rotate-left text-info me-2"></i>RACE ARCHIVE</h6>
           <span class="small text-secondary" style="font-size:0.75rem;">ผลการแข่งขันฤดูกาลก่อนหน้า</span>
         </div>
+        
         <div class="mb-3">
           <label class="form-label">เลือกสนามย้อนหลัง</label>
-          <select id="sel2025Race" class="form-select" onchange="on2025RaceChange()"><option value="" disabled selected>-- เลือกสนาม --</option></select>
+          <select id="sel2025Race" class="form-select archive-race-select" onchange="on2025RaceChange()">
+            <option value="" disabled selected>-- เลือกสนาม --</option>
+          </select>
         </div>
 
         <div id="content2025" style="display: none;">
-          <div class="rc-section-title"><i class="fa-solid fa-image text-success"></i>รูปภาพผลการแข่งขันปีก่อนหน้า</div>
           
-          <div class="rc-card-btn p-3 flex-column text-center justify-content-center mb-3" onclick="openMediaPreview2025('quali2025')">
-            <div class="d-flex justify-content-between align-items-center w-100">
-              <span class="small fw-bold text-white"><i class="fa-solid fa-stopwatch text-info me-2"></i>Qualifying ปีก่อน</span>
-              <span class="rc-btn-badge bg-secondary" id="badgeQuali2025">ไม่มีภาพ</span>
-            </div>
-            <img id="thumbQuali2025" src="" class="img-fluid rounded mt-2 border border-secondary" style="display: none; width: 100%; height: auto; object-fit: contain;">
+          <!-- 1. สวิตช์แคปซูลสลับโหมด (Segmented Control Switcher) -->
+          <div class="archive-segmented-control mb-3">
+            <button type="button" id="segBtnQuali" class="archive-seg-btn active-quali" onclick="switchArchiveMode('quali2025')">
+              <i class="fa-solid fa-stopwatch me-1"></i> QUALIFYING
+              <span class="seg-dot" id="dotQuali2025"></span>
+            </button>
+            <button type="button" id="segBtnRace" class="archive-seg-btn" onclick="switchArchiveMode('race2025')">
+              <i class="fa-solid fa-flag-checkered me-1"></i> MAIN RACE
+              <span class="seg-dot" id="dotRace2025"></span>
+            </button>
           </div>
 
-          <div class="rc-card-btn p-3 flex-column text-center justify-content-center mb-2" onclick="openMediaPreview2025('race2025')">
-            <div class="d-flex justify-content-between align-items-center w-100">
-              <span class="small fw-bold text-white"><i class="fa-solid fa-flag-checkered text-warning me-2"></i>Main Race ปีก่อน</span>
-              <span class="rc-btn-badge bg-secondary" id="badgeRace2025">ไม่มีภาพ</span>
-            </div>
-            <img id="thumbRace2025" src="" class="img-fluid rounded mt-2 border border-secondary" style="display: none; width: 100%; height: auto; object-fit: contain;">
+          <!-- 2. Sci-Fi Header พร้อมเส้น Gradient วิ่งจรดขอบขวา -->
+          <div class="archive-scifi-header">
+            <span id="archiveHeaderTitle"><i class="fa-solid fa-bolt text-info me-2"></i>QUALIFYING CLASSIFICATION</span>
+            <div class="archive-scifi-line"></div>
           </div>
+
+          <!-- 3. กรอบแสดงผลเดียวแบบ Cinematic Full-Bleed (ไร้กรอบซ้อนกรอบ) -->
+          <div id="archiveViewerBox" class="archive-cinematic-viewer" onclick="openActiveArchivePreview()">
+            <img id="archiveMainImg" src="" class="archive-fullbleed-img" alt="Archive Result" style="display: none;">
+            
+            <!-- ปุ่มขยายสไตล์กระจกฝ้า (Floating Frosted Glass Overlay) ซ้อนมุมขวาล่าง -->
+            <div id="archiveFloatingBadge" class="archive-floating-zoom" style="display: none;">
+              <i class="fa-solid fa-magnifying-glass-plus text-danger me-1"></i> แตะเพื่อขยาย
+            </div>
+
+            <!-- หน้าจอเรดาร์ Standby กรณีสนามนั้นยังไม่มีรูปภาพ -->
+            <div id="archiveEmptyState" class="archive-empty-telemetry" style="display: none;">
+              <i class="fa-solid fa-satellite-dish mb-2"></i>
+              <div class="f1-font fw-bold text-white" style="letter-spacing: 1px;">NO TELEMETRY DATA ARCHIVED</div>
+              <div class="small text-secondary mt-1" style="font-size: 0.72rem;">ยังไม่มีภาพบันทึกผลการแข่งขันในโหมดนี้</div>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
-
     <!-- 5. Community Tab -->
     <div id="tab-community" class="tab-pane-custom" style="display: none;">
       <div class="f1-card p-3">
