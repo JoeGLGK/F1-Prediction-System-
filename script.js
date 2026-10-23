@@ -607,6 +607,40 @@ function onRaceChange() {
   } else { histAlert.style.display = 'none'; }
 }
 
+// ฟังก์ชันแปลงข้อความยาง (เช่น "C2 / C3 / C4") ให้เป็นวงกลมสีขอบยาง Pirelli (Hard ขาว / Medium เหลือง / Soft แดง)
+function formatPirelliTires(tireStr) {
+  if (!tireStr || tireStr.trim() === '-' || tireStr.trim() === '') return '-';
+  
+  // ค้นหาตัวเลขเบอร์ยาง เช่น C1, C2, C3, C4, C5, C6
+  const matches = tireStr.toUpperCase().match(/C\d/g);
+  if (!matches || matches.length === 0) {
+    return tireStr; // ถ้าไม่ได้พิมพ์ในรูปแบบ C1-C6 ให้แสดงข้อความตามปกติ
+  }
+
+  // เรียงลำดับจากเลขน้อยไปมาก (เลขน้อย = แข็ง Hard, เลขกลาง = Medium, เลขมาก = นิ่ม Soft)
+  const sorted = matches.slice().sort(function(a, b) {
+    return parseInt(a.replace('C', '')) - parseInt(b.replace('C', ''));
+  });
+
+  let html = '<div class="pirelli-compounds-wrap">';
+  sorted.forEach(function(comp, idx) {
+    let colorClass = 'tyre-medium';
+    let labelTitle = 'Medium';
+    if (sorted.length === 3) {
+      if (idx === 0) { colorClass = 'tyre-hard'; labelTitle = 'Hard'; }
+      else if (idx === 1) { colorClass = 'tyre-medium'; labelTitle = 'Medium'; }
+      else if (idx === 2) { colorClass = 'tyre-soft'; labelTitle = 'Soft'; }
+    } else if (idx === 0) {
+      colorClass = 'tyre-hard';
+    } else if (idx === sorted.length - 1) {
+      colorClass = 'tyre-soft';
+    }
+    html += '<span class="tyre-compound-pill ' + colorClass + '" title="' + labelTitle + '">' + comp + '</span>';
+  });
+  html += '</div>';
+  return html;
+}
+
 function onCenterRaceChange() {
   const raceId = document.getElementById('selCenterRace').value; 
   const currentRace = globalRaces.find(function(r) { return r.id === raceId; }); 
@@ -642,16 +676,16 @@ function onCenterRaceChange() {
     } 
   }
   
-  // 3. ข้อมูล Widget Telemetry
+  // 3. ข้อมูล Telemetry Spec Sheet (พร้อมแปลงยาง Pirelli เป็นวงกลมสี)
   const info = currentRace.trackInfo || {};
   document.getElementById('rcTrackType').innerText = info.trackType || '-'; 
-  document.getElementById('rcTires').innerText = info.tires || '-'; 
+  document.getElementById('rcTires').innerHTML = formatPirelliTires(info.tires || '-'); 
   document.getElementById('rcSafetyCar').innerText = info.safetyCar || '-'; 
   document.getElementById('rcWeather').innerHTML = '<span class="weather-icon-animated">' + (info.weather || '-') + '</span>'; 
   document.getElementById('rcPrevWinners').innerText = info.prevWinners || '-'; 
   document.getElementById('rcKeyNote').innerText = info.keyNote || '-';
 
-  // 4. ควบคุมการแสดงผล "รูปแผนผังแทร็ก"
+  // 4. ควบคุมการแสดงผล "รูปแผนผังแทร็ก" ด้านบนการ์ด
   const layoutWrapper = document.getElementById('rcTrackLayoutWrapper');
   const layoutImg = document.getElementById('rcTrackLayoutImg');
   if (layoutWrapper && layoutImg) {
