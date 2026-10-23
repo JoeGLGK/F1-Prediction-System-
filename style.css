@@ -1513,3 +1513,67 @@ body {
 .nav-item:not(.active) {
   color: #64748b !important;
 }
+/* =========================================================
+   SKELETON LOADERS (แทนที่ Spinner หมุนๆ)
+   ========================================================= */
+.skeleton-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 10px 0;
+}
+
+.skeleton-card {
+  background: rgba(26, 29, 38, 0.5); /* สีพื้นหลังการ์ดจางๆ */
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* เอฟเฟกต์แสงวิ่งพาดผ่าน (Shimmer) */
+.skeleton-card::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.06), transparent);
+  transform: translateX(-100%);
+  animation: shimmer 1.5s infinite;
+}
+
+.skeleton-avatar {
+  width: 45px; 
+  height: 45px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.skeleton-text-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.skeleton-line {
+  height: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+}
+.skeleton-line.w-75 { width: 75%; }
+.skeleton-line.w-50 { width: 50%; }
+
+.skeleton-score {
+  width: 40px; 
+  height: 24px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+}
+
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
+}
