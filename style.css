@@ -2092,3 +2092,27 @@ body {
   vertical-align: middle;
   filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
 }
+/* --- หัวข้อสไตล์ F1 Official (มีขีดแดงด้านซ้าย) --- */
+.section-header-f1 {
+  font-family: 'Titillium Web', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 12px;
+  padding-left: 10px;
+  border-left: 4px solid var(--f1-red, #e10600); /* ดึงสีแดง F1 มาใช้ */
+  background: transparent;
+  line-height: 1.2;
+}
+
+/* --- กล่องครอบไร้กรอบ (สำหรับใส่รูปภาพ) --- */
+.practice-borderless-container {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
