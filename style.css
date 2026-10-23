@@ -1257,3 +1257,12 @@ body {
   object-fit: contain;
   background-color: #000;
 }
+.pirelli-tire-img {
+  width: 36px !important; 
+  height: 36px !important;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
+  animation: spinTire 15s linear infinite;
+}
