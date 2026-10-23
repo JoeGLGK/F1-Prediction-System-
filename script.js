@@ -1003,12 +1003,13 @@ function handleAdminSaveMediaLinks() {
   const payload = { 
     raceId: raceId, 
     trackImg: document.getElementById('adTrackImgUrl').value.trim(),
+    trackLayoutImg: document.getElementById('adTrackImgUrl').value.trim(), // เพิ่มบรรทัดนี้เพื่อให้ส่งค่าไปพร้อมกันทั้ง 2 ชื่อ
     practiceImg: document.getElementById('adPracticeUrl').value.trim(), 
     quali2025: document.getElementById('adQuali2025Url').value.trim(), 
     race2025: document.getElementById('adRace2025Url').value.trim(), 
     extLink: document.getElementById('adExtLink').value.trim(), 
     extTitle: "อัตราต่อรอง" 
-  }; 
+  };
   callGAS("adminSaveTrackMediaLinks", { pin: pin, data: payload }).then(function(res) { 
     showToast(res.msg, res.success ? 'success' : 'error'); 
     if(res.success) forceRefreshData(); 
