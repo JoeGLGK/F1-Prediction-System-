@@ -654,12 +654,14 @@ function handleCheckFinishedRace() {
 function updateUserSessionUI() {
   const player = localStorage.getItem('f1_player_name');
   const formDisplay = document.getElementById('formPlayerDisplay');
+  const bannerEl = document.getElementById('userScoreBanner');
 
   if (!player) { 
     document.getElementById('myPlayerName').innerText = '--'; 
     document.getElementById('myCurrentRank').innerText = '-'; 
     document.getElementById('myTotalScore').innerText = '0'; 
     if (formDisplay) formDisplay.innerText = '-';
+    if (bannerEl) bannerEl.style.removeProperty('--theme-color');
     return; 
   }
 
@@ -670,9 +672,16 @@ function updateUserSessionUI() {
   if (match) { 
     document.getElementById('myCurrentRank').innerText = 'อันดับที่ ' + match[0]; 
     document.getElementById('myTotalScore').innerText = match[2]; 
+    
+    // ดึงข้อมูลทีมของตัวเองมาเซ็ตเป็นสีเรืองแสงของแบนเนอร์
+    const team = match[4] || "F1";
+    const teamColor = TEAM_COLORS[team] || "#e10600";
+    if (bannerEl) bannerEl.style.setProperty('--theme-color', teamColor);
+    
   } else { 
     document.getElementById('myCurrentRank').innerText = 'ยังไม่มีอันดับ'; 
     document.getElementById('myTotalScore').innerText = '0'; 
+    if (bannerEl) bannerEl.style.removeProperty('--theme-color');
   }
 }
 
