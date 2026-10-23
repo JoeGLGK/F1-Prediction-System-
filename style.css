@@ -1906,3 +1906,152 @@ body {
   box-shadow: 0 0 15px rgba(225, 6, 0, 0.3), inset 0 0 10px rgba(225, 6, 0, 0.2);
   text-shadow: 0 0 8px rgba(225, 6, 0, 0.6);
 }
+/* =========================================================
+   RACE ARCHIVE: SEGMENTED SWITCHER & CINEMATIC FULL-BLEED
+   ========================================================= */
+
+/* 1. สวิตช์แคปซูลสลับโหมด (iOS / F1 TV Style) */
+.archive-segmented-control {
+  display: flex;
+  background: #06070a;
+  padding: 4px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  gap: 4px;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.8);
+}
+
+.archive-seg-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #64748b;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 800;
+  font-size: 0.85rem;
+  letter-spacing: 0.8px;
+  padding: 9px 10px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
+}
+
+/* สถานะเมื่อเลือกโหมด Qualifying (เรืองแสงโทนฟ้า Cyan) */
+.archive-seg-btn.active-quali {
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.22) 0%, rgba(15, 23, 42, 0.95) 100%);
+  color: #ffffff;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  box-shadow: 0 4px 15px rgba(14, 165, 233, 0.2);
+}
+.archive-seg-btn.active-quali i {
+  color: #38bdf8;
+  filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.6));
+}
+
+/* สถานะเมื่อเลือกโหมด Main Race (เรืองแสงโทนแดง-ทอง Racing) */
+.archive-seg-btn.active-race {
+  background: linear-gradient(135deg, rgba(225, 6, 0, 0.25) 0%, rgba(15, 23, 42, 0.95) 100%);
+  color: #ffffff;
+  border: 1px solid rgba(225, 6, 0, 0.45);
+  box-shadow: 0 4px 15px rgba(225, 6, 0, 0.25);
+}
+.archive-seg-btn.active-race i {
+  color: #fbbf24;
+  filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.6));
+}
+
+/* จุดไฟ LED เล็กๆ บนสวิตช์ บอกว่ามีรูปพร้อมดูหรือไม่ */
+.seg-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #334155;
+  transition: all 0.3s ease;
+}
+.seg-dot.ready {
+  background: #10b981;
+  box-shadow: 0 0 6px #10b981;
+}
+
+/* 2. Sci-Fi Header พร้อมเส้น Gradient */
+.archive-scifi-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+  padding: 0 2px;
+}
+.archive-scifi-header span {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #cbd5e1;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.archive-scifi-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.2), transparent);
+}
+
+/* 3. กรอบภาพ Cinematic Full-Bleed (ไร้กรอบซ้อนกรอบ) */
+.archive-cinematic-viewer {
+  position: relative;
+  width: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #050608;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.85);
+  cursor: pointer;
+}
+
+.archive-fullbleed-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 16px;
+  transition: transform 0.35s ease, opacity 0.25s ease;
+}
+.archive-cinematic-viewer:active .archive-fullbleed-img {
+  transform: scale(0.985);
+}
+
+/* 4. ปุ่มขยาย Floating Frosted Glass มุมขวาล่าง */
+.archive-floating-zoom {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  background: rgba(10, 12, 18, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #f8fafc;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 5px 12px;
+  border-radius: 30px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.7);
+  pointer-events: none;
+  z-index: 4;
+}
+
+/* 5. หน้าจอเรดาร์ Standby เมื่อไม่มีภาพ */
+.archive-empty-telemetry {
+  padding: 45px 20px;
+  text-align: center;
+  background: radial-gradient(circle at center, rgba(225, 6, 0, 0.05) 0%, transparent 70%);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+}
+.archive-empty-telemetry i {
+  font-size: 2rem;
+  color: #475569;
+}
