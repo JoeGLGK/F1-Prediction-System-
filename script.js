@@ -785,15 +785,140 @@ function openBreakdownModal(raceId) {
   });
 }
 
+// ฟังก์ชันย่อชื่อนักแข่งให้แสดงนามสกุลบนตั๋วได้กระชับสวยงาม
+function getShortDriverName(fullName) {
+  if (!fullName || fullName === '-') return '-';
+  const parts = fullName.trim().split(' ');
+  return parts.length > 1 ? parts[parts.length - 1] : fullName;
+}
+
 function loadCommunityPredictions() {
   const raceId = document.getElementById('selCommRace').value; 
   const box = document.getElementById('commContent'); 
-  box.innerHTML = '<div class="text-center text-secondary py-3"><i class="fa-solid fa-spinner fa-spin me-2"></i>กำลังตรวจสอบข้อมูล...</div>';
+  box.innerHTML = '<div class="text-center text-secondary py-4"><i class="fa-solid fa-spinner fa-spin me-2"></i>กำลังดึงตั๋วโพยเพื่อน...</div>';
+
+  const currentRace = globalRaces.find(function(r) { return r.id === raceId; });
+  const isCalculated = currentRace && currentRace.status === 'CALCULATED';
+
   callGAS("getCommunityPredictions", { raceId: raceId }).then(function(res) {
-    if (!res.locked) { box.innerHTML = '<div class="p-3 rounded text-center bg-black border border-warning"><div class="text-warning fw-bold fs-5 mb-2"><i class="fa-solid fa-lock me-2"></i>ยังไม่เปิดเผยข้อมูล</div><div class="small text-secondary">' + res.msg + '</div></div>'; return; }
-    if (res.predictions.length === 0) { box.innerHTML = '<div class="text-center text-muted py-3">ไม่มีใครส่งคำทายในสนามนี้</div>'; return; }
-    let html = '<div class="consensus-stat-card"><div class="small text-secondary fw-bold mb-2 text-uppercase"><i class="fa-solid fa-chart-pie text-info me-1"></i>สถิติเสียงส่วนใหญ่ (' + res.totalPredictors + ' คน)</div><div class="d-flex justify-content-between small py-1 border-bottom border-dark"><span>🏆 เต็ง 1 (P1):</span><span class="text-warning fw-bold">' + res.topP1 + '</span></div><div class="d-flex justify-content-between small py-1"><span>⚡ เต็ง FL:</span><span class="text-info fw-bold">' + res.topFL + '</span></div></div>';
-    html += res.predictions.map(function(p) { return '<div class="p-3 mb-2 rounded bg-black border border-secondary text-start"><div class="d-flex justify-content-between align-items-center mb-2"><span class="fw-bold text-white"><i class="fa-solid fa-user-astronaut text-danger me-2"></i>' + p.player + '</span><span class="badge bg-danger">ได้ ' + p.score + ' แต้ม</span></div><div class="small text-secondary"><div><strong>P1:</strong> ' + p.p1 + ' | <strong>P2:</strong> ' + p.p2 + '</div><div><strong>P3:</strong> ' + p.p3 + ' | <strong>P4:</strong> ' + p.p4 + '</div>' + (p.fl ? '<div class="text-purple"><strong>⚡ FL:</strong> ' + p.fl + '</div>' : '') + '</div></div>'; }).join('');
+    // 1. กรณีสนามยังไม่ปิดรับ (แสดงตั๋ว Paddock ล็อก พร้อมตราประทับสีแดง LOCKED)
+    if (!res.locked) { 
+      box.innerHTML = 
+        '<div class="locked-ticket-card">' +
+          '<div class="rubber-stamp-locked"><i class="fa-solid fa-lock me-2"></i>LOCKED</div>' +
+          '<div class="text-white fw-bold mb-1" style="font-family:\'Rajdhani\',sans-serif; font-size:1.05rem; letter-spacing:0.5px;">PADDOCK PARC FERMÉ</div>' +
+          '<div class="small text-secondary">' + res.msg + '</div>' +
+        '</div>'; 
+      return; 
+    }
+
+    if (!res.predictions || res.predictions.length === 0) { 
+      box.innerHTML = '<div class="text-center text-muted py-4">ไม่มีใครส่งคำทายในสนามนี้</div>'; 
+      return; 
+    }
+
+    const total = res.predictions.length;
+
+    // 2. คำนวณเปอร์เซ็นต์โหวตจริงจากโพยทั้งหมดในสนามนั้น (P1 และ FL)
+    const p1Counts = {};
+    const flCounts = {};
+    res.predictions.forEach(function(p) {
+      if (p.p1) p1Counts[p.p1] = (p1Counts[p.p1] || 0) + 1;
+      if (p.fl) flCounts[p.fl] = (flCounts[p.fl] || 0) + 1;
+    });
+
+    function getTopStat(countsObj, fallbackText) {
+      let topDriver = '-';
+      let maxCount = 0;
+      Object.keys(countsObj).forEach(function(d) {
+        if (countsObj[d] > maxCount) {
+          maxCount = countsObj[d];
+          topDriver = d;
+        }
+      });
+      if (maxCount === 0) return { driver: fallbackText || '-', pct: 0, count: 0, color: '#e10600' };
+      const pct = Math.round((maxCount / total) * 100);
+      const dInfo = DRIVER_INFO[topDriver] || { color: '#e10600' };
+      // ถ้าสีทีมเป็นขาวล้วนหรือมืดเกินไป ให้ปรับโทนให้สว่างชัดบนหลอด
+      const barColor = dInfo.color || '#e10600';
+      return { driver: topDriver, pct: pct, count: maxCount, color: barColor };
+    }
+
+    const topP1Stat = getTopStat(p1Counts, res.topP1);
+    const topFLStat = getTopStat(flCounts, res.topFL);
+
+    // 3. สร้างกล่องหลอดพลังโหวต (Consensus Progress Bar) เติมสีตามทีมนักแข่ง
+    let html = 
+      '<div class="consensus-telemetry-box">' +
+        '<div class="consensus-header">' +
+          '<span><i class="fa-solid fa-bolt text-info me-1"></i> CONSENSUS TELEMETRY</span>' +
+          '<span class="badge bg-dark border border-secondary text-light">' + total + ' PADDOCK PASSES</span>' +
+        '</div>' +
+
+        // หลอดโหวต P1
+        '<div class="consensus-item">' +
+          '<div class="consensus-label-row">' +
+            '<span class="text-secondary small">🏆 มหาชนเทใจ P1: <strong class="consensus-driver ms-1">' + topP1Stat.driver + '</strong></span>' +
+            '<span class="consensus-pct" style="color:' + topP1Stat.color + ';">' + topP1Stat.pct + '% (' + topP1Stat.count + '/' + total + ')</span>' +
+          '</div>' +
+          '<div class="consensus-track">' +
+            '<div class="consensus-fill" style="width:' + topP1Stat.pct + '%; background:' + topP1Stat.color + '; box-shadow: 0 0 10px ' + topP1Stat.color + ';"></div>' +
+          '</div>' +
+        '</div>' +
+
+        // หลอดโหวต Fastest Lap
+        '<div class="consensus-item">' +
+          '<div class="consensus-label-row">' +
+            '<span class="text-secondary small">⚡ เต็ง Fastest Lap: <strong class="consensus-driver ms-1">' + topFLStat.driver + '</strong></span>' +
+            '<span class="consensus-pct" style="color:' + topFLStat.color + ';">' + topFLStat.pct + '% (' + topFLStat.count + '/' + total + ')</span>' +
+          '</div>' +
+          '<div class="consensus-track">' +
+            '<div class="consensus-fill" style="width:' + topFLStat.pct + '%; background:' + topFLStat.color + '; box-shadow: 0 0 10px ' + topFLStat.color + ';"></div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
+    // 4. สร้างตั๋วโพยทายผลของเพื่อนแต่ละคน (Paddock Pass Tickets)
+    html += res.predictions.map(function(p, idx) {
+      const c1 = (DRIVER_INFO[p.p1] || {}).color || '#64748b';
+      const c2 = (DRIVER_INFO[p.p2] || {}).color || '#64748b';
+      const c3 = (DRIVER_INFO[p.p3] || {}).color || '#64748b';
+      const c4 = (DRIVER_INFO[p.p4] || {}).color || '#64748b';
+
+      // ส่วนหางตั๋วฝั่งขวา: ถ้าแข่งจบแล้วโชว์คะแนนใหญ่ๆ ถ้ายังไม่แข่งโชว์ตราประทับ LOCKED IN
+      let stubContent = '';
+      if (isCalculated || Number(p.score) > 0) {
+        stubContent = 
+          '<div class="ticket-pts-val text-warning">' + p.score + '</div>' +
+          '<div class="ticket-pts-lbl">POINTS</div>';
+      } else {
+        stubContent = 
+          '<div class="ticket-pending-stamp">LOCKED IN</div>' +
+          '<div class="ticket-pts-lbl mt-1">WAITING</div>';
+      }
+
+      const passNum = String(idx + 1).padStart(2, '0');
+
+      return '<div class="pred-ticket">' +
+               '<div class="ticket-main">' +
+                 '<div class="ticket-player-header">' +
+                   '<div class="ticket-player-name"><i class="fa-solid fa-id-badge text-danger"></i>' + p.player + '</div>' +
+                   '<span class="ticket-pass-tag">PASS #' + passNum + '</span>' +
+                 '</div>' +
+                 '<div class="ticket-picks-grid">' +
+                   '<div class="ticket-pick-item"><span class="ticket-pos-pill p1">P1</span><span class="ticket-driver-dot" style="background:' + c1 + '"></span><span class="ticket-driver-txt">' + getShortDriverName(p.p1) + '</span></div>' +
+                   '<div class="ticket-pick-item"><span class="ticket-pos-pill p2">P2</span><span class="ticket-driver-dot" style="background:' + c2 + '"></span><span class="ticket-driver-txt">' + getShortDriverName(p.p2) + '</span></div>' +
+                   '<div class="ticket-pick-item"><span class="ticket-pos-pill p3">P3</span><span class="ticket-driver-dot" style="background:' + c3 + '"></span><span class="ticket-driver-txt">' + getShortDriverName(p.p3) + '</span></div>' +
+                   '<div class="ticket-pick-item"><span class="ticket-pos-pill">P4</span><span class="ticket-driver-dot" style="background:' + c4 + '"></span><span class="ticket-driver-txt">' + getShortDriverName(p.p4) + '</span></div>' +
+                 '</div>' +
+                 (p.fl ? '<div class="ticket-fl-bar"><i class="fa-solid fa-bolt"></i><span>FL: ' + getShortDriverName(p.fl) + '</span></div>' : '') +
+               '</div>' +
+               '<div class="ticket-stub">' +
+                 stubContent +
+               '</div>' +
+             '</div>';
+    }).join('');
+
     box.innerHTML = html;
   });
 }
