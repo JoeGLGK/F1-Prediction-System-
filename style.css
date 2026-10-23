@@ -1999,31 +1999,40 @@ body {
   box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.05), 0 0 12px var(--team-color, rgba(255, 255, 255, 0.2));
 }
 
+/* --- เลื่อนป้ายบอกตำแหน่งมามุมซ้ายล่าง และจัดเรียงแนวนอน --- */
 .driver-pick-badges {
   position: absolute;
-  bottom: 8px; /* ย้ายมาอยู่ด้านล่าง */
-  right: 8px;  /* ย้ายมาอยู่ด้านขวา */
+  bottom: 8px;  /* ย้ายมาอยู่ด้านล่าง */
+  left: 10px;   /* ย้ายมามุมซ้าย */
   display: flex;
-  flex-direction: column;
+  flex-direction: row; /* เรียงป้ายแนวนอนเผื่อมีหลายป้าย */
   gap: 4px;
   z-index: 5;
-  align-items: flex-end;
+  align-items: center;
 }
 
+/* --- ปรับขนาดป้ายให้เล็กลง --- */
 .pick-badge {
-  font-size: 0.65rem;
+  font-size: 0.55rem; /* ลดขนาดตัวอักษรลง */
   font-weight: 900;
-  padding: 2px 6px;
-  border-radius: 4px;
+  padding: 2px 5px;   /* ลดขนาดความกว้าง/สูงของป้าย */
+  border-radius: 3px;
   text-shadow: 0 1px 2px rgba(0,0,0,0.8);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.8);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.6);
   font-family: 'Titillium Web', sans-serif;
+  line-height: 1;
 }
+
 .pick-badge.p1 { color: #000; background: var(--gold); border: 1px solid #000; text-shadow: none; }
 .pick-badge.p2 { color: #000; background: var(--silver); border: 1px solid #000; text-shadow: none; }
 .pick-badge.p3 { color: #fff; background: var(--bronze); border: 1px solid rgba(255,255,255,0.3); }
 .pick-badge.p4 { color: #fff; background: #475569; border: 1px solid rgba(255,255,255,0.2); }
 .pick-badge.pfl { color: #fff; background: #a855f7; border: 1px solid rgba(255,255,255,0.2); }
+
+/* --- เพิ่มพื้นที่ด้านล่างการ์ด ป้องกันป้ายทับชื่อทีม --- */
+.driver-pick-btn {
+  padding-bottom: 26px !important; 
+}
 
 /* โลโก้ทีมขนาดเล็กท้ายชื่อทีม */
 .driver-pick-team-logo {
