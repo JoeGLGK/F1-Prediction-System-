@@ -201,6 +201,31 @@ body {
 .prince .pts-display { font-size: 1.5rem; color: #fff; }
 .pts-label { font-size: 0.75rem; color: #cbd5e1; margin-left: 2px; }
 
+/* ตรงกลาง: โชว์รูปรถ */
+.car-showcase {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+.king .car-showcase { height: 85px; margin: 12px 0; }
+.prince .car-showcase { height: 60px; margin: 10px 0; }
+
+.car-showcase img {
+  max-height: 100%;
+  max-width: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 8px rgba(0,0,0,0.6));
+}
+
+/* ปรับขนาดรถของอันดับ 2 และ 3 ให้มีระยะห่างจากขอบการ์ดเล็กน้อย */
+.prince .car-showcase img {
+  max-width: 92%;
+}
 /* ส่วนท้าย: ชื่อ และ โลโก้ทีม */
 .card-footer {
   position: relative;
