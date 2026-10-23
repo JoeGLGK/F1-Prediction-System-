@@ -320,6 +320,7 @@ function confirmLoginGate() {
     btn.disabled = false; btn.innerHTML = oldText;
     if (res.success) {
       localStorage.setItem('f1_player_name', selected); 
+      localStorage.setItem('f1_player_pin', pin); // บันทึกรหัส PIN ลงในเครื่องเพื่อใช้ยืนยันตอนส่ง 
       if (pinEl) pinEl.value = '';
       updateUserSessionUI(); 
       loginGateModalInstance.hide(); 
@@ -369,7 +370,22 @@ function renderUI(data) {
 
   const openRaces = globalRaces.filter(function(r) { return r.status === 'OPEN'; });
   const selRace = document.getElementById('selRace');
-  if(selRace) selRace.innerHTML = '<option value="" disabled selected>-- เลือกสนาม --</option>' + openRaces.map(function(r) { return '<option value="' + r.id + '" data-type="' + r.type + '" data-dl="' + r.deadline + '">🟢 ' + r.name + '</option>'; }).join('');
+  
+  if(selRace) {
+    // 1. จำค่าสนามที่ผู้ใช้กำลังเลือกอยู่ตอนนี้
+    const currentSelected = selRace.value; 
+    
+    // 2. สร้างตัวเลือกสนามใหม่
+    selRace.innerHTML = '<option value="" disabled selected>-- เลือกสนาม --</option>' + openRaces.map(function(r) { return '<option value="' + r.id + '" data-type="' + r.type + '" data-dl="' + r.deadline + '">🟢 ' + r.name + '</option>'; }).join('');
+    
+    // 3. ถ้าเลือกค้างไว้ ให้เซ็ตค่ากลับไป / แต่ถ้ายังไม่เลือกและมีสนามเปิดแค่ 1 สนาม ให้เลือกอัตโนมัติเลย
+    if (currentSelected && openRaces.some(r => r.id === currentSelected)) {
+      selRace.value = currentSelected;
+    } else if (!currentSelected && openRaces.length === 1) {
+      selRace.value = openRaces[0].id;
+      setTimeout(() => onRaceChange(), 100); // อัปเดต UI ทันที
+    }
+  }
 
   const allRaceOpts = '<option value="" disabled selected>-- เลือกสนาม --</option>' + globalRaces.map(function(r) { return '<option value="' + r.id + '" data-type="' + r.type + '">' + (r.status === 'OPEN' ? '🔴' : (r.status === 'CALCULATED' ? '🏁' : '⚡')) + ' ' + r.name + '</option>'; }).join('');
   ['selCommRace','adminRace','adRaceDead','adRaceCheck','adMediaRace','selCenterRace','sel2025Race'].forEach(function(id) { let el = document.getElementById(id); if(el) el.innerHTML = allRaceOpts; });
@@ -1118,8 +1134,12 @@ function handlePrediction(e) {
   }
 
   const btn = document.getElementById('btnPred');
+  const playerPin = localStorage.getItem('f1_player_pin') || ''; // ดึง PIN ที่จำไว้
   btn.disabled = true; 
-  callGAS("submitPrediction", { data: { playerName: player, raceId: rSel.value, type: rSel.options[rSel.selectedIndex].dataset.type, p1: p1, p2: p2, p3: p3, p4: p4, fl: document.getElementById('posFL').value } }).then(function(res) { 
+  callGAS("submitPrediction", { 
+    pin: playerPin, // แนบไปให้ Google Apps Script ตรวจสอบ
+    data: { playerName: player, raceId: rSel.value, type: rSel.options[rSel.selectedIndex].dataset.type, p1: p1, p2: p2, p3: p3, p4: p4, fl: document.getElementById('posFL').value } 
+  }).then(function(res) { 
     btn.disabled = false; showToast(res.msg, res.success ? 'success' : 'error'); 
     if (res.success) { 
       document.getElementById('savedPredAlert').style.display = 'block'; 
