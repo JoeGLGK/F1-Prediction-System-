@@ -1309,3 +1309,21 @@ function refreshRaceCenter() {
     showToast('Error: ' + err, 'error'); 
   });
 }
+function switchStandings(type) {
+  const userView = document.getElementById('user-standings-view');
+  const driverView = document.getElementById('driver-standings-view');
+  const btnUser = document.getElementById('btn-user-standings');
+  const btnDriver = document.getElementById('btn-driver-standings');
+
+  if (type === 'user') {
+    userView.classList.remove('d-none');
+    driverView.classList.add('d-none');
+    btnUser.classList.add('active');
+    btnDriver.classList.remove('active');
+  } else {
+    userView.classList.add('d-none');
+    driverView.classList.remove('d-none');
+    btnUser.classList.remove('active');
+    btnDriver.classList.add('active');
+  }
+}
