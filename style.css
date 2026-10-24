@@ -2168,39 +2168,42 @@ body {
   0%, 100% { opacity: 1; }
   50% { opacity: 0; }
 }
-/* --- 1. โครงสร้างปก (นำขอบมนกลับมา เพื่อให้เข้ากับ Card อื่นๆ ในแอป) --- */
+/* ==========================================
+   BROADCAST HUD HERO BANNER (COMPLETE SET)
+   ========================================== */
+
+/* 1. โครงสร้างการ์ดรูปปก (แสดงรูปเต็มสัดส่วน ไม่ซูม) */
 .hero-banner-hud {
   position: relative;
   width: 100%;
-  height: 210px; /* ต้นเหตุที่ทำให้กรอบเตี้ยกว่ารูป */
-  ...
+  height: auto;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.6);
 }
 
 .hero-img-hud {
   width: 100%;
-  height: 100%;
-  object-fit: cover; /* ต้นเหตุที่ทำให้รูปถูกครอปและซูม */
-  object-position: center 20%; 
+  height: auto;
+  display: block;
 }
 
-/* --- 2. Gradient เฟดภาพ --- */
+/* 2. พื้นหลังไล่สีดำด้านล่างเพื่อดันตัวหนังสือให้เด่น */
 .hero-overlay-hud {
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 140px; 
-  /* เปลี่ยนสีเฟดให้ดำสนิทขึ้นเพื่อให้ข้อความเด่น */
-  background: linear-gradient(to top, rgba(13, 14, 18, 1) 0%, rgba(13, 14, 18, 0.8) 40%, transparent 100%);
+  height: 65%; /* กินพื้นที่ไล่สีขึ้นมา 65% ของความสูงรูป */
+  background: linear-gradient(to top, rgba(13, 14, 18, 0.98) 0%, rgba(13, 14, 18, 0.75) 45%, transparent 100%);
   display: flex;
   align-items: flex-end;
 }
 
-/* (ลบคลาส .hud-anchor-line ออกจาก CSS ได้เลยครับ ไม่ได้ใช้แล้ว) */
-
-/* --- 4. ชื่อแอป (คงเดิม) --- */
+/* 3. ชื่อหลัก F1 PREDICTOR */
 .brand-title-hud {
-  font-size: 1.45rem;
+  font-size: 1.4rem;
   font-weight: 900;
   color: #ffffff;
   letter-spacing: 1px;
@@ -2209,9 +2212,72 @@ body {
 
 .f1-badge-hud {
   background-color: #e10600;
-  color: #fff;
-  padding: 1px 5px;
+  color: #ffffff;
+  padding: 1px 6px;
   border-radius: 3px;
-  margin-right: 6px; /* เพิ่มระยะห่างจากคำว่า PREDICTOR นิดนึง */
+  margin-right: 6px;
   font-size: 0.9em;
+}
+
+/* 4. จุดไฟบอกสถานะสีแดงกะพริบ (Live Indicator) */
+.live-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background-color: #e10600;
+  border-radius: 50%;
+  margin-right: 8px;
+  box-shadow: 0 0 6px #e10600;
+  animation: hudBlink 1.8s infinite ease-in-out;
+  flex-shrink: 0;
+}
+
+@keyframes hudBlink {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.2; transform: scale(0.85); }
+}
+
+/* 5. ข้อความรองฟอนต์ดิจิทัล (2026 OFFICIAL FANTASY LEAGUE) */
+.hud-subtitle {
+  font-family: 'Share Tech Mono', monospace !important;
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.75); /* สีเทาสว่าง */
+  letter-spacing: 1.5px;
+  line-height: 1;
+  display: inline-block;
+}
+
+/* 6. ปุ่มลงทะเบียนสไตล์ System Badge (ป้ายสถานะระบบ) */
+.btn-sys-badge {
+  background: rgba(20, 22, 28, 0.65); /* พื้นหลังเทาดำโปร่งแสง */
+  border: 1px solid rgba(255, 255, 255, 0.18); /* เส้นขอบกระจกบางๆ */
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border-radius: 4px; /* สี่เหลี่ยมผืนผ้ามุมคมนิดๆ */
+  color: rgba(255, 255, 255, 0.85);
+  font-family: 'Kanit', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 400;
+  padding: 4px 9px;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.25s ease;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+/* ไอคอนรูปคนและเส้นคั่นด้านในปุ่ม */
+.btn-sys-badge i {
+  font-size: 0.6rem;
+  color: rgba(255, 255, 255, 0.5);
+  border-right: 1px solid rgba(255, 255, 255, 0.2); /* เส้นตรงบางๆ คั่นกลาง */
+  padding-right: 6px;
+  margin-right: 6px;
+  line-height: 1;
+}
+
+.btn-sys-badge:hover, .btn-sys-badge:active {
+  background: rgba(35, 40, 50, 0.85);
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #ffffff;
 }
