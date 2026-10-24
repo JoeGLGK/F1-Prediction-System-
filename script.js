@@ -1327,3 +1327,64 @@ function switchStandings(type) {
     btnDriver.classList.add('active');
   }
 }
+/* ==========================================
+   ระบบดึงคะแนนนักแข่ง F1 อัตโนมัติ (Fetch API)
+   ========================================== */
+
+async function fetchF1Standings() {
+  try {
+    // 1. ดึงข้อมูลจาก API (ใช้ current เพื่อดึงข้อมูลปีปัจจุบันเสมอ)
+    const response = await fetch('https://api.jolpi.ca/ergast/f1/current/driverStandings.json');
+    const data = await response.json();
+    
+    // 2. เจาะเข้าถึงอาร์เรย์รายการนักแข่งและคะแนน
+    const standings = data.MRData.StandingsTable.StandingsLists[0].DriverStandings;
+    
+    // 3. ดึงแถวตารางนักแข่งทั้งหมดบนเว็บเรามาเตรียมไว้
+    const container = document.querySelector('.f1-official-standings');
+    const rows = document.querySelectorAll('.f1-standings-row');
+    const rowsArray = Array.from(rows); // แปลงเป็น Array เพื่อให้จัดเรียงได้
+
+    // 4. วนลูปข้อมูลจาก API เพื่ออัปเดตตัวเลขบนเว็บ
+    standings.forEach(driverData => {
+      // ดึงนามสกุลนักแข่งจาก API และทำให้อ่านง่าย (ลบสระ/วรรณยุกต์ เช่น Pérez -> perez)
+      const apiFamilyName = driverData.Driver.familyName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      const points = driverData.points;
+      const position = driverData.position;
+
+      // ค้นหาแถวบนเว็บที่มีชื่อตรงกับ API
+      const targetRow = rowsArray.find(row => {
+        const nameEl = row.querySelector('.driver-name');
+        if (!nameEl) return false;
+        const htmlName = nameEl.innerText.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        return htmlName.includes(apiFamilyName);
+      });
+
+      // ถ้าเจอชื่อตรงกัน ให้อัปเดตคะแนน อันดับ และบันทึกอันดับไว้จัดเรียง
+      if (targetRow) {
+        targetRow.querySelector('.col-pts').innerText = points;
+        targetRow.querySelector('.col-pos').innerText = position;
+        targetRow.setAttribute('data-position', position);
+      }
+    });
+
+    // 5. จัดเรียงแถว HTML ใหม่ตามอันดับ (1-22)
+    rowsArray.sort((a, b) => {
+      const posA = parseInt(a.getAttribute('data-position')) || 999;
+      const posB = parseInt(b.getAttribute('data-position')) || 999;
+      return posA - posB;
+    });
+
+    // 6. นำแถวที่สลับตำแหน่งแล้ว ใส่กลับคืนเข้าไปในตาราง
+    rowsArray.forEach(row => row.remove()); // ล้างของเก่าออก
+    rowsArray.forEach(row => container.appendChild(row)); // ใส่ของใหม่ที่เรียงแล้วเข้าไปแทน
+
+    console.log("✅ อัปเดตตารางคะแนน F1 ล่าสุดเรียบร้อย");
+
+  } catch (error) {
+    console.error('❌ เกิดข้อผิดพลาดในการดึงข้อมูล F1 API:', error);
+  }
+}
+
+// สั่งให้ระบบดึงข้อมูลทันทีเมื่อเปิดหน้าเว็บ
+document.addEventListener('DOMContentLoaded', fetchF1Standings);
