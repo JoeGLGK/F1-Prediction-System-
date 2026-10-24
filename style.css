@@ -2201,9 +2201,9 @@ body {
   align-items: flex-end;
 }
 
-/* 3. ชื่อหลัก F1 PREDICTOR */
+/* 3. ชื่อหลัก F1 PREDICTOR (ปรับขนาดให้เล็กลง) */
 .brand-title-hud {
-  font-size: 1.4rem;
+  font-size: 1.15rem; /* ลดขนาดคำว่า PREDICTOR ลง (เดิม 1.4rem) */
   font-weight: 900;
   color: #ffffff;
   letter-spacing: 1px;
@@ -2213,12 +2213,11 @@ body {
 .f1-badge-hud {
   background-color: #e10600;
   color: #ffffff;
-  padding: 1px 6px;
+  padding: 1px 4px; /* ลดความกว้างซ้าย-ขวาของป้ายแดงลง */
   border-radius: 3px;
-  margin-right: 6px;
-  font-size: 0.9em;
+  margin-right: 5px; /* ลดระยะห่างระหว่างป้ายกับข้อความนิดหน่อย */
+  font-size: 0.8em; /* ลดขนาดอักษร F1 ลง (เดิม 0.9em) */
 }
-
 /* 4. จุดไฟบอกสถานะสีแดงกะพริบ (Live Indicator) */
 .live-dot {
   display: inline-block;
