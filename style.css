@@ -1931,10 +1931,14 @@ body {
   text-transform: uppercase;
   white-space: nowrap;
 }
+/* --- เปลี่ยนเส้นต่อท้ายหัวข้อเป็นสีแดง F1 --- */
 .archive-scifi-line {
-  flex: 1;
-  height: 1px;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.2), transparent);
+  flex-grow: 1;
+  height: 2px;
+  margin-left: 12px;
+  /* ไล่สีแดง F1 (#e10600) จากซ้ายแล้วค่อยๆ จางหายไปทางขวา */
+  background: linear-gradient(90deg, #e10600 0%, rgba(225, 6, 0, 0.4) 50%, transparent 100%) !important;
+  box-shadow: 0 0 8px rgba(225, 6, 0, 0.5); /* เพิ่มแสงเรืองสีแดงจางๆ ให้เข้ากับโทน HUD */
 }
 
 /* 3. กรอบภาพ Cinematic Full-Bleed (ไร้กรอบซ้อนกรอบ) */
