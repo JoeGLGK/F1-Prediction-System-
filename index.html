@@ -34,28 +34,27 @@
   </div>
 
   <div class="container" style="max-width: 540px;">
-    <!-- รูปปกสไตล์ Cinematic Card (มีขอบมนและลบขีดแดงซ้ำซ้อน) -->
+   <!-- รูปปกสไตล์ Broadcast HUD พร้อมไฟ Live และปุ่ม System Badge -->
     <div class="hero-banner-hud mb-3">
-      <img src="https://lh3.googleusercontent.com/d/1S5L95gn7qm9VsOmGQqeNk-xfldaUkKB5" alt="F1 Racing" class="hero-img-hud">
+      <img src="https://lh3.googleusercontent.com/d/1NomsRDdQu7ST2uJL2PET9MIvRrU50XB4" alt="F1 Racing" class="hero-img-hud">
       
       <div class="hero-overlay-hud">
-        <!-- เพิ่ม px-3 pb-3 ให้กลุ่มข้อความขยับเข้ามาจากขอบอีกนิด -->
         <div class="d-flex justify-content-between align-items-end w-100 px-3 pb-3">
           
           <div class="d-flex flex-column" onclick="registerSecretClick()" title="Secret Admin Gateway" style="cursor: pointer;">
-            <!-- โลโก้ F1 PREDICTOR เพียวๆ ไม่มีขีดแดงนำหน้า -->
+            <!-- โลโก้หลัก F1 PREDICTOR -->
             <div class="d-flex align-items-center mb-1">
               <div class="brand-title-hud f1-font"><span class="f1-badge-hud">F1</span> PREDICTOR</div>
             </div>
-            <!-- ข้อความรองพร้อมจุดไฟกะพริบ Live (ขยับให้ตรงกับตัว F) -->
-            <div class="d-flex align-items-center ps-1">
-              <span class="live-dot me-2"></span>
+            <!-- ข้อความรองฟอนต์ดิจิทัล + จุดไฟสีแดงกะพริบ -->
+            <div class="d-flex align-items-center ps-1 mt-1">
+              <span class="live-dot"></span>
               <span class="hud-subtitle">2026 OFFICIAL FANTASY LEAGUE</span>
             </div>
           </div>
           
-          <!-- ปุ่มลงทะเบียน System Badge -->
-          <button class="btn-sys-badge" onclick="openRegisterModal()">
+          <!-- ปุ่มลงทะเบียนสไตล์ System Badge (ป้ายสถานะระบบทีวี) -->
+          <button type="button" class="btn-sys-badge" onclick="openRegisterModal()">
             <i class="fa-solid fa-user"></i><span>ลงทะเบียน</span>
           </button>
           
