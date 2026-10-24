@@ -2116,3 +2116,51 @@ body {
   display: flex;
   flex-direction: column;
 }
+/* --- กรอบช่องว่างแบบ Telemetry HUD --- */
+.slot-empty-state {
+  border: 1px dashed rgba(255, 255, 255, 0.25); /* กรอบเส้นประสีเทาขุ่น */
+  background: rgba(15, 15, 20, 0.6); /* พื้นหลังดำโปร่งแสง */
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 85px; /* ล็อกความสูงให้เท่าการ์ดปกติ */
+  width: 100%;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+/* เอฟเฟกต์เมื่อเอาเมาส์ชี้หรือแตะ */
+.driver-slot-card:hover .slot-empty-state {
+  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(25, 25, 30, 0.8);
+}
+
+/* --- ไอคอนเป้าเล็ง (Crosshairs) --- */
+.empty-icon {
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.2);
+  margin-bottom: 8px;
+}
+
+/* --- ข้อความ AWAITING INPUT ฟอนต์ดิจิทัล --- */
+.telemetry-await {
+  font-family: 'Share Tech Mono', monospace; /* ใช้ฟอนต์ดิจิทัล */
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 1px;
+}
+
+/* --- เซอร์เซอร์กะพริบ (Blinking Cursor) --- */
+.blink-cursor {
+  display: inline-block;
+  margin-left: 2px;
+  width: 6px;
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
