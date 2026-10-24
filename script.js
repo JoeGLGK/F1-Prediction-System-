@@ -1309,50 +1309,51 @@ function refreshRaceCenter() {
     showToast('Error: ' + err, 'error'); 
   });
 }
+// ==========================================
+// ฟังก์ชันสลับหน้าตาราง (รองรับ 3 แท็บ)
+// ==========================================
 function switchStandings(type) {
-  const userView = document.getElementById('user-standings-view');
-  const driverView = document.getElementById('driver-standings-view');
-  const btnUser = document.getElementById('btn-user-standings');
-  const btnDriver = document.getElementById('btn-driver-standings');
+  const views = {
+    'user': document.getElementById('user-standings-view'),
+    'driver': document.getElementById('driver-standings-view'),
+    'team': document.getElementById('team-standings-view')
+  };
+  const btns = {
+    'user': document.getElementById('btn-user-standings'),
+    'driver': document.getElementById('btn-driver-standings'),
+    'team': document.getElementById('btn-team-standings')
+  };
 
-  if (type === 'user') {
-    userView.classList.remove('d-none');
-    driverView.classList.add('d-none');
-    btnUser.classList.add('active');
-    btnDriver.classList.remove('active');
-  } else {
-    userView.classList.add('d-none');
-    driverView.classList.remove('d-none');
-    btnUser.classList.remove('active');
-    btnDriver.classList.add('active');
-  }
+  // ซ่อนทุกหน้าและเอา active ออกจากทุกปุ่ม
+  Object.keys(views).forEach(key => {
+    if (views[key]) views[key].classList.add('d-none');
+    if (btns[key]) btns[key].classList.remove('active');
+  });
+
+  // แสดงหน้าที่เลือกและไฮไลต์ปุ่ม
+  if (views[type]) views[type].classList.remove('d-none');
+  if (btns[type]) btns[type].classList.add('active');
 }
-/* ==========================================
-   ระบบดึงคะแนนนักแข่ง F1 อัตโนมัติ (Fetch API)
-   ========================================== */
 
+// ==========================================
+// ระบบดึงคะแนนนักแข่ง F1 อัตโนมัติ (Fetch API)
+// ==========================================
 async function fetchF1Standings() {
   try {
-    // 1. ดึงข้อมูลจาก API (ใช้ current เพื่อดึงข้อมูลปีปัจจุบันเสมอ)
     const response = await fetch('https://api.jolpi.ca/ergast/f1/current/driverStandings.json');
     const data = await response.json();
-    
-    // 2. เจาะเข้าถึงอาร์เรย์รายการนักแข่งและคะแนน
     const standings = data.MRData.StandingsTable.StandingsLists[0].DriverStandings;
     
-    // 3. ดึงแถวตารางนักแข่งทั้งหมดบนเว็บเรามาเตรียมไว้
+    // ดึงเฉพาะแถวนักแข่ง (ป้องกันการสับสนกับแถวของทีม)
     const container = document.querySelector('.f1-official-standings');
-    const rows = document.querySelectorAll('.f1-standings-row');
-    const rowsArray = Array.from(rows); // แปลงเป็น Array เพื่อให้จัดเรียงได้
+    const rows = document.querySelectorAll('#driver-standings-view .f1-standings-row');
+    const rowsArray = Array.from(rows);
 
-    // 4. วนลูปข้อมูลจาก API เพื่ออัปเดตตัวเลขบนเว็บ
     standings.forEach(driverData => {
-      // ดึงนามสกุลนักแข่งจาก API และทำให้อ่านง่าย (ลบสระ/วรรณยุกต์ เช่น Pérez -> perez)
       const apiFamilyName = driverData.Driver.familyName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
       const points = driverData.points;
       const position = driverData.position;
 
-      // ค้นหาแถวบนเว็บที่มีชื่อตรงกับ API
       const targetRow = rowsArray.find(row => {
         const nameEl = row.querySelector('.driver-name');
         if (!nameEl) return false;
@@ -1360,7 +1361,6 @@ async function fetchF1Standings() {
         return htmlName.includes(apiFamilyName);
       });
 
-      // ถ้าเจอชื่อตรงกัน ให้อัปเดตคะแนน อันดับ และบันทึกอันดับไว้จัดเรียง
       if (targetRow) {
         targetRow.querySelector('.col-pts').innerText = points;
         targetRow.querySelector('.col-pos').innerText = position;
@@ -1368,23 +1368,70 @@ async function fetchF1Standings() {
       }
     });
 
-    // 5. จัดเรียงแถว HTML ใหม่ตามอันดับ (1-22)
     rowsArray.sort((a, b) => {
       const posA = parseInt(a.getAttribute('data-position')) || 999;
       const posB = parseInt(b.getAttribute('data-position')) || 999;
       return posA - posB;
     });
 
-    // 6. นำแถวที่สลับตำแหน่งแล้ว ใส่กลับคืนเข้าไปในตาราง
-    rowsArray.forEach(row => row.remove()); // ล้างของเก่าออก
-    rowsArray.forEach(row => container.appendChild(row)); // ใส่ของใหม่ที่เรียงแล้วเข้าไปแทน
-
-    console.log("✅ อัปเดตตารางคะแนน F1 ล่าสุดเรียบร้อย");
-
+    rowsArray.forEach(row => row.remove());
+    rowsArray.forEach(row => container.appendChild(row));
+    console.log("✅ อัปเดตตารางคะแนนนักแข่ง F1 ล่าสุดเรียบร้อย");
   } catch (error) {
-    console.error('❌ เกิดข้อผิดพลาดในการดึงข้อมูล F1 API:', error);
+    console.error('❌ เกิดข้อผิดพลาดในการดึงข้อมูลนักแข่ง F1 API:', error);
   }
 }
 
+// ==========================================
+// ระบบดึงคะแนนทีม F1 อัตโนมัติ (Constructors)
+// ==========================================
+async function fetchF1TeamStandings() {
+  try {
+    const response = await fetch('https://api.jolpi.ca/ergast/f1/current/constructorStandings.json');
+    const data = await response.json();
+    const standings = data.MRData.StandingsTable.StandingsLists[0].ConstructorStandings;
+    
+    const container = document.querySelector('.f1-team-cards-container');
+    if (!container) return;
+    const rowsArray = Array.from(container.querySelectorAll('.team-card'));
+
+    standings.forEach(teamData => {
+      const apiTeamId = teamData.Constructor.constructorId.toLowerCase(); 
+      const points = teamData.points;
+      const position = teamData.position;
+
+      const targetRow = rowsArray.find(row => {
+        const nameEl = row.querySelector('.team-name');
+        if (!nameEl) return false;
+        const htmlName = nameEl.innerText.toLowerCase();
+        return htmlName.includes(apiTeamId) || apiTeamId.includes(htmlName.split(' ')[0]);
+      });
+
+      if (targetRow) {
+        targetRow.querySelector('.col-pts').innerText = points;
+        targetRow.querySelector('.col-pos').innerText = position;
+        targetRow.setAttribute('data-position', position);
+      }
+    });
+
+    rowsArray.sort((a, b) => {
+      const posA = parseInt(a.getAttribute('data-position')) || 999;
+      const posB = parseInt(b.getAttribute('data-position')) || 999;
+      return posA - posB;
+    });
+
+    rowsArray.forEach(row => row.remove());
+    rowsArray.forEach(row => container.appendChild(row));
+    console.log("✅ อัปเดตตารางคะแนนทีมเรียบร้อย");
+  } catch (error) {
+    console.error('❌ เกิดข้อผิดพลาดในการดึงข้อมูลคะแนนทีม:', error);
+  }
+}
+
+// ==========================================
 // สั่งให้ระบบดึงข้อมูลทันทีเมื่อเปิดหน้าเว็บ
-document.addEventListener('DOMContentLoaded', fetchF1Standings);
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+  fetchF1Standings();      // ดึงคะแนนนักแข่ง
+  fetchF1TeamStandings();  // ดึงคะแนนทีม
+});
