@@ -2168,44 +2168,37 @@ body {
   0%, 100% { opacity: 1; }
   50% { opacity: 0; }
 }
-/* --- 1. โครงสร้างปก (ไร้ขอบ ตัดขอบมนทิ้ง) --- */
+/* --- 1. โครงสร้างปก (นำขอบมนกลับมา เพื่อให้เข้ากับ Card อื่นๆ ในแอป) --- */
 .hero-banner-hud {
   position: relative;
   width: 100%;
-  height: 200px; /* ความสูงของรูปปก ปรับลด-เพิ่มได้ */
-  border-radius: 0; /* ตัดขอบมนทิ้งให้กลืนไปกับจอ */
-  overflow: hidden;
+  height: 210px; /* ต้นเหตุที่ทำให้กรอบเตี้ยกว่ารูป */
+  ...
 }
 
 .hero-img-hud {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: center 20%; /* ปรับจุดโฟกัสรูปให้อยู่ตรงกลางค่อนไปด้านบนนิดๆ */
+  object-fit: cover; /* ต้นเหตุที่ทำให้รูปถูกครอปและซูม */
+  object-position: center 20%; 
 }
 
-/* --- 2. Gradient เฟดภาพให้กลืนเป็นสีดำ (สีพื้นแอปคือ #0d0e12) --- */
+/* --- 2. Gradient เฟดภาพ --- */
 .hero-overlay-hud {
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 130px; /* ระยะความสูงของการไล่สี */
-  background: linear-gradient(to top, #0d0e12 5%, rgba(13, 14, 18, 0.7) 60%, transparent 100%);
+  height: 140px; 
+  /* เปลี่ยนสีเฟดให้ดำสนิทขึ้นเพื่อให้ข้อความเด่น */
+  background: linear-gradient(to top, rgba(13, 14, 18, 1) 0%, rgba(13, 14, 18, 0.8) 40%, transparent 100%);
   display: flex;
   align-items: flex-end;
 }
 
-/* --- 3. เส้นสมอสีแดง F1 (Anchor Line) --- */
-.hud-anchor-line {
-  width: 4px;
-  height: 22px;
-  background-color: #e10600;
-  margin-right: 8px;
-  box-shadow: 0 0 5px rgba(225, 6, 0, 0.5);
-}
+/* (ลบคลาส .hud-anchor-line ออกจาก CSS ได้เลยครับ ไม่ได้ใช้แล้ว) */
 
-/* --- 4. ชื่อแอป --- */
+/* --- 4. ชื่อแอป (คงเดิม) --- */
 .brand-title-hud {
   font-size: 1.45rem;
   font-weight: 900;
@@ -2219,59 +2212,6 @@ body {
   color: #fff;
   padding: 1px 5px;
   border-radius: 3px;
-  margin-right: 4px;
+  margin-right: 6px; /* เพิ่มระยะห่างจากคำว่า PREDICTOR นิดนึง */
   font-size: 0.9em;
-}
-
-/* --- 5. ฟอนต์ข้อความรองและจุดไฟ Live กะพริบ --- */
-.hud-subtitle {
-  font-family: 'Share Tech Mono', monospace; /* ใช้ฟอนต์ดิจิทัล */
-  font-size: 0.65rem;
-  color: rgba(255, 255, 255, 0.45);
-  letter-spacing: 1.5px;
-}
-
-.live-dot {
-  width: 5px;
-  height: 5px;
-  background-color: #e10600;
-  border-radius: 50%;
-  box-shadow: 0 0 6px #e10600;
-  animation: hudBlink 1.5s infinite ease-in-out;
-}
-
-@keyframes hudBlink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.15; }
-}
-
-/* --- 6. ปุ่มลงทะเบียน (System Badge) --- */
-.btn-sys-badge {
-  background: rgba(25, 28, 35, 0.6); /* พื้นหลังโปร่งแสง */
-  border: 1px solid rgba(255, 255, 255, 0.15); /* ขอบกระจกบางๆ */
-  backdrop-filter: blur(5px);
-  border-radius: 4px;
-  color: rgba(255, 255, 255, 0.7);
-  font-family: 'Kanit', sans-serif; /* หรือใช้ Titillium Web */
-  font-size: 0.65rem;
-  font-weight: 400;
-  padding: 4px 8px;
-  display: flex;
-  align-items: center;
-  transition: all 0.3s ease;
-  margin-bottom: 3px; /* ดันปุ่มให้ลอยเหนือขอบล่างนิดนึง */
-}
-
-.btn-sys-badge i {
-  font-size: 0.55rem;
-  color: rgba(255, 255, 255, 0.4); /* สีไอคอนคนให้ดูจางๆ */
-  border-right: 1px solid rgba(255, 255, 255, 0.15); /* เส้นคั่นไอคอนกับตัวหนังสือ */
-  padding-right: 5px;
-  margin-right: 5px;
-}
-
-.btn-sys-badge:hover, .btn-sys-badge:active {
-  background: rgba(45, 50, 60, 0.8);
-  color: #fff;
-  border-color: rgba(255, 255, 255, 0.3);
 }
