@@ -34,15 +34,31 @@
   </div>
 
   <div class="container" style="max-width: 540px;">
-    <div class="hero-banner">
-      <img src="https://lh3.googleusercontent.com/d/1NomsRDdQu7ST2uJL2PET9MIvRrU50XB4" alt="F1 Racing" class="hero-img">
-      <div class="hero-overlay">
-        <div class="d-flex justify-content-between align-items-end">
-          <div>
-            <div class="brand-title f1-font" onclick="registerSecretClick()" title="Secret Admin Gateway"><span class="brand-badge">F1</span> PREDICTOR</div>
-            <div class="small text-secondary fw-semibold">2026 OFFICIAL FANTASY LEAGUE</div>
+    <!-- รูปปกสไตล์ Broadcast HUD ไร้กรอบและเฟดดำด้านล่าง -->
+    <div class="hero-banner-hud mb-3">
+      <img src="https://lh3.googleusercontent.com/d/1NomsRDdQu7ST2uJL2PET9MIvRrU50XB4" alt="F1 Racing" class="hero-img-hud">
+      
+      <div class="hero-overlay-hud">
+        <div class="d-flex justify-content-between align-items-end w-100 px-2 pb-2">
+          
+          <div class="d-flex flex-column" onclick="registerSecretClick()" title="Secret Admin Gateway" style="cursor: pointer;">
+            <!-- ชื่อแอปพร้อมขีดแดง (Anchor Line) -->
+            <div class="d-flex align-items-center mb-1">
+              <div class="hud-anchor-line"></div>
+              <div class="brand-title-hud f1-font"><span class="f1-badge-hud">F1</span> PREDICTOR</div>
+            </div>
+            <!-- ข้อความรองพร้อมจุดไฟกะพริบ Live -->
+            <div class="d-flex align-items-center ps-2">
+              <span class="live-dot me-2"></span>
+              <span class="hud-subtitle">2026 OFFICIAL FANTASY LEAGUE</span>
+            </div>
           </div>
-          <button class="btn btn-sm btn-outline-light rounded-pill px-3 py-1" onclick="openRegisterModal()"><i class="fa-solid fa-user-plus me-1 text-danger"></i>ลงทะเบียน</button>
+          
+          <!-- ปุ่มลงทะเบียนสไตล์ System Badge -->
+          <button class="btn-sys-badge" onclick="openRegisterModal()">
+            <i class="fa-solid fa-user"></i><span>ลงทะเบียน</span>
+          </button>
+          
         </div>
       </div>
     </div>
