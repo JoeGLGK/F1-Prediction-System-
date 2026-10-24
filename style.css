@@ -2355,11 +2355,11 @@ body {
 
 /* --- 4. รูปนักแข่งและชื่อทีม --- */
 .driver-headshot {
-  width: 38px !important; /* ล็อกความกว้างรูป */
-  height: 38px !important; /* ล็อกความสูงรูป */
+  width: 52px !important; /* ล็อกความกว้างรูป */
+  height: 52px !important; /* ล็อกความสูงรูป */
   object-fit: cover;
   border-radius: 4px;
-  margin-right: 12px;
+  margin-right: 14px;
   background: transparent;
 }
 .driver-info {
