@@ -2383,3 +2383,79 @@ body {
   margin-left: 6px;
   opacity: 0.8;
 }
+.f1-team-cards-container {
+  gap: 10px;
+}
+.team-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 65px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--team-color) 45%, transparent) 0%, rgba(30, 30, 40, 1) 40%, rgba(20, 20, 28, 1) 100%);
+  padding: 0 16px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.team-card-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 2;
+  width: 35%;
+}
+.team-card-left .team-pos {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #fff;
+  min-width: 20px;
+}
+.team-card-left .team-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.team-card-center {
+  position: absolute;
+  left: 38%;
+  width: 45%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+.team-bg-logo {
+  position: absolute;
+  height: 130%;
+  right: -10px;
+  opacity: 0.1;
+  filter: grayscale(100%);
+  object-fit: contain;
+}
+.team-car-img {
+  position: relative;
+  width: 100%;
+  max-width: 140px;
+  object-fit: contain;
+  z-index: 2;
+}
+.team-card-right {
+  z-index: 2;
+  text-align: right;
+  width: 20%;
+}
+.team-card-right .team-pts {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #ffd700;
+}
+.team-card-right .pts-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #aaa;
+  margin-left: 2px;
+}
