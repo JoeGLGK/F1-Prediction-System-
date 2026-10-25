@@ -1646,8 +1646,17 @@ function switchStandings(type) {
   // แสดงหน้าที่เลือกและไฮไลต์ปุ่ม
   if (views[type]) views[type].classList.remove('d-none');
   if (btns[type]) btns[type].classList.add('active');
-}
 
+  // 👇 ควบคุมการแสดงผลกล่อง "ตรวจผลการแข่งขัน"
+  const checkCard = document.getElementById('checkResultCard');
+  if (checkCard) {
+    if (type === 'user') {
+      checkCard.style.display = 'block'; // แสดงเฉพาะแท็บ PREDICTOR LEAGUE
+    } else {
+      checkCard.style.display = 'none';  // ซ่อนเมื่อกดแท็บ F1 Drivers และ F1 Teams
+    }
+  }
+}
 // ==========================================
 // 1. ฟังก์ชันสร้างตารางนักแข่งและตารางทีมในหน้า Standings อัตโนมัติ
 // ==========================================
