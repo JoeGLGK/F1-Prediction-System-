@@ -1,157 +1,6 @@
-const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwZ_VB9I7ClOgDpd8bDkaY09CzipETJMeQPDK6Qk6JYVNPdgfXA6ZrmXDG8gYsJ9I6u/exec";
-
 // =========================================================
-// 1. OPTIMIZED API CALLER (ป้องกันการยิงซ้ำ + มีระบบ Timeout & Cache)
+// 3. APPLICATION UI & LOGIC (จัดการหน้าจอ, Modal, Timer, Events)
 // =========================================================
-const apiCache = new Map();
-const pendingRequests = new Map();
-
-async function callGAS(action, payload = {}, options = { useCache: false, ttl: 30000 }) {
-  const cacheKey = action + "_" + JSON.stringify(payload);
-
-  if (options.useCache && apiCache.has(cacheKey)) {
-    const cached = apiCache.get(cacheKey);
-    if (Date.now() - cached.timestamp < options.ttl) {
-      return cached.data;
-    }
-  }
-
-  if (pendingRequests.has(cacheKey)) {
-    return pendingRequests.get(cacheKey);
-  }
-
-  const fetchPromise = (async () => {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000);
-
-    try {
-      const response = await fetch(GAS_API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(Object.assign({ action: action }, payload)),
-        signal: controller.signal
-      });
-      clearTimeout(timeoutId);
-      const result = await response.json();
-
-      if (options.useCache) {
-        apiCache.set(cacheKey, { data: result, timestamp: Date.now() });
-      }
-      return result;
-    } finally {
-      clearTimeout(timeoutId);
-      pendingRequests.delete(cacheKey);
-    }
-  })();
-
-  pendingRequests.set(cacheKey, fetchPromise);
-  return fetchPromise;
-}
-
-function showToast(msg, type='success') { 
-  const c = document.getElementById('f1ToastContainer'); 
-  if(!c) return; 
-  const t = document.createElement('div'); 
-  t.className = 'f1-toast ' + type; 
-  t.innerHTML = (type==='success'?'✅':'⚠️') + ' <span>' + msg + '</span>'; 
-  c.appendChild(t); 
-  setTimeout(function() { t.remove(); }, 4700); 
-}
-
-function triggerHaptic() { 
-  if (navigator.vibrate) navigator.vibrate(40); 
-}
-
-const TEAM_LOGOS = { 
-  "Ferrari": "https://lh3.googleusercontent.com/d/1vSyLK4voiZIq9-ctG7X5aAkdPezha1xu", 
-  "Red Bull Racing": "https://lh3.googleusercontent.com/d/1pM-9Vo3HyaA-ZL5bjavA0D9nNYoClRAv", 
-  "McLaren": "https://lh3.googleusercontent.com/d/1EhsPjx5G3tVpXROG9x5Eos7xYXTIUKMf", 
-  "Mercedes": "https://lh3.googleusercontent.com/d/1i-5H1bNHXpX3Jt7ZciAP3gmV5QjtAwlF", 
-  "Aston Martin": "https://lh3.googleusercontent.com/d/1smqEEy8i7d1AbQmqVXR68hD1qP0Qwx1p", 
-  "Alpine": "https://lh3.googleusercontent.com/d/1CAPj3vwXe7cWOuxBPhOX-ciiJ8FlGqFG", 
-  "Williams": "https://lh3.googleusercontent.com/d/18mn901TW_w5SW4Fg5Ke0WBKgxyt-5ICN", 
-  "VCARB": "https://lh3.googleusercontent.com/d/1AfEAprJx9b4ivULrg41CCYiVUnBi6ps2", 
-  "Audi": "https://lh3.googleusercontent.com/d/1w0dvPdMVK2b09liK6G-XEt2LXu6S-Mt0", 
-  "Sauber": "https://lh3.googleusercontent.com/d/1w0dvPdMVK2b09liK6G-XEt2LXu6S-Mt0", 
-  "Haas": "https://lh3.googleusercontent.com/d/1i7aUDygqHB5Qf0ySyWIUSzy0F-YW8jHz", 
-  "Cadilac": "https://lh3.googleusercontent.com/d/1GIArchbZm5K7bmSNfpkGNi8bHae5G1w0",
-  "Cadillac": "https://lh3.googleusercontent.com/d/1GIArchbZm5K7bmSNfpkGNi8bHae5G1w0"
-};
-
-const TEAM_COLORS = { 
-  "Ferrari": "#e10600", 
-  "Red Bull Racing": "#3671c6", 
-  "McLaren": "#ff8000", 
-  "Mercedes": "#27f4d2", 
-  "Aston Martin": "#229971", 
-  "Alpine": "#ff87bc", 
-  "Williams": "#005aff", 
-  "VCARB": "#6692ff", 
-  "Audi": "#00e701", 
-  "Sauber": "#00e701", 
-  "Haas": "#ffffff", 
-  "Cadilac": "#ffd700",
-  "Cadillac": "#ffd700" 
-};
-
-const TEAM_CARS = {
-  "Ferrari": "https://lh3.googleusercontent.com/d/16fGNY2kTdnXIoDRjzkXmpbZwOn27xAAR",
-  "Red Bull Racing": "https://lh3.googleusercontent.com/d/1MUwr4Pi3TbBAKIYefrPpVcmfqdqfe-OW",
-  "McLaren": "https://lh3.googleusercontent.com/d/1ZFP_jPxbzfRLknkRWj_GhEHRbkBK-l6g",
-  "Mercedes": "https://lh3.googleusercontent.com/d/1y_4syJ21I8PbkQ5-O8VCnkKfNMO8_t0d",
-  "Aston Martin": "https://lh3.googleusercontent.com/d/17A9qzj-jYzgwDwxZxsUyhj3aZZr9XHSn",
-  "Alpine": "https://lh3.googleusercontent.com/d/1VB8NbkZMwYaQpXAskv98bSpaZ97zRR3b",
-  "Williams": "https://lh3.googleusercontent.com/d/1CyrgK3KDX9C__EYuUwr9o5Qj-_LRnaQh",
-  "VCARB": "https://lh3.googleusercontent.com/d/11EsP5GQrWqpBv68QWc3UPahhHuWydoMX",
-  "Audi": "https://lh3.googleusercontent.com/d/1lqDE-G4e6rTrFXybJi2BH2NwBrWUm8X3",
-  "Sauber": "https://lh3.googleusercontent.com/d/1lqDE-G4e6rTrFXybJi2BH2NwBrWUm8X3",
-  "Haas": "https://lh3.googleusercontent.com/d/1dNjNrpTi-BznASYs9cRjjQmnILOdfhxK",
-  "Cadilac": "https://lh3.googleusercontent.com/d/109l7yKIfGsfABg0R5sSh35yu3aq2DAwq",
-  "Cadillac": "https://lh3.googleusercontent.com/d/109l7yKIfGsfABg0R5sSh35yu3aq2DAwq"
-};
-
-const DEFAULT_DRIVER_IMG = "https://cdn-icons-png.flaticon.com/512/1995/1995470.png";
-
-const STANDINGS_TEAM_LOGOS = {
-  "Ferrari": "https://lh3.googleusercontent.com/d/1vSyLK4voiZIq9-ctG7X5aAkdPezha1xu",
-  "Red Bull Racing": "https://lh3.googleusercontent.com/d/1KC9EYSP6cPPF6ql5IJAsFV5o4ijtbUzb",
-  "McLaren": "https://lh3.googleusercontent.com/d/1EhsPjx5G3tVpXROG9x5Eos7xYXTIUKMf",
-  "Mercedes": "https://lh3.googleusercontent.com/d/1i-5H1bNHXpX3Jt7ZciAP3gmV5QjtAwlF",
-  "Aston Martin": "https://lh3.googleusercontent.com/d/1RGvvMhVcr0mT9YhAxp7eazZeiLK5QxRD",
-  "Alpine": "https://lh3.googleusercontent.com/d/1ZVcZBEVtLjtKeO6C8WPS40RKixY_AUtQ",
-  "Williams": "https://lh3.googleusercontent.com/d/18mn901TW_w5SW4Fg5Ke0WBKgxyt-5ICN",
-  "VCARB": "https://lh3.googleusercontent.com/d/1dkHpDK-mSffLW2KeYQLM2QrhT-l_sCM8",
-  "Audi": "https://lh3.googleusercontent.com/d/1w0dvPdMVK2b09liK6G-XEt2LXu6S-Mt0",
-  "Haas": "https://lh3.googleusercontent.com/d/1i7aUDygqHB5Qf0ySyWIUSzy0F-YW8jHz",
-  "Cadillac": "https://lh3.googleusercontent.com/d/1GIArchbZm5K7bmSNfpkGNi8bHae5G1w0"
-};
-
-const DRIVER_INFO = {
-  "Kimi Antonelli": { team: "Mercedes", standingsTeam: "Mercedes", color: "#27f4d2", img: "https://lh3.googleusercontent.com/d/1XueMkRyOLH6YggOKxiU__FNxc1oxOhO7", headshot: "https://lh3.googleusercontent.com/d/1JPd4IiYhF5Wf_Ul75iPhe9zPw2v8teQN" },
-  "George Russell": { team: "Mercedes", standingsTeam: "Mercedes", color: "#27f4d2", img: "https://lh3.googleusercontent.com/d/1wineMhWS2aqA68eErrDxvikfopeorSKD", headshot: "https://lh3.googleusercontent.com/d/1cogOB1tyuiXSx7wzLIopjEDy9OGOqai-" },
-  "Max Verstappen": { team: "Red Bull Racing", standingsTeam: "Red Bull Racing", color: "#3671c6", img: "https://lh3.googleusercontent.com/d/1FIH6Hjzdr9KKxf5yYYgpFJzX2GJmp5MZ", headshot: "https://lh3.googleusercontent.com/d/1XUMoxEkMqVjcgkZJ_WICLlGzx4xD-Ti_" },
-  "Isack Hadjar": { team: "Red Bull Racing", standingsTeam: "Red Bull Racing", color: "#3671c6", img: "https://lh3.googleusercontent.com/d/1eR94vK-62qi7bDucBnuvHNicUcve06SA", headshot: "https://lh3.googleusercontent.com/d/1O8gJ_jYfKRjeksWwkk-70XaXelhucVzb" },
-  "Lando Norris": { team: "McLaren", standingsTeam: "McLaren", color: "#ff8000", img: "https://lh3.googleusercontent.com/d/15gZwBnLjfhkbT2jwoXq0oe53DoinzLUR", headshot: "https://lh3.googleusercontent.com/d/1V-8HQn6Pfv2-V8MOi3X1ncN3eS_sGfPX" },
-  "Oscar Piastri": { team: "McLaren", standingsTeam: "McLaren", color: "#ff8000", img: "https://lh3.googleusercontent.com/d/1LZaV4wfjgXtaN35WgxwuzZiE2HdCfFbs", headshot: "https://lh3.googleusercontent.com/d/1WvMxJEp2wRPz2ZulvHOdQ2k7QW4Gm0Yj" },
-  "Lewis Hamilton": { team: "Ferrari", standingsTeam: "Ferrari", color: "#e10600", img: "https://lh3.googleusercontent.com/d/1lZb4XYfCoxHyZnaqkaUoUbET1z8W6pKz", headshot: "https://lh3.googleusercontent.com/d/1f9OyBz8nBeNPuaF1KLdrGlUuUybiHFNx" },
-  "Charles Leclerc": { team: "Ferrari", standingsTeam: "Ferrari", color: "#e10600", img: "https://lh3.googleusercontent.com/d/1E1xYy5TP1ei7CqBNFsU-MI0Evr3w2sK4", headshot: "https://lh3.googleusercontent.com/d/1hynvMyKMqqBkGqq96sCTj0yPx_3nAJd7" },
-  "Liam Lawson": { team: "VCARB", standingsTeam: "VCARB", color: "#6692ff", img: "https://lh3.googleusercontent.com/d/11RZ7qdc_blnLI4QmWTFOq2b-ontSKjnR", headshot: "https://lh3.googleusercontent.com/d/1exC0YVYungiAqMJ0AnCP9d1XeWkIsgXl" },
-  "Arvid Lindblad": { team: "VCARB", standingsTeam: "VCARB", color: "#6692ff", img: "https://lh3.googleusercontent.com/d/1SMM0ioYV1iuDY3IdjeILDHcyrz585RLx", headshot: "https://lh3.googleusercontent.com/d/1SNOnd7pux2M-jB4-puulcXwpZbh3vxew" },
-  "Nico Hülkenberg": { team: "Audi", standingsTeam: "Sauber", color: "#00e701", img: "https://lh3.googleusercontent.com/d/1gAGhigxnQpFXRJzmomddT1pdQgxrflJO", headshot: "https://lh3.googleusercontent.com/d/1gilFs7cWCw4gZNILUPwqCnYZ-ZA1dQuJ" },
-  "Gabriel Bortoleto": { team: "Audi", standingsTeam: "Sauber", color: "#00e701", img: "https://lh3.googleusercontent.com/d/1rQQ2uxUgKw1YMqLFndjIAhNHvbTC31qI", headshot: "https://lh3.googleusercontent.com/d/1jlp92jslcQEXfc5XivFmjAZMY7iKC4ju" },
-  "Oliver Bearman": { team: "Haas", standingsTeam: "Haas", color: "#ffffff", img: "https://lh3.googleusercontent.com/d/1y32Nd5CGiQQL9LVXW2Yyg-uBGCdE62QL", headshot: "https://lh3.googleusercontent.com/d/1dFbFnhW82fxap4gYVWsExd6xZmo-axmk" },
-  "Esteban Ocon": { team: "Haas", standingsTeam: "Haas", color: "#ffffff", img: "https://lh3.googleusercontent.com/d/1dIYK5u651tz4uFLXElJY7RijV4EKRBGd", headshot: "https://lh3.googleusercontent.com/d/1G0ZXdtwaFsl7YB2abkFPbtFS7YTJ2R44" },
-  "Carlos Sainz": { team: "Williams", standingsTeam: "Williams", color: "#005aff", img: "https://lh3.googleusercontent.com/d/1xpTy6YAwaPPA1NOHQdg3SttuEi0T1TsW", headshot: "https://lh3.googleusercontent.com/d/11OnFZVfgKQuIn-iiTOy8gn84ef8HEcP2" },
-  "Alexander Albon": { team: "Williams", standingsTeam: "Williams", color: "#005aff", img: "https://lh3.googleusercontent.com/d/1LnzHzqrhNAL1l3w7mVtr-iKTD4Rk06gw", headshot: "https://lh3.googleusercontent.com/d/11hihz-EOy8lWhLeYC0_1gJ8MZfRHiyHa" },
-  "Pierre Gasly": { team: "Alpine", standingsTeam: "Alpine", color: "#ff87bc", img: "https://lh3.googleusercontent.com/d/1maqM4IhIgFkmRQ_KelrWPQraNPO_qu5_", headshot: "https://lh3.googleusercontent.com/d/15agHTWnibHBmPgyoyodzfEFc4xbBFA7r" },
-  "Franco Colapinto": { team: "Alpine", standingsTeam: "Alpine", color: "#ff87bc", img: "https://lh3.googleusercontent.com/d/1Fnl0mVNwXZZC41s0SQU9AqAwQkD1f198", headshot: "https://lh3.googleusercontent.com/d/1HixFZqNBYmS933gXxneOInA-Be9daQ1K" },
-  "Fernando Alonso": { team: "Aston Martin", standingsTeam: "Aston Martin", color: "#229971", img: "https://lh3.googleusercontent.com/d/1b9pCYfexGdOmo8fLfDTiH4spH5lXJrLU", headshot: "https://lh3.googleusercontent.com/d/1s551SXjYkq2g0E2OWCN5TyUGq_-PPc-L" },
-  "Lance Stroll": { team: "Aston Martin", standingsTeam: "Aston Martin", color: "#229971", img: "https://lh3.googleusercontent.com/d/1VCHnoTG4I8LiJL6AxBMnsXGJU4jpLbAi", headshot: "https://lh3.googleusercontent.com/d/1cIob029sx-tSOm9IGLFWwzc0sqzHxOrB" },
-  "Sergio Pérez": { team: "Cadillac", standingsTeam: "Cadillac", color: "#ffd700", img: "https://lh3.googleusercontent.com/d/1DAVP6b75_8Y0v4LEfCKnXlNxnKhOgHBh", headshot: "https://lh3.googleusercontent.com/d/1U14btMCB4fF9UamzLjbGUHmFCfs-3jSp" },
-  "Valtteri Bottas": { team: "Cadillac", standingsTeam: "Cadillac", color: "#ffd700", img: "https://lh3.googleusercontent.com/d/1j_esvm_OfYqmfPB4lsKvbfPZUMO3FvCq", headshot: "https://lh3.googleusercontent.com/d/106vLZiJ1hTJ1bc8wWOqTAYVB4D4RT7jk" }
-};
-
-const DRIVERS = Object.keys(DRIVER_INFO);
 
 let secretClicks = 0; 
 let clickTimer = null; 
@@ -171,6 +20,21 @@ let globalRaces = [];
 let lastPendingList = []; 
 let currentActiveMedia = null;
 let isRefreshing = false;
+let currentArchiveMode = 'quali2025';
+
+function showToast(msg, type='success') { 
+  const c = document.getElementById('f1ToastContainer'); 
+  if(!c) return; 
+  const t = document.createElement('div'); 
+  t.className = 'f1-toast ' + type; 
+  t.innerHTML = (type==='success'?'✅':'⚠️') + ' <span>' + msg + '</span>'; 
+  c.appendChild(t); 
+  setTimeout(function() { t.remove(); }, 4700); 
+}
+
+function triggerHaptic() { 
+  if (navigator.vibrate) navigator.vibrate(40); 
+}
 
 window.onload = function() {
   adminModalInstance = new bootstrap.Modal(document.getElementById('adminModal')); 
@@ -371,9 +235,12 @@ function openMediaPreview2025(type) {
   imagePreviewModalInstance.show(); 
 }
 
-document.getElementById('imagePreviewModal').addEventListener('hidden.bs.modal', function () { 
-  document.getElementById('previewImageSrc').src = ''; 
-});
+const imgPreviewEl = document.getElementById('imagePreviewModal');
+if (imgPreviewEl) {
+  imgPreviewEl.addEventListener('hidden.bs.modal', function () { 
+    document.getElementById('previewImageSrc').src = ''; 
+  });
+}
 
 function previewTrackImageById(imgId) {
   triggerHaptic();
@@ -835,8 +702,6 @@ function onCenterRaceChange() {
   }
 }
 
-let currentArchiveMode = 'quali2025';
-
 function on2025RaceChange() {
   const raceId = document.getElementById('sel2025Race').value; 
   const currentRace = globalRaces.find(function(r) { return r.id === raceId; }); 
@@ -913,7 +778,7 @@ function openActiveArchivePreview() {
 }
 
 // =========================================================
-// 2. ACCURATE PIT-WALL TIMER (แม่นยำสูง ไม่รีเรนเดอร์ DOM ซ้ำ)
+// ACCURATE PIT-WALL TIMER
 // =========================================================
 function parseThaiDeadline(rawDl) {
   if (!rawDl) return null;
@@ -994,14 +859,8 @@ function startCountdown() {
 }
 
 // =========================================================
-// 3. ADVANCED SCORING ENGINE (ระบบตรวจคะแนนแบบละเอียด)
+// ADVANCED SCORING ENGINE
 // =========================================================
-const SCORING_RULES = {
-  EXACT_POS: 2,        
-  FASTEST_LAP: 1,      
-  IN_TOP4_WRONG_POS: 0 
-};
-
 function calculateDetailedScore(actual, pred, isSprint = false) {
   if (!actual || !pred) return { total: 0, details: {} };
 
@@ -1516,92 +1375,6 @@ function initOfficialStandingsDOM() {
           </div>
         </div>`;
     }).join('');
-  }
-}
-
-async function fetchF1Standings() {
-  try {
-    const response = await fetch('https://api.jolpi.ca/ergast/f1/current/driverStandings.json');
-    const data = await response.json();
-    const standings = data.MRData.StandingsTable.StandingsLists[0].DriverStandings;
-    
-    const container = document.getElementById('driverStandingsList') || document.querySelector('.f1-official-standings');
-    if (!container) return;
-    const rows = container.querySelectorAll('.f1-standings-row');
-    const rowsArray = Array.from(rows);
-
-    standings.forEach(driverData => {
-      const apiFamilyName = driverData.Driver.familyName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-      const points = driverData.points;
-      const position = driverData.position;
-
-      const targetRow = rowsArray.find(row => {
-        const nameEl = row.querySelector('.driver-name');
-        if (!nameEl) return false;
-        const htmlName = nameEl.innerText.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        return htmlName.includes(apiFamilyName);
-      });
-
-      if (targetRow) {
-        targetRow.querySelector('.col-pts').innerText = points;
-        targetRow.querySelector('.col-pos').innerText = position;
-        targetRow.setAttribute('data-position', position);
-      }
-    });
-
-    rowsArray.sort((a, b) => {
-      const posA = parseInt(a.getAttribute('data-position')) || 999;
-      const posB = parseInt(b.getAttribute('data-position')) || 999;
-      return posA - posB;
-    });
-
-    rowsArray.forEach(row => row.remove());
-    rowsArray.forEach(row => container.appendChild(row));
-  } catch (error) {
-    console.error('❌ เกิดข้อผิดพลาดในการดึงข้อมูลนักแข่ง F1 API:', error);
-  }
-}
-
-async function fetchF1TeamStandings() {
-  try {
-    const response = await fetch('https://api.jolpi.ca/ergast/f1/current/constructorStandings.json');
-    const data = await response.json();
-    const standings = data.MRData.StandingsTable.StandingsLists[0].ConstructorStandings;
-    
-    const container = document.getElementById('teamStandingsList') || document.querySelector('.f1-team-cards-container');
-    if (!container) return;
-    const rowsArray = Array.from(container.querySelectorAll('.team-card'));
-
-    standings.forEach(teamData => {
-      const apiTeamId = teamData.Constructor.constructorId.toLowerCase(); 
-      const points = teamData.points;
-      const position = teamData.position;
-
-      const targetRow = rowsArray.find(row => {
-        const nameEl = row.querySelector('.team-name');
-        if (!nameEl) return false;
-        const htmlName = nameEl.innerText.toLowerCase();
-        if (apiTeamId.includes('sauber') && htmlName === 'audi') return true;
-        return htmlName.includes(apiTeamId) || apiTeamId.includes(htmlName.split(' ')[0]);
-      });
-
-      if (targetRow) {
-        targetRow.querySelector('.col-pts').innerText = points;
-        targetRow.querySelector('.col-pos').innerText = position;
-        targetRow.setAttribute('data-position', position);
-      }
-    });
-
-    rowsArray.sort((a, b) => {
-      const posA = parseInt(a.getAttribute('data-position')) || 999;
-      const posB = parseInt(b.getAttribute('data-position')) || 999;
-      return posA - posB;
-    });
-
-    rowsArray.forEach(row => row.remove());
-    rowsArray.forEach(row => container.appendChild(row));
-  } catch (error) {
-    console.error('❌ เกิดข้อผิดพลาดในการดึงข้อมูลคะแนนทีม:', error);
   }
 }
 
