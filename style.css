@@ -2459,3 +2459,86 @@ body {
   color: #aaa;
   margin-left: 2px;
 }
+/* =========================================================
+   UX/UI UPGRADE: PIT WALL DYNAMIC TIMER & SCORE BADGES
+   ========================================================= */
+
+/* เปลี่ยนสีไฟสถานะบนกล่อง Countdown ตามความเร่งด่วน */
+.countdown-box.status-warning {
+  border-top-color: #f59e0b !important;
+}
+.countdown-box.status-warning::before {
+  content: 'PIT LANE CLOSING SOON';
+  color: #f59e0b;
+}
+.countdown-box.status-warning::after {
+  background: #f59e0b;
+  box-shadow: 0 0 8px #f59e0b;
+  animation: blink 0.6s infinite;
+}
+
+.countdown-box.status-critical {
+  border-top-color: #e10600 !important;
+  box-shadow: inset 0 0 25px rgba(225, 6, 0, 0.25), 0 5px 15px rgba(0,0,0,0.6) !important;
+}
+.countdown-box.status-critical::before {
+  content: 'FINAL CALL - DEPLOY NOW';
+  color: #ff3838;
+}
+.countdown-box.status-critical::after {
+  background: #ff3838;
+  box-shadow: 0 0 12px #ff3838;
+  animation: blink 0.3s infinite;
+}
+
+.countdown-box.status-closed {
+  border-top-color: #475569 !important;
+}
+.countdown-box.status-closed::before {
+  content: 'PARC FERMÉ - SESSION LOCKED';
+  color: #64748b;
+}
+.countdown-box.status-closed::after {
+  background: #ef4444;
+  box-shadow: none;
+  animation: none;
+}
+
+/* เอฟเฟกต์ตัวเลขกระตุกเบาๆ เมื่อวินาทีเปลี่ยน */
+.timer-num {
+  transition: color 0.2s ease, transform 0.1s ease;
+  display: inline-block;
+  min-width: 42px;
+}
+
+/* ป้ายกำกับคะแนนแบบละเอียดในหน้า Breakdown */
+.score-pill-exact {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+}
+.score-pill-partial {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+}
+.score-pill-miss {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+}
