@@ -1153,7 +1153,7 @@ function showPlayerStats(playerName) {
     `;
     body.innerHTML = html;
 
-    // การวาดกราฟผ่าน Chart.js (แสดงคะแนนรายสนาม พร้อม Tooltip คะแนนรวมสะสม)
+    // การวาดกราฟผ่าน Chart.js (แสดงคะแนนรายสนาม พร้อมป้ายโชว์คะแนนรวมสะสม)
     if (res.history && res.history.length > 0) {
       if (playerChartInstance) {
         playerChartInstance.destroy();
@@ -1163,15 +1163,15 @@ function showPlayerStats(playerName) {
       
       let labels = [];
       let dataPoints = [];
-      let cumulativeScores = []; // อาเรย์สำหรับเก็บคะแนนสะสมรวม
+      let cumulativeScores = []; 
       let runningTotal = 0;
 
       res.history.forEach((h, i) => {
         labels.push(`R${i+1}`);
         const scoreNum = (h.score === '-' || h.score === '') ? 0 : Number(h.score);
         runningTotal += scoreNum;
-        dataPoints.push(scoreNum);          // คะแนนเฉพาะสนามนั้น (ใช้วาดเส้นกราฟวิ่งขึ้น-ลง)
-        cumulativeScores.push(runningTotal); // คะแนนสะสมรวมถึงสนามนั้น
+        dataPoints.push(scoreNum);          
+        cumulativeScores.push(runningTotal); 
       });
 
       let gradient = ctx.createLinearGradient(0, 0, 0, 200);
@@ -1213,14 +1213,13 @@ function showPlayerStats(playerName) {
               callbacks: {
                 title: function(context) {
                   const idx = context[0].dataIndex;
-                  return res.history[idx].race; // ชื่อสนามเต็ม
+                  return res.history[idx].race;
                 },
                 label: function(context) {
                   const idx = context.dataIndex;
                   const ptsEarned = res.history[idx].score;
                   const totalSoFar = cumulativeScores[idx];
                   
-                  // แสดงทั้งคะแนนสนามนั้นและคะแนนสะสมรวมในป้ายเดียวกัน
                   return [
                     `Race Score: +${ptsEarned} PTS`,
                     `Total Score: ${totalSoFar} PTS`
@@ -1250,6 +1249,9 @@ function showPlayerStats(playerName) {
     } else {
       document.getElementById('playerTelemetryChart').parentElement.innerHTML = `<div class="text-center text-muted small py-5"><i class="fa-solid fa-satellite-dish mb-2 fs-4"></i><br>NO TELEMETRY DATA</div>`;
     }
+  });
+}
+
 function handleAdminDeadline() { 
   const pin = document.getElementById('adminPin').value, raceId = document.getElementById('adRaceDead').value, rawDt = document.getElementById('adNewDead').value; 
   if (!pin || !raceId) { showToast('กรุณากรอก Admin PIN', 'error'); return; } 
