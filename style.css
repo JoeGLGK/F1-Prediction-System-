@@ -2676,3 +2676,139 @@ body {
   color: #cbd5e1;
   font-weight: 600;
 }
+/* =========================================================
+   UX/UI UPGRADE: PLAYER CAREER STATS (SUPER LICENSE)
+   ========================================================= */
+
+.stats-super-license {
+  position: relative;
+  width: 100%;
+}
+
+.stats-super-license::before {
+  content: '';
+  position: absolute;
+  top: -20px; left: 50%;
+  transform: translateX(-50%);
+  width: 120%; height: 150px;
+  background: radial-gradient(circle at top, var(--team-color) 0%, transparent 60%);
+  opacity: 0.15;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.sl-header {
+  position: relative;
+  z-index: 1;
+  background: linear-gradient(135deg, rgba(20, 22, 28, 0.8) 0%, rgba(10, 12, 16, 0.95) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-left: 4px solid var(--team-color);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+}
+
+.sl-avatar {
+  width: 48px;
+  height: 48px;
+  background: #000;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.05);
+}
+
+.sl-avatar img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+}
+
+.sl-info {
+  flex-grow: 1;
+}
+
+.sl-name {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.sl-team {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.sl-rank {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.sl-rank-lbl {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.55rem;
+  color: #94a3b8;
+  letter-spacing: 1px;
+}
+
+.sl-rank-val {
+  font-family: 'Titillium Web', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: #fff;
+  line-height: 1;
+  text-shadow: 0 2px 8px rgba(255, 255, 255, 0.2);
+}
+
+/* Telemetry Bento Box */
+.telemetry-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.telemetry-widget {
+  background: #0a0a0e;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.border-yellow { border-left: 3px solid #ffc107; }
+.border-blue { border-left: 3px solid #0dcaf0; }
+.border-purple { border-left: 3px solid #a855f7; }
+
+.widget-head {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-weight: 600;
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.widget-value {
+  font-family: 'Titillium Web', sans-serif;
+  font-weight: 800;
+  line-height: 1;
+}
