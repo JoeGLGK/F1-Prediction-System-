@@ -1092,11 +1092,9 @@ function showPlayerStats(playerName) {
   triggerHaptic(); 
   statsModalInstance.show(); 
   const body = document.getElementById('statsBody');
-  // แอนิเมชันโหลดข้อมูลสไตล์ F1
-  body.innerHTML = '<div class="text-center py-5"><div class="loader-spinner mx-auto"></div><div class="text-secondary small mt-3 f1-font" style="letter-spacing:1px;">GATHERING TELEMETRY...</div></div>';
+  body.innerHTML = '<div class="text-center py-5"><i class="fa-solid fa-spinner fa-spin text-danger fs-1 mb-3"></i><div class="text-secondary small f1-font" style="letter-spacing:1px;">GATHERING TELEMETRY...</div></div>';
 
   callGAS("getPlayerStats", { playerName: playerName }).then(function(res) {
-    // ค้นหาทีมของผู้เล่นจาก Leaderboard เพื่อเอาสีและโลโก้มาตกแต่ง
     let pTeam = "F1";
     const match = globalLeaderboard.find(r => String(r[1]).toLowerCase() === playerName.toLowerCase());
     if (match) pTeam = match[4] || "F1";
@@ -1105,10 +1103,10 @@ function showPlayerStats(playerName) {
     const logoUrl = TEAM_LOGOS[pTeam] ? getDriveDirectLink(TEAM_LOGOS[pTeam]) : "";
 
     let html = `
-      <div class="stats-super-license" style="--team-color: ${teamColor};">
+      <div class="stats-super-license" style="--team-color: ${teamColor}; text-align: left;">
         
-        <!-- 1. ส่วนหัว: บัตรนักแข่ง (Super License Header) -->
-        <div class="sl-header mb-4">
+        <!-- 1. Super License Header -->
+        <div class="sl-header mb-3">
           <div class="sl-avatar">
             ${logoUrl ? `<img src="${logoUrl}" alt="Team">` : `<i class="fa-solid fa-user-astronaut text-secondary"></i>`}
           </div>
@@ -1122,55 +1120,120 @@ function showPlayerStats(playerName) {
           </div>
         </div>
 
-        <!-- 2. ส่วนข้อมูลวิเคราะห์ (Telemetry Bento Box) -->
-        <div class="telemetry-grid mb-4">
+        <!-- 2. Telemetry Bento Box -->
+        <div class="telemetry-grid mb-3">
           <div class="telemetry-widget border-yellow">
             <div class="widget-head"><i class="fa-solid fa-trophy text-warning"></i> <span>TOTAL SCORE</span></div>
-            <div class="widget-value text-warning" style="font-size:1.4rem;">${res.totalScore} <span class="fs-6 text-secondary">PTS</span></div>
+            <div class="widget-value text-warning fs-3">${res.totalScore} <span class="fs-6 text-secondary">PTS</span></div>
           </div>
           <div class="telemetry-widget border-blue">
             <div class="widget-head"><i class="fa-solid fa-crosshairs text-info"></i> <span>EXACT HITS</span></div>
-            <div class="widget-value text-info" style="font-size:1.4rem;">${res.exactHits} <span class="fs-6 text-secondary">Times</span></div>
+            <div class="widget-value text-info fs-3">${res.exactHits} <span class="fs-6 text-secondary">Times</span></div>
           </div>
-          <div class="telemetry-widget border-purple" style="grid-column: span 2; min-height: 70px;">
+          <div class="telemetry-widget border-purple" style="grid-column: span 2;">
             <div class="widget-head"><i class="fa-solid fa-bolt text-purple"></i> <span>FASTEST LAP PREDICTIONS</span></div>
-            <div class="widget-value text-purple fs-5">${res.flHits} <span class="fs-6 text-secondary">Successful Picks</span></div>
+            <div class="widget-value text-purple fs-4">${res.flHits} <span class="fs-6 text-secondary">Successful Picks</span></div>
           </div>
         </div>
 
-        <!-- 3. ส่วนประวัติคะแนน (Season History Timeline) -->
-        <div class="d-flex align-items-center mb-3">
-          <i class="fa-solid fa-route text-danger me-2"></i>
-          <span class="f1-font fw-bold text-white" style="letter-spacing: 0.5px; font-size: 0.9rem;">SEASON RECORD</span>
-          <div class="flex-grow-1 ms-3" style="height: 1px; background: linear-gradient(90deg, rgba(255,255,255,0.1), transparent);"></div>
+        <!-- 3. Telemetry Line Chart -->
+        <div class="d-flex align-items-center mb-2">
+          <i class="fa-solid fa-chart-area text-danger me-2"></i>
+          <span class="f1-font fw-bold text-white" style="letter-spacing: 0.5px; font-size: 0.9rem;">SEASON TREND</span>
         </div>
         
-        <div class="sl-history-container">
+        <div class="chart-container" style="position: relative; height: 220px; width: 100%; background: #0a0a0e; border: 1px solid rgba(255,255,255,0.05); border-radius: 10px; padding: 10px 5px;">
+          <canvas id="playerTelemetryChart"></canvas>
+        </div>
+      </div>
     `;
-
-    if (res.history.length === 0) {
-      html += `<div class="text-center text-muted small py-4"><i class="fa-solid fa-satellite-dish mb-2 fs-4"></i><br>NO RACE DATA AVAILABLE</div>`;
-    } else {
-      res.history.forEach(h => {
-        const scoreNum = Number(h.score) || 0;
-        let badgeClass = 'bg-secondary';
-        let icon = '';
-        if (scoreNum > 0) {
-          badgeClass = 'bg-success';
-          icon = '<i class="fa-solid fa-arrow-trend-up me-1"></i>';
-        }
-        
-        html += `
-          <div class="sl-history-row">
-            <div class="sl-history-race">${h.race}</div>
-            <div class="sl-history-score"><span class="badge ${badgeClass} py-1 px-2" style="font-size:0.75rem;">${icon}+${scoreNum} PTS</span></div>
-          </div>
-        `;
-      });
-    }
-
-    html += `</div></div>`;
     body.innerHTML = html;
+
+    // การวาดกราฟผ่าน Chart.js
+    if (res.history && res.history.length > 0) {
+      const ctx = document.getElementById('playerTelemetryChart').getContext('2d');
+      
+      let labels = [];
+      let dataPoints = [];
+      let currentScore = 0;
+
+      res.history.forEach((h, i) => {
+        labels.push(`R${i+1}`); // ใช้ชื่อย่อ R1, R2... เพื่อให้กราฟไม่เบียด
+        const scoreNum = (h.score === '-' || h.score === '') ? 0 : Number(h.score);
+        currentScore += scoreNum;
+        dataPoints.push(currentScore);
+      });
+
+      // เอฟเฟกต์สีไล่ระดับใต้เส้นกราฟ
+      let gradient = ctx.createLinearGradient(0, 0, 0, 200);
+      gradient.addColorStop(0, teamColor + '60'); 
+      gradient.addColorStop(1, teamColor + '00'); 
+
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: dataPoints,
+            borderColor: teamColor,
+            backgroundColor: gradient,
+            borderWidth: 2,
+            pointBackgroundColor: '#000',
+            pointBorderColor: teamColor,
+            pointBorderWidth: 2,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            fill: true,
+            tension: 0.3 // ทำให้เส้นโค้งสมูท
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: 'rgba(10, 12, 16, 0.95)',
+              titleColor: '#fff',
+              bodyColor: teamColor,
+              titleFont: { family: 'Rajdhani', size: 14, weight: 'bold' },
+              bodyFont: { family: 'Rajdhani', size: 16, weight: 'bold' },
+              borderColor: teamColor,
+              borderWidth: 1,
+              displayColors: false,
+              callbacks: {
+                title: function(context) {
+                  const idx = context[0].dataIndex;
+                  return res.history[idx].race; // โชว์ชื่อสนามเต็มใน Tooltip
+                },
+                label: function(context) {
+                  const idx = context.dataIndex;
+                  const ptsEarned = res.history[idx].score;
+                  return [`Total: ${context.parsed.y} PTS`, `Earned: +${ptsEarned} PTS`];
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: 'rgba(255, 255, 255, 0.05)', tickLength: 0 },
+              ticks: { color: '#94a3b8', font: { family: 'Share Tech Mono', size: 10 } }
+            },
+            y: {
+              beginAtZero: true,
+              grid: { color: 'rgba(255, 255, 255, 0.05)', drawBorder: false },
+              ticks: { color: '#94a3b8', font: { family: 'Share Tech Mono', size: 10 }, maxTicksLimit: 5 }
+            }
+          },
+          interaction: {
+            mode: 'index',
+            intersect: false,
+          }
+        }
+      });
+    } else {
+        document.getElementById('playerTelemetryChart').parentElement.innerHTML = `<div class="text-center text-muted small py-5"><i class="fa-solid fa-satellite-dish mb-2 fs-4"></i><br>NO TELEMETRY DATA</div>`;
+    }
   });
 }
 
