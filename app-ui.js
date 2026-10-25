@@ -1149,19 +1149,17 @@ function showPlayerStats(playerName) {
     `;
     body.innerHTML = html;
 
-    // การวาดกราฟผ่าน Chart.js
+    // การวาดกราฟผ่าน Chart.js (แสดงคะแนนรายสนามแบบวิ่งขึ้น-ลงได้)
     if (res.history && res.history.length > 0) {
       const ctx = document.getElementById('playerTelemetryChart').getContext('2d');
       
       let labels = [];
       let dataPoints = [];
-      let currentScore = 0;
 
       res.history.forEach((h, i) => {
-        labels.push(`R${i+1}`); // ใช้ชื่อย่อ R1, R2... เพื่อให้กราฟไม่เบียด
+        labels.push(`R${i+1}`); // ใช้ชื่อย่อ R1, R2...
         const scoreNum = (h.score === '-' || h.score === '') ? 0 : Number(h.score);
-        currentScore += scoreNum;
-        dataPoints.push(currentScore);
+        dataPoints.push(scoreNum); // 📌 ใช้คะแนนของสนามนั้นๆ โดยตรง ไม่บวกสะสม
       });
 
       // เอฟเฟกต์สีไล่ระดับใต้เส้นกราฟ
@@ -1184,7 +1182,7 @@ function showPlayerStats(playerName) {
             pointRadius: 4,
             pointHoverRadius: 6,
             fill: true,
-            tension: 0.3 // ทำให้เส้นโค้งสมูท
+            tension: 0.3 // เส้นโค้งสมูท
           }]
         },
         options: {
@@ -1204,12 +1202,12 @@ function showPlayerStats(playerName) {
               callbacks: {
                 title: function(context) {
                   const idx = context[0].dataIndex;
-                  return res.history[idx].race; // โชว์ชื่อสนามเต็มใน Tooltip
+                  return res.history[idx].race; // โชว์ชื่อสนามเต็มเมื่อเอาเมาส์ชี้/แตะ
                 },
                 label: function(context) {
                   const idx = context.dataIndex;
                   const ptsEarned = res.history[idx].score;
-                  return [`Total: ${context.parsed.y} PTS`, `Earned: +${ptsEarned} PTS`];
+                  return `Race Score: +${ptsEarned} PTS`; // แสดงคะแนนของสนามนั้นๆ
                 }
               }
             }
@@ -1234,8 +1232,6 @@ function showPlayerStats(playerName) {
     } else {
         document.getElementById('playerTelemetryChart').parentElement.innerHTML = `<div class="text-center text-muted small py-5"><i class="fa-solid fa-satellite-dish mb-2 fs-4"></i><br>NO TELEMETRY DATA</div>`;
     }
-  });
-}
 
 function handleAdminDeadline() { 
   const pin = document.getElementById('adminPin').value, raceId = document.getElementById('adRaceDead').value, rawDt = document.getElementById('adNewDead').value; 
