@@ -1440,7 +1440,63 @@ function switchStandings(type) {
 }
 
 // ==========================================
-// ระบบดึงคะแนนนักแข่ง F1 อัตโนมัติ (Fetch API)
+// 1. ฟังก์ชันสร้างตารางนักแข่งและตารางทีมในหน้า Standings อัตโนมัติ
+// ==========================================
+function initOfficialStandingsDOM() {
+  // 1.1 สร้างตารางนักแข่ง (ใช้รูป info.headshot แยกกับหน้าทายผล)
+  const driverListEl = document.getElementById('driverStandingsList');
+  if (driverListEl) {
+    driverListEl.innerHTML = Object.keys(DRIVER_INFO).map((fullName, idx) => {
+      const info = DRIVER_INFO[fullName];
+      const parts = fullName.split(' ');
+      const shortName = parts[0].charAt(0) + '. ' + parts.slice(1).join(' ');
+      const headshotUrl = getDriveDirectLink(info.headshot || info.img);
+      const displayTeam = info.standingsTeam || info.team;
+
+      return `
+        <div class="f1-standings-row" data-position="${idx + 1}">
+          <div class="col-pos">${idx + 1}</div>
+          <div class="col-driver">
+            <img src="${headshotUrl}" alt="${shortName}" class="driver-headshot" loading="lazy" decoding="async">
+            <div class="driver-info">
+              <div class="driver-name text-white">${shortName}</div>
+              <div class="team-name m-0" style="color: ${info.color};">${displayTeam}</div>
+            </div>
+          </div>
+          <div class="col-pts text-white">0</div>
+        </div>`;
+    }).join('');
+  }
+
+  // 1.2 สร้างตารางทีม (ใช้โลโก้จาก STANDINGS_TEAM_LOGOS)
+  const teamListEl = document.getElementById('teamStandingsList');
+  if (teamListEl) {
+    const mainTeams = ["Ferrari", "Red Bull Racing", "McLaren", "Mercedes", "Aston Martin", "Alpine", "Williams", "VCARB", "Audi", "Haas", "Cadillac"];
+    teamListEl.innerHTML = mainTeams.map((teamName, idx) => {
+      const color = TEAM_COLORS[teamName] || "#ffffff";
+      const bgLogo = getDriveDirectLink(STANDINGS_TEAM_LOGOS[teamName] || TEAM_LOGOS[teamName] || "");
+      const car = getDriveDirectLink(TEAM_CARS[teamName] || "");
+
+      return `
+        <div class="team-card f1-standings-row" data-position="${idx + 1}" style="--team-color: ${color};">
+          <div class="team-card-left">
+            <span class="team-pos col-pos">${idx + 1}</span>
+            <span class="team-name driver-name">${teamName}</span>
+          </div>
+          <div class="team-card-center">
+            <img src="${bgLogo}" class="team-bg-logo" alt="${teamName} Logo" loading="lazy" decoding="async">
+            <img src="${car}" class="team-car-img" alt="${teamName} Car" loading="lazy" decoding="async">
+          </div>
+          <div class="team-card-right">
+            <span class="team-pts col-pts">0</span><span class="pts-label">PTS</span>
+          </div>
+        </div>`;
+    }).join('');
+  }
+}
+
+// ==========================================
+// 2. ระบบดึงคะแนนนักแข่ง F1 อัตโนมัติ (Fetch API)
 // ==========================================
 async function fetchF1Standings() {
   try {
@@ -1448,9 +1504,10 @@ async function fetchF1Standings() {
     const data = await response.json();
     const standings = data.MRData.StandingsTable.StandingsLists[0].DriverStandings;
     
-    // ดึงเฉพาะแถวนักแข่ง (ป้องกันการสับสนกับแถวของทีม)
-    const container = document.querySelector('.f1-official-standings');
-    const rows = document.querySelectorAll('#driver-standings-view .f1-standings-row');
+    // ชี้เป้าไปที่ #driverStandingsList ที่เราเพิ่งสร้างขึ้นมา
+    const container = document.getElementById('driverStandingsList') || document.querySelector('.f1-official-standings');
+    if (!container) return;
+    const rows = container.querySelectorAll('.f1-standings-row');
     const rowsArray = Array.from(rows);
 
     standings.forEach(driverData => {
@@ -1487,7 +1544,7 @@ async function fetchF1Standings() {
 }
 
 // ==========================================
-// ระบบดึงคะแนนทีม F1 อัตโนมัติ (Constructors)
+// 3. ระบบดึงคะแนนทีม F1 อัตโนมัติ (Constructors)
 // ==========================================
 async function fetchF1TeamStandings() {
   try {
@@ -1495,7 +1552,7 @@ async function fetchF1TeamStandings() {
     const data = await response.json();
     const standings = data.MRData.StandingsTable.StandingsLists[0].ConstructorStandings;
     
-    const container = document.querySelector('.f1-team-cards-container');
+    const container = document.getElementById('teamStandingsList') || document.querySelector('.f1-team-cards-container');
     if (!container) return;
     const rowsArray = Array.from(container.querySelectorAll('.team-card'));
 
@@ -1508,6 +1565,8 @@ async function fetchF1TeamStandings() {
         const nameEl = row.querySelector('.team-name');
         if (!nameEl) return false;
         const htmlName = nameEl.innerText.toLowerCase();
+        // รองรับการจับคู่ทั้งชื่อตรง และกรณี Sauber/Audi ใน API
+        if (apiTeamId.includes('sauber') && htmlName === 'audi') return true;
         return htmlName.includes(apiTeamId) || apiTeamId.includes(htmlName.split(' ')[0]);
       });
 
@@ -1533,9 +1592,10 @@ async function fetchF1TeamStandings() {
 }
 
 // ==========================================
-// สั่งให้ระบบดึงข้อมูลทันทีเมื่อเปิดหน้าเว็บ
+// 4. สั่งให้ระบบสร้าง DOM ตารางก่อน แล้วดึงข้อมูล API ทันทีเมื่อเปิดหน้าเว็บ
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
-  fetchF1Standings();      // ดึงคะแนนนักแข่ง
-  fetchF1TeamStandings();  // ดึงคะแนนทีม
+  initOfficialStandingsDOM(); // 1. สร้างแถวตารางนักแข่งและทีมขึ้นมาก่อน
+  fetchF1Standings();         // 2. ดึงคะแนนนักแข่งจาก API มาใส่
+  fetchF1TeamStandings();     // 3. ดึงคะแนนทีมจาก API มาใส่
 });
