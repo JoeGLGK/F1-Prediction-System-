@@ -1,12 +1,53 @@
 const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwZ_VB9I7ClOgDpd8bDkaY09CzipETJMeQPDK6Qk6JYVNPdgfXA6ZrmXDG8gYsJ9I6u/exec";
 
-async function callGAS(action, payload = {}) {
-  const response = await fetch(GAS_API_URL, {
-    method: "POST",
-    headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body: JSON.stringify(Object.assign({ action: action }, payload))
-  });
-  return await response.json();
+// =========================================================
+// 1. OPTIMIZED API CALLER (ป้องกันการยิงซ้ำ + มีระบบ Timeout & Cache)
+// =========================================================
+const apiCache = new Map();
+const pendingRequests = new Map();
+
+async function callGAS(action, payload = {}, options = { useCache: false, ttl: 30000 }) {
+  const cacheKey = action + "_" + JSON.stringify(payload);
+
+  // 1. ถ้าอนุญาตให้ใช้ Cache และข้อมูลยังไม่หมดอายุ ให้คืนค่าทันที
+  if (options.useCache && apiCache.has(cacheKey)) {
+    const cached = apiCache.get(cacheKey);
+    if (Date.now() - cached.timestamp < options.ttl) {
+      return cached.data;
+    }
+  }
+
+  // 2. Request Deduplication: ถ้ามีคำสั่งเดียวกันกำลังโหลดอยู่ ให้รอผลลัพธ์ตัวเดิม ไม่ยิงซ้ำ
+  if (pendingRequests.has(cacheKey)) {
+    return pendingRequests.get(cacheKey);
+  }
+
+  const fetchPromise = (async () => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // Timeout 15 วินาที
+
+    try {
+      const response = await fetch(GAS_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(Object.assign({ action: action }, payload)),
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      const result = await response.json();
+
+      if (options.useCache) {
+        apiCache.set(cacheKey, { data: result, timestamp: Date.now() });
+      }
+      return result;
+    } finally {
+      clearTimeout(timeoutId);
+      pendingRequests.delete(cacheKey);
+    }
+  })();
+
+  pendingRequests.set(cacheKey, fetchPromise);
+  return fetchPromise;
 }
 
 function showToast(msg, type='success') { 
@@ -796,8 +837,10 @@ function onRaceChange() {
   const raceId = opt.value; 
   const isSprint = opt.dataset.type === 'Sprint'; 
   document.getElementById('flWrapper').style.display = isSprint ? 'none' : 'block';
+  
+  // 👇 จุดที่แก้ไข: เปลี่ยนมาใช้ฟังก์ชัน parseThaiDeadline เพื่อป้องกันเวลาเพี้ยน
   let rawDl = (opt.dataset.dl || "").trim(); 
-  if (!rawDl) { currentDeadline = null; } else { currentDeadline = new Date(rawDl.replace(' ', 'T')); }
+  currentDeadline = parseThaiDeadline(rawDl);
   startCountdown();
 
   const raceObj = globalRaces.find(function(r) { return r.id === raceId; });
@@ -812,6 +855,33 @@ function onRaceChange() {
       imgWrapper.style.display = 'none';
     }
   }
+
+  ['pos1','pos2','pos3','pos4','posFL'].forEach(function(id) { 
+    const el = document.getElementById(id);
+    if (el) el.value = ''; 
+    updateCardUI(id, ''); 
+  });
+
+  const player = localStorage.getItem('f1_player_name'); 
+  const histAlert = document.getElementById('savedPredAlert');
+  if (player) {
+    callGAS("getUserSavedPrediction", { raceId: raceId, playerName: player }).then(function(res) {
+      if (res.found) {
+        histAlert.style.display = 'block'; 
+        document.getElementById('savedPredTime').innerText = 'บันทึกเมื่อ: ' + res.submittedAt; 
+        document.getElementById('savedPredContent').innerHTML = '<strong>P1:</strong> ' + res.p1 + ' | <strong>P2:</strong> ' + res.p2 + '<br><strong>P3:</strong> ' + res.p3 + ' | <strong>P4:</strong> ' + res.p4 + (res.fl ? ' | <strong>FL:</strong> ' + res.fl : '');
+
+        const savedVals = [res.p1, res.p2, res.p3, res.p4, res.fl];
+        ['pos1','pos2','pos3','pos4','posFL'].forEach(function(id, i) { 
+          const val = savedVals[i] || '';
+          const el = document.getElementById(id);
+          if (el) el.value = val; 
+          updateCardUI(id, val);
+        });
+      } else { histAlert.style.display = 'none'; }
+    });
+  } else { histAlert.style.display = 'none'; }
+}
 
   ['pos1','pos2','pos3','pos4','posFL'].forEach(function(id) { 
     const el = document.getElementById(id);
@@ -1012,57 +1082,196 @@ function openActiveArchivePreview() {
   openMediaPreview2025(currentArchiveMode);
 }
 
+// =========================================================
+// 2. ACCURATE PIT-WALL TIMER (แม่นยำสูง ไม่รีเรนเดอร์ DOM ซ้ำ)
+// =========================================================
+function parseThaiDeadline(rawDl) {
+  if (!rawDl) return null;
+  let cleanStr = rawDl.trim().replace(' ', 'T');
+  // บังคับโซนเวลาไทย (+07:00) ป้องกันบั๊กเวลาเพี้ยนในมือถือบางรุ่น
+  if (!cleanStr.includes('Z') && !cleanStr.includes('+') && cleanStr.length <= 19) {
+    if (cleanStr.split(':').length === 2) cleanStr += ':00';
+    cleanStr += '+07:00';
+  }
+  const dt = new Date(cleanStr);
+  return isNaN(dt.getTime()) ? new Date(rawDl.replace(' ', 'T')) : dt;
+}
+
 function startCountdown() {
-  clearInterval(countdownInterval); 
-  const box = document.getElementById('countdownBox'); 
+  if (countdownInterval) clearInterval(countdownInterval);
+  const box = document.getElementById('countdownBox');
   const submitBtn = document.getElementById('btnPred');
-  if (!currentDeadline || isNaN(currentDeadline.getTime())) { 
-    box.style.display = 'block'; 
-    box.innerHTML = '<div class="text-secondary small py-1"><i class="fa-solid fa-clock me-1"></i>ยังไม่ได้กำหนดเวลาปิดรับ</div>'; 
-    return; 
+  if (!box) return;
+
+  box.className = 'countdown-box'; // Reset สถานะสี
+
+  if (!currentDeadline || isNaN(currentDeadline.getTime())) {
+    box.style.display = 'block';
+    box.innerHTML = '<div class="text-secondary small py-1"><i class="fa-solid fa-clock me-1"></i>ยังไม่ได้กำหนดเวลาปิดรับ</div>';
+    return;
   }
+
   box.style.display = 'block';
+  // สร้างโครงสร้าง HTML แค่ครั้งเดียว
+  box.innerHTML = `
+    <div class="timer-units">
+      <div><div class="timer-num" id="t-day">00</div><div class="timer-lbl">DAY</div></div>
+      <div><div class="timer-num" id="t-hr">00</div><div class="timer-lbl">HRS</div></div>
+      <div><div class="timer-num" id="t-min">00</div><div class="timer-lbl">MIN</div></div>
+      <div><div class="timer-num" id="t-sec">00</div><div class="timer-lbl">SEC</div></div>
+    </div>`;
+
+  const elDay = document.getElementById('t-day');
+  const elHr  = document.getElementById('t-hr');
+  const elMin = document.getElementById('t-min');
+  const elSec = document.getElementById('t-sec');
+  const pad = (n) => String(n).padStart(2, '0');
+
   function updateTimer() {
-    const diff = currentDeadline - new Date();
-    if (diff <= 0) { 
-      box.innerHTML = '<div class="text-danger fw-bold py-1">⏰ หมดเวลาทายผล</div>'; 
-      if (submitBtn) { submitBtn.disabled = true; submitBtn.innerText = 'CLOSED'; } 
-      clearInterval(countdownInterval); 
-      return; 
+    const diff = currentDeadline.getTime() - Date.now();
+
+    if (diff <= 0) {
+      box.className = 'countdown-box status-closed';
+      box.innerHTML = '<div class="text-danger fw-bold py-1"><i class="fa-solid fa-lock me-1"></i>หมดเวลาทายผล (PARC FERMÉ)</div>';
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-lock me-2"></i>SESSION CLOSED';
+      }
+      clearInterval(countdownInterval);
+      return;
     }
-    if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane me-2"></i>SUBMIT PREDICTION'; }
-    const d = Math.floor(diff / 86400000); 
-    const h = Math.floor((diff / 3600000) % 24); 
-    const m = Math.floor((diff / 60000) % 60); 
+
+    // เปลี่ยนสีกรอบตามความเร่งด่วน
+    if (diff <= 900000) { box.className = 'countdown-box status-critical'; } // ต่ำกว่า 15 นาที
+    else if (diff <= 3600000) { box.className = 'countdown-box status-warning'; } // ต่ำกว่า 1 ชม.
+    else { box.className = 'countdown-box'; }
+
+    if (submitBtn && submitBtn.disabled) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane me-2"></i>SUBMIT PREDICTION';
+    }
+
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff / 3600000) % 24);
+    const m = Math.floor((diff / 60000) % 60);
     const s = Math.floor((diff / 1000) % 60);
-    const pad = function(n) { return String(n).padStart(2, '0'); };
-    box.innerHTML = '<div class="timer-units"><div><div class="timer-num">' + pad(d) + '</div><div class="timer-lbl">DAY</div></div><div><div class="timer-num">' + pad(h) + '</div><div class="timer-lbl">HRS</div></div><div><div class="timer-num">' + pad(m) + '</div><div class="timer-lbl">MIN</div></div><div><div class="timer-num">' + pad(s) + '</div><div class="timer-lbl">SEC</div></div></div>';
+
+    // อัปเดตเฉพาะตัวเลขที่เปลี่ยน (ลดการทำงาน CPU)
+    if (elDay && elDay.textContent !== pad(d)) elDay.textContent = pad(d);
+    if (elHr  && elHr.textContent  !== pad(h)) elHr.textContent  = pad(h);
+    if (elMin && elMin.textContent !== pad(m)) elMin.textContent = pad(m);
+    if (elSec) elSec.textContent = pad(s);
   }
-  updateTimer(); 
+
+  updateTimer();
   countdownInterval = setInterval(updateTimer, 1000);
 }
 
-function openBreakdownModal(raceId) {
-  triggerHaptic(); 
-  breakdownModalInstance.show(); 
-  const body = document.getElementById('breakdownBody'); 
-  body.innerHTML = '<div class="text-center py-3"><i class="fa-solid fa-spinner fa-spin me-2"></i>กำลังตรวจสอบผล...</div>';
-  callGAS("getRaceBreakdown", { raceId: raceId, playerName: localStorage.getItem('f1_player_name') || '' }).then(function(res) {
-    if (!res.actual) { body.innerHTML = '<div class="text-danger text-center">ไม่พบข้อมูล</div>'; return; }
-    const act = res.actual, pred = res.userPred;
-    function matchRow(posName, actVal, predVal) {
-      const isMatch = predVal && actVal && (predVal.trim().toLowerCase() === actVal.trim().toLowerCase());
-      const badge = pred ? (isMatch ? '<span class="badge bg-success">✅ +2</span>' : '<span class="badge bg-danger">❌ 0</span>') : '';
-      return '<div class="p-2 mb-2 rounded bg-black border ' + (isMatch ? 'border-success' : 'border-secondary') + '"><div class="d-flex justify-content-between small text-secondary mb-1"><span><strong>' + posName + '</strong> (จริง: <span class="text-warning">' + (actVal || '-') + '</span>)</span>' + badge + '</div><div class="small text-white">คุณทาย: <strong>' + (predVal || '<span class="text-muted">ไม่ได้ส่ง</span>') + '</strong></div></div>';
+// =========================================================
+// 3. ADVANCED SCORING ENGINE (ระบบตรวจคะแนนแบบละเอียด)
+// =========================================================
+const SCORING_RULES = {
+  EXACT_POS: 2,        // ทายถูกตรงตำแหน่งเป๊ะ ได้ 2 คะแนน
+  FASTEST_LAP: 1,      // ทาย Fastest Lap ถูก ได้ 1 คะแนน
+  IN_TOP4_WRONG_POS: 0 // ถ้าอนาคตอยากให้คะแนนคนทายติด Top 4 แต่ผิดอันดับ ให้แก้เลขนี้
+};
+
+function calculateDetailedScore(actual, pred, isSprint = false) {
+  if (!actual || !pred) return { total: 0, details: {} };
+
+  let total = 0;
+  const details = {};
+  const actualTop4 = [actual.p1, actual.p2, actual.p3, actual.p4].map(d => (d || '').trim().toLowerCase());
+  const positions = ['p1', 'p2', 'p3', 'p4'];
+
+  positions.forEach((pos) => {
+    const pDriver = (pred[pos] || '').trim().toLowerCase();
+    const aDriver = (actual[pos] || '').trim().toLowerCase();
+
+    if (!pDriver) {
+      details[pos] = { pts: 0, status: 'MISS', label: 'ไม่ได้เลือก' };
+      return;
     }
-    let html = '<div class="mb-3 text-center"><h6 class="fw-bold text-white mb-1">' + act.name + '</h6>' + (pred ? '<span class="badge bg-warning text-dark fs-6">คะแนน: ' + pred.score + ' แต้ม</span>' : '<span class="badge bg-secondary">ไม่ได้ส่งคำทาย</span>') + '</div>' + matchRow('P1', act.p1, pred?pred.p1:'') + matchRow('P2', act.p2, pred?pred.p2:'') + matchRow('P3', act.p3, pred?pred.p3:'') + matchRow('P4', act.p4, pred?pred.p4:'');
-    if (act.type !== 'Sprint') {
-      const mFL = pred && pred.fl && act.fl && pred.fl.trim().toLowerCase() === act.fl.trim().toLowerCase();
-      const badgeFl = pred ? (mFL ? '<span class="badge bg-success">✅ +1</span>' : '<span class="badge bg-danger">❌ 0</span>') : '';
-      html += '<div class="p-2 mb-2 rounded bg-black border ' + (mFL ? 'border-success' : 'border-secondary') + '"><div class="d-flex justify-content-between small text-secondary mb-1"><span><strong>⚡ FL</strong> (จริง: <span class="text-warning">' + (act.fl || '-') + '</span>)</span>' + badgeFl + '</div><div class="small text-white">คุณทาย: <strong>' + (pred?pred.fl:'<span class="text-muted">ไม่ได้ส่ง</span>') + '</strong></div></div>';
+
+    if (pDriver === aDriver) {
+      total += SCORING_RULES.EXACT_POS;
+      details[pos] = { pts: SCORING_RULES.EXACT_POS, status: 'EXACT', label: `✅ เป๊ะ (+${SCORING_RULES.EXACT_POS})` };
+    } else if (SCORING_RULES.IN_TOP4_WRONG_POS > 0 && actualTop4.includes(pDriver)) {
+      total += SCORING_RULES.IN_TOP4_WRONG_POS;
+      details[pos] = { pts: SCORING_RULES.IN_TOP4_WRONG_POS, status: 'PARTIAL', label: `⚡ ติด Top 4 (+${SCORING_RULES.IN_TOP4_WRONG_POS})` };
+    } else {
+      details[pos] = { pts: 0, status: 'MISS', label: '❌ พลาด (0)' };
     }
-    body.innerHTML = html;
   });
+
+  if (!isSprint) {
+    const pFL = (pred.fl || '').trim().toLowerCase();
+    const aFL = (actual.fl || '').trim().toLowerCase();
+    if (pFL && aFL && pFL === aFL) {
+      total += SCORING_RULES.FASTEST_LAP;
+      details.fl = { pts: SCORING_RULES.FASTEST_LAP, status: 'EXACT', label: `⚡ FL เป๊ะ (+${SCORING_RULES.FASTEST_LAP})` };
+    } else {
+      details.fl = { pts: 0, status: 'MISS', label: '❌ พลาด (0)' };
+    }
+  }
+
+  return { total, details };
+}
+
+function openBreakdownModal(raceId) {
+  triggerHaptic();
+  breakdownModalInstance.show();
+  const body = document.getElementById('breakdownBody');
+  body.innerHTML = '<div class="text-center py-3"><i class="fa-solid fa-spinner fa-spin me-2"></i>กำลังวิเคราะห์ Telemetry คะแนน...</div>';
+
+  callGAS("getRaceBreakdown", { raceId: raceId, playerName: localStorage.getItem('f1_player_name') || '' }, { useCache: true, ttl: 60000 })
+    .then(function(res) {
+      if (!res.actual) {
+        body.innerHTML = '<div class="text-danger text-center">ไม่พบข้อมูลผลการแข่งขัน</div>';
+        return;
+      }
+      const act = res.actual;
+      const pred = res.userPred;
+      const isSprint = act.type === 'Sprint';
+      const calc = calculateDetailedScore(act, pred, isSprint);
+      const displayScore = pred && pred.score !== undefined ? pred.score : calc.total;
+
+      function renderMatchRow(posKey, posTitle, actVal, predVal) {
+        const info = calc.details[posKey] || { status: 'MISS', label: '0' };
+        let pillClass = 'score-pill-miss';
+        let borderClass = 'border-secondary';
+        if (info.status === 'EXACT') { pillClass = 'score-pill-exact'; borderClass = 'border-success'; }
+        else if (info.status === 'PARTIAL') { pillClass = 'score-pill-partial'; borderClass = 'border-warning'; }
+
+        return `
+          <div class="p-2 mb-2 rounded bg-black border ${borderClass}">
+            <div class="d-flex justify-content-between align-items-center small text-secondary mb-1">
+              <span><strong>${posTitle}</strong> (ผลจริง: <span class="text-warning fw-bold">${actVal || '-'}</span>)</span>
+              ${pred ? `<span class="${pillClass}">${info.label}</span>` : ''}
+            </div>
+            <div class="small text-white">คุณทาย: <strong>${predVal || '<span class="text-muted">ไม่ได้ส่ง</span>'}</strong></div>
+          </div>`;
+      }
+
+      let html = `
+        <div class="mb-3 text-center">
+          <h6 class="fw-bold text-white mb-2 f1-font">${act.name}</h6>
+          ${pred 
+            ? `<span class="badge bg-warning text-dark fs-6 px-3 py-2">คะแนนรวมที่ได้: ${displayScore} PTS</span>` 
+            : `<span class="badge bg-secondary">คุณไม่ได้ส่งคำทายในสนามนี้</span>`}
+        </div>
+        ${renderMatchRow('p1', '🥇 P1', act.p1, pred ? pred.p1 : '')}
+        ${renderMatchRow('p2', '🥈 P2', act.p2, pred ? pred.p2 : '')}
+        ${renderMatchRow('p3', '🥉 P3', act.p3, pred ? pred.p3 : '')}
+        ${renderMatchRow('p4', '🏁 P4', act.p4, pred ? pred.p4 : '')}
+      `;
+
+      if (!isSprint) {
+        html += renderMatchRow('fl', '⚡ Fastest Lap', act.fl, pred ? pred.fl : '');
+      }
+
+      body.innerHTML = html;
+    });
 }
 
 // ฟังก์ชันย่อชื่อนักแข่งให้แสดงนามสกุลบนตั๋วได้กระชับสวยงาม
