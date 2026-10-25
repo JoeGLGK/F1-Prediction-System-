@@ -1091,9 +1091,86 @@ function loadCommunityPredictions() {
 function showPlayerStats(playerName) {
   triggerHaptic(); 
   statsModalInstance.show(); 
-  document.getElementById('statsBody').innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>กำลังคำนวณสถิติ...';
+  const body = document.getElementById('statsBody');
+  // แอนิเมชันโหลดข้อมูลสไตล์ F1
+  body.innerHTML = '<div class="text-center py-5"><div class="loader-spinner mx-auto"></div><div class="text-secondary small mt-3 f1-font" style="letter-spacing:1px;">GATHERING TELEMETRY...</div></div>';
+
   callGAS("getPlayerStats", { playerName: playerName }).then(function(res) {
-    document.getElementById('statsBody').innerHTML = '<div class="mb-3"><div class="fs-4 fw-bold text-white mb-1"><i class="fa-solid fa-user-astronaut text-danger me-2"></i>' + res.playerName + '</div><span class="badge bg-warning text-dark fs-6">อันดับที่ ' + res.rank + '</span> <span class="badge bg-danger fs-6">' + res.totalScore + ' คะแนน</span></div><div class="row g-2 mb-3"><div class="col-6"><div class="p-2 rounded bg-black border border-secondary"><div class="text-secondary small">ทายเป๊ะ (P1-P4)</div><div class="fs-4 fw-bold text-info">' + res.exactHits + ' ครั้ง</div></div></div><div class="col-6"><div class="p-2 rounded bg-black border border-secondary"><div class="text-secondary small">ทาย FL ถูก</div><div class="fs-4 fw-bold text-purple">' + res.flHits + ' ครั้ง</div></div></div></div><h6 class="text-secondary small fw-bold text-start text-uppercase mb-2">ประวัติคะแนนแต่ละสนาม</h6><div class="p-2 rounded bg-black border border-secondary" style="max-height: 180px; overflow-y: auto;">' + (res.history.length === 0 ? '<div class="text-muted small">ยังไม่มีประวัติ</div>' : res.history.map(function(h) { return '<div class="d-flex justify-content-between small py-1 border-bottom border-dark text-start"><span>' + h.race + '</span><span class="text-warning fw-bold">' + h.score + ' pts</span></div>'; }).join('')) + '</div>';
+    // ค้นหาทีมของผู้เล่นจาก Leaderboard เพื่อเอาสีและโลโก้มาตกแต่ง
+    let pTeam = "F1";
+    const match = globalLeaderboard.find(r => String(r[1]).toLowerCase() === playerName.toLowerCase());
+    if (match) pTeam = match[4] || "F1";
+
+    const teamColor = TEAM_COLORS[pTeam] || "#555555";
+    const logoUrl = TEAM_LOGOS[pTeam] ? getDriveDirectLink(TEAM_LOGOS[pTeam]) : "";
+
+    let html = `
+      <div class="stats-super-license" style="--team-color: ${teamColor};">
+        
+        <!-- 1. ส่วนหัว: บัตรนักแข่ง (Super License Header) -->
+        <div class="sl-header mb-4">
+          <div class="sl-avatar">
+            ${logoUrl ? `<img src="${logoUrl}" alt="Team">` : `<i class="fa-solid fa-user-astronaut text-secondary"></i>`}
+          </div>
+          <div class="sl-info">
+            <div class="sl-name">${res.playerName}</div>
+            <div class="sl-team" style="color: ${teamColor};">${pTeam}</div>
+          </div>
+          <div class="sl-rank">
+            <span class="sl-rank-lbl">CURRENT RANK</span>
+            <span class="sl-rank-val">${res.rank}</span>
+          </div>
+        </div>
+
+        <!-- 2. ส่วนข้อมูลวิเคราะห์ (Telemetry Bento Box) -->
+        <div class="telemetry-grid mb-4">
+          <div class="telemetry-widget border-yellow">
+            <div class="widget-head"><i class="fa-solid fa-trophy text-warning"></i> <span>TOTAL SCORE</span></div>
+            <div class="widget-value text-warning" style="font-size:1.4rem;">${res.totalScore} <span class="fs-6 text-secondary">PTS</span></div>
+          </div>
+          <div class="telemetry-widget border-blue">
+            <div class="widget-head"><i class="fa-solid fa-crosshairs text-info"></i> <span>EXACT HITS</span></div>
+            <div class="widget-value text-info" style="font-size:1.4rem;">${res.exactHits} <span class="fs-6 text-secondary">Times</span></div>
+          </div>
+          <div class="telemetry-widget border-purple" style="grid-column: span 2; min-height: 70px;">
+            <div class="widget-head"><i class="fa-solid fa-bolt text-purple"></i> <span>FASTEST LAP PREDICTIONS</span></div>
+            <div class="widget-value text-purple fs-5">${res.flHits} <span class="fs-6 text-secondary">Successful Picks</span></div>
+          </div>
+        </div>
+
+        <!-- 3. ส่วนประวัติคะแนน (Season History Timeline) -->
+        <div class="d-flex align-items-center mb-3">
+          <i class="fa-solid fa-route text-danger me-2"></i>
+          <span class="f1-font fw-bold text-white" style="letter-spacing: 0.5px; font-size: 0.9rem;">SEASON RECORD</span>
+          <div class="flex-grow-1 ms-3" style="height: 1px; background: linear-gradient(90deg, rgba(255,255,255,0.1), transparent);"></div>
+        </div>
+        
+        <div class="sl-history-container">
+    `;
+
+    if (res.history.length === 0) {
+      html += `<div class="text-center text-muted small py-4"><i class="fa-solid fa-satellite-dish mb-2 fs-4"></i><br>NO RACE DATA AVAILABLE</div>`;
+    } else {
+      res.history.forEach(h => {
+        const scoreNum = Number(h.score) || 0;
+        let badgeClass = 'bg-secondary';
+        let icon = '';
+        if (scoreNum > 0) {
+          badgeClass = 'bg-success';
+          icon = '<i class="fa-solid fa-arrow-trend-up me-1"></i>';
+        }
+        
+        html += `
+          <div class="sl-history-row">
+            <div class="sl-history-race">${h.race}</div>
+            <div class="sl-history-score"><span class="badge ${badgeClass} py-1 px-2" style="font-size:0.75rem;">${icon}+${scoreNum} PTS</span></div>
+          </div>
+        `;
+      });
+    }
+
+    html += `</div></div>`;
+    body.innerHTML = html;
   });
 }
 
