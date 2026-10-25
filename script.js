@@ -9,7 +9,6 @@ const pendingRequests = new Map();
 async function callGAS(action, payload = {}, options = { useCache: false, ttl: 30000 }) {
   const cacheKey = action + "_" + JSON.stringify(payload);
 
-  // 1. ถ้าอนุญาตให้ใช้ Cache และข้อมูลยังไม่หมดอายุ ให้คืนค่าทันที
   if (options.useCache && apiCache.has(cacheKey)) {
     const cached = apiCache.get(cacheKey);
     if (Date.now() - cached.timestamp < options.ttl) {
@@ -17,14 +16,13 @@ async function callGAS(action, payload = {}, options = { useCache: false, ttl: 3
     }
   }
 
-  // 2. Request Deduplication: ถ้ามีคำสั่งเดียวกันกำลังโหลดอยู่ ให้รอผลลัพธ์ตัวเดิม ไม่ยิงซ้ำ
   if (pendingRequests.has(cacheKey)) {
     return pendingRequests.get(cacheKey);
   }
 
   const fetchPromise = (async () => {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000); // Timeout 15 วินาที
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
 
     try {
       const response = await fetch(GAS_API_URL, {
@@ -96,7 +94,6 @@ const TEAM_COLORS = {
   "Cadillac": "#ffd700" 
 };
 
-// ลิงก์รูปรถ F1 ของแต่ละทีม
 const TEAM_CARS = {
   "Ferrari": "https://lh3.googleusercontent.com/d/16fGNY2kTdnXIoDRjzkXmpbZwOn27xAAR",
   "Red Bull Racing": "https://lh3.googleusercontent.com/d/1MUwr4Pi3TbBAKIYefrPpVcmfqdqfe-OW",
@@ -115,7 +112,6 @@ const TEAM_CARS = {
 
 const DEFAULT_DRIVER_IMG = "https://cdn-icons-png.flaticon.com/512/1995/1995470.png";
 
-// โลโก้พื้นหลังของการ์ดทีมในหน้า "อันดับ (F1 TEAMS)" ที่ใช้คนละลิงก์กับหน้าทายผล
 const STANDINGS_TEAM_LOGOS = {
   "Ferrari": "https://lh3.googleusercontent.com/d/1vSyLK4voiZIq9-ctG7X5aAkdPezha1xu",
   "Red Bull Racing": "https://lh3.googleusercontent.com/d/1KC9EYSP6cPPF6ql5IJAsFV5o4ijtbUzb",
@@ -130,118 +126,29 @@ const STANDINGS_TEAM_LOGOS = {
   "Cadillac": "https://lh3.googleusercontent.com/d/1GIArchbZm5K7bmSNfpkGNi8bHae5G1w0"
 };
 
-// ข้อมูลนักแข่ง: แยก img (หน้าทายผล) และ headshot + standingsTeam (หน้าอันดับ)
 const DRIVER_INFO = {
-  "Kimi Antonelli": { 
-    team: "Mercedes", standingsTeam: "Mercedes", color: "#27f4d2", 
-    img: "https://lh3.googleusercontent.com/d/1XueMkRyOLH6YggOKxiU__FNxc1oxOhO7",
-    headshot: "https://lh3.googleusercontent.com/d/1JPd4IiYhF5Wf_Ul75iPhe9zPw2v8teQN" 
-  },
-  "George Russell": { 
-    team: "Mercedes", standingsTeam: "Mercedes", color: "#27f4d2", 
-    img: "https://lh3.googleusercontent.com/d/1wineMhWS2aqA68eErrDxvikfopeorSKD",
-    headshot: "https://lh3.googleusercontent.com/d/1cogOB1tyuiXSx7wzLIopjEDy9OGOqai-" 
-  },
-  "Max Verstappen": { 
-    team: "Red Bull Racing", standingsTeam: "Red Bull Racing", color: "#3671c6", 
-    img: "https://lh3.googleusercontent.com/d/1FIH6Hjzdr9KKxf5yYYgpFJzX2GJmp5MZ",
-    headshot: "https://lh3.googleusercontent.com/d/1XUMoxEkMqVjcgkZJ_WICLlGzx4xD-Ti_" 
-  },
-  "Isack Hadjar": { 
-    team: "Red Bull Racing", standingsTeam: "Red Bull Racing", color: "#3671c6", 
-    img: "https://lh3.googleusercontent.com/d/1eR94vK-62qi7bDucBnuvHNicUcve06SA",
-    headshot: "https://lh3.googleusercontent.com/d/1O8gJ_jYfKRjeksWwkk-70XaXelhucVzb" 
-  },
-  "Lando Norris": { 
-    team: "McLaren", standingsTeam: "McLaren", color: "#ff8000", 
-    img: "https://lh3.googleusercontent.com/d/15gZwBnLjfhkbT2jwoXq0oe53DoinzLUR",
-    headshot: "https://lh3.googleusercontent.com/d/1V-8HQn6Pfv2-V8MOi3X1ncN3eS_sGfPX" 
-  },
-  "Oscar Piastri": { 
-    team: "McLaren", standingsTeam: "McLaren", color: "#ff8000", 
-    img: "https://lh3.googleusercontent.com/d/1LZaV4wfjgXtaN35WgxwuzZiE2HdCfFbs",
-    headshot: "https://lh3.googleusercontent.com/d/1WvMxJEp2wRPz2ZulvHOdQ2k7QW4Gm0Yj" 
-  },
-  "Lewis Hamilton": { 
-    team: "Ferrari", standingsTeam: "Ferrari", color: "#e10600", 
-    img: "https://lh3.googleusercontent.com/d/1lZb4XYfCoxHyZnaqkaUoUbET1z8W6pKz",
-    headshot: "https://lh3.googleusercontent.com/d/1f9OyBz8nBeNPuaF1KLdrGlUuUybiHFNx" 
-  },
-  "Charles Leclerc": { 
-    team: "Ferrari", standingsTeam: "Ferrari", color: "#e10600", 
-    img: "https://lh3.googleusercontent.com/d/1E1xYy5TP1ei7CqBNFsU-MI0Evr3w2sK4",
-    headshot: "https://lh3.googleusercontent.com/d/1hynvMyKMqqBkGqq96sCTj0yPx_3nAJd7" 
-  },
-  "Liam Lawson": { 
-    team: "VCARB", standingsTeam: "VCARB", color: "#6692ff", 
-    img: "https://lh3.googleusercontent.com/d/11RZ7qdc_blnLI4QmWTFOq2b-ontSKjnR",
-    headshot: "https://lh3.googleusercontent.com/d/1exC0YVYungiAqMJ0AnCP9d1XeWkIsgXl" 
-  },
-  "Arvid Lindblad": { 
-    team: "VCARB", standingsTeam: "VCARB", color: "#6692ff", 
-    img: "https://lh3.googleusercontent.com/d/1SMM0ioYV1iuDY3IdjeILDHcyrz585RLx",
-    headshot: "https://lh3.googleusercontent.com/d/1SNOnd7pux2M-jB4-puulcXwpZbh3vxew" 
-  },
-  "Nico Hülkenberg": { 
-    team: "Audi", standingsTeam: "Sauber", color: "#00e701", 
-    img: "https://lh3.googleusercontent.com/d/1gAGhigxnQpFXRJzmomddT1pdQgxrflJO",
-    headshot: "https://lh3.googleusercontent.com/d/1gilFs7cWCw4gZNILUPwqCnYZ-ZA1dQuJ" 
-  },
-  "Gabriel Bortoleto": { 
-    team: "Audi", standingsTeam: "Sauber", color: "#00e701", 
-    img: "https://lh3.googleusercontent.com/d/1rQQ2uxUgKw1YMqLFndjIAhNHvbTC31qI",
-    headshot: "https://lh3.googleusercontent.com/d/1jlp92jslcQEXfc5XivFmjAZMY7iKC4ju" 
-  },
-  "Oliver Bearman": { 
-    team: "Haas", standingsTeam: "Haas", color: "#ffffff", 
-    img: "https://lh3.googleusercontent.com/d/1y32Nd5CGiQQL9LVXW2Yyg-uBGCdE62QL",
-    headshot: "https://lh3.googleusercontent.com/d/1dFbFnhW82fxap4gYVWsExd6xZmo-axmk" 
-  },
-  "Esteban Ocon": { 
-    team: "Haas", standingsTeam: "Haas", color: "#ffffff", 
-    img: "https://lh3.googleusercontent.com/d/1dIYK5u651tz4uFLXElJY7RijV4EKRBGd",
-    headshot: "https://lh3.googleusercontent.com/d/1G0ZXdtwaFsl7YB2abkFPbtFS7YTJ2R44" 
-  },
-  "Carlos Sainz": { 
-    team: "Williams", standingsTeam: "Williams", color: "#005aff", 
-    img: "https://lh3.googleusercontent.com/d/1xpTy6YAwaPPA1NOHQdg3SttuEi0T1TsW",
-    headshot: "https://lh3.googleusercontent.com/d/11OnFZVfgKQuIn-iiTOy8gn84ef8HEcP2" 
-  },
-  "Alexander Albon": { 
-    team: "Williams", standingsTeam: "Williams", color: "#005aff", 
-    img: "https://lh3.googleusercontent.com/d/1LnzHzqrhNAL1l3w7mVtr-iKTD4Rk06gw",
-    headshot: "https://lh3.googleusercontent.com/d/11hihz-EOy8lWhLeYC0_1gJ8MZfRHiyHa" 
-  },
-  "Pierre Gasly": { 
-    team: "Alpine", standingsTeam: "Alpine", color: "#ff87bc", 
-    img: "https://lh3.googleusercontent.com/d/1maqM4IhIgFkmRQ_KelrWPQraNPO_qu5_",
-    headshot: "https://lh3.googleusercontent.com/d/15agHTWnibHBmPgyoyodzfEFc4xbBFA7r" 
-  },
-  "Franco Colapinto": { 
-    team: "Alpine", standingsTeam: "Alpine", color: "#ff87bc", 
-    img: "https://lh3.googleusercontent.com/d/1Fnl0mVNwXZZC41s0SQU9AqAwQkD1f198",
-    headshot: "https://lh3.googleusercontent.com/d/1HixFZqNBYmS933gXxneOInA-Be9daQ1K" 
-  },
-  "Fernando Alonso": { 
-    team: "Aston Martin", standingsTeam: "Aston Martin", color: "#229971", 
-    img: "https://lh3.googleusercontent.com/d/1b9pCYfexGdOmo8fLfDTiH4spH5lXJrLU",
-    headshot: "https://lh3.googleusercontent.com/d/1s551SXjYkq2g0E2OWCN5TyUGq_-PPc-L" 
-  },
-  "Lance Stroll": { 
-    team: "Aston Martin", standingsTeam: "Aston Martin", color: "#229971", 
-    img: "https://lh3.googleusercontent.com/d/1VCHnoTG4I8LiJL6AxBMnsXGJU4jpLbAi",
-    headshot: "https://lh3.googleusercontent.com/d/1cIob029sx-tSOm9IGLFWwzc0sqzHxOrB" 
-  },
-  "Sergio Pérez": { 
-    team: "Cadillac", standingsTeam: "Cadillac", color: "#ffd700", 
-    img: "https://lh3.googleusercontent.com/d/1DAVP6b75_8Y0v4LEfCKnXlNxnKhOgHBh",
-    headshot: "https://lh3.googleusercontent.com/d/1U14btMCB4fF9UamzLjbGUHmFCfs-3jSp" 
-  },
-  "Valtteri Bottas": { 
-    team: "Cadillac", standingsTeam: "Cadillac", color: "#ffd700", 
-    img: "https://lh3.googleusercontent.com/d/1j_esvm_OfYqmfPB4lsKvbfPZUMO3FvCq",
-    headshot: "https://lh3.googleusercontent.com/d/106vLZiJ1hTJ1bc8wWOqTAYVB4D4RT7jk" 
-  }
+  "Kimi Antonelli": { team: "Mercedes", standingsTeam: "Mercedes", color: "#27f4d2", img: "https://lh3.googleusercontent.com/d/1XueMkRyOLH6YggOKxiU__FNxc1oxOhO7", headshot: "https://lh3.googleusercontent.com/d/1JPd4IiYhF5Wf_Ul75iPhe9zPw2v8teQN" },
+  "George Russell": { team: "Mercedes", standingsTeam: "Mercedes", color: "#27f4d2", img: "https://lh3.googleusercontent.com/d/1wineMhWS2aqA68eErrDxvikfopeorSKD", headshot: "https://lh3.googleusercontent.com/d/1cogOB1tyuiXSx7wzLIopjEDy9OGOqai-" },
+  "Max Verstappen": { team: "Red Bull Racing", standingsTeam: "Red Bull Racing", color: "#3671c6", img: "https://lh3.googleusercontent.com/d/1FIH6Hjzdr9KKxf5yYYgpFJzX2GJmp5MZ", headshot: "https://lh3.googleusercontent.com/d/1XUMoxEkMqVjcgkZJ_WICLlGzx4xD-Ti_" },
+  "Isack Hadjar": { team: "Red Bull Racing", standingsTeam: "Red Bull Racing", color: "#3671c6", img: "https://lh3.googleusercontent.com/d/1eR94vK-62qi7bDucBnuvHNicUcve06SA", headshot: "https://lh3.googleusercontent.com/d/1O8gJ_jYfKRjeksWwkk-70XaXelhucVzb" },
+  "Lando Norris": { team: "McLaren", standingsTeam: "McLaren", color: "#ff8000", img: "https://lh3.googleusercontent.com/d/15gZwBnLjfhkbT2jwoXq0oe53DoinzLUR", headshot: "https://lh3.googleusercontent.com/d/1V-8HQn6Pfv2-V8MOi3X1ncN3eS_sGfPX" },
+  "Oscar Piastri": { team: "McLaren", standingsTeam: "McLaren", color: "#ff8000", img: "https://lh3.googleusercontent.com/d/1LZaV4wfjgXtaN35WgxwuzZiE2HdCfFbs", headshot: "https://lh3.googleusercontent.com/d/1WvMxJEp2wRPz2ZulvHOdQ2k7QW4Gm0Yj" },
+  "Lewis Hamilton": { team: "Ferrari", standingsTeam: "Ferrari", color: "#e10600", img: "https://lh3.googleusercontent.com/d/1lZb4XYfCoxHyZnaqkaUoUbET1z8W6pKz", headshot: "https://lh3.googleusercontent.com/d/1f9OyBz8nBeNPuaF1KLdrGlUuUybiHFNx" },
+  "Charles Leclerc": { team: "Ferrari", standingsTeam: "Ferrari", color: "#e10600", img: "https://lh3.googleusercontent.com/d/1E1xYy5TP1ei7CqBNFsU-MI0Evr3w2sK4", headshot: "https://lh3.googleusercontent.com/d/1hynvMyKMqqBkGqq96sCTj0yPx_3nAJd7" },
+  "Liam Lawson": { team: "VCARB", standingsTeam: "VCARB", color: "#6692ff", img: "https://lh3.googleusercontent.com/d/11RZ7qdc_blnLI4QmWTFOq2b-ontSKjnR", headshot: "https://lh3.googleusercontent.com/d/1exC0YVYungiAqMJ0AnCP9d1XeWkIsgXl" },
+  "Arvid Lindblad": { team: "VCARB", standingsTeam: "VCARB", color: "#6692ff", img: "https://lh3.googleusercontent.com/d/1SMM0ioYV1iuDY3IdjeILDHcyrz585RLx", headshot: "https://lh3.googleusercontent.com/d/1SNOnd7pux2M-jB4-puulcXwpZbh3vxew" },
+  "Nico Hülkenberg": { team: "Audi", standingsTeam: "Sauber", color: "#00e701", img: "https://lh3.googleusercontent.com/d/1gAGhigxnQpFXRJzmomddT1pdQgxrflJO", headshot: "https://lh3.googleusercontent.com/d/1gilFs7cWCw4gZNILUPwqCnYZ-ZA1dQuJ" },
+  "Gabriel Bortoleto": { team: "Audi", standingsTeam: "Sauber", color: "#00e701", img: "https://lh3.googleusercontent.com/d/1rQQ2uxUgKw1YMqLFndjIAhNHvbTC31qI", headshot: "https://lh3.googleusercontent.com/d/1jlp92jslcQEXfc5XivFmjAZMY7iKC4ju" },
+  "Oliver Bearman": { team: "Haas", standingsTeam: "Haas", color: "#ffffff", img: "https://lh3.googleusercontent.com/d/1y32Nd5CGiQQL9LVXW2Yyg-uBGCdE62QL", headshot: "https://lh3.googleusercontent.com/d/1dFbFnhW82fxap4gYVWsExd6xZmo-axmk" },
+  "Esteban Ocon": { team: "Haas", standingsTeam: "Haas", color: "#ffffff", img: "https://lh3.googleusercontent.com/d/1dIYK5u651tz4uFLXElJY7RijV4EKRBGd", headshot: "https://lh3.googleusercontent.com/d/1G0ZXdtwaFsl7YB2abkFPbtFS7YTJ2R44" },
+  "Carlos Sainz": { team: "Williams", standingsTeam: "Williams", color: "#005aff", img: "https://lh3.googleusercontent.com/d/1xpTy6YAwaPPA1NOHQdg3SttuEi0T1TsW", headshot: "https://lh3.googleusercontent.com/d/11OnFZVfgKQuIn-iiTOy8gn84ef8HEcP2" },
+  "Alexander Albon": { team: "Williams", standingsTeam: "Williams", color: "#005aff", img: "https://lh3.googleusercontent.com/d/1LnzHzqrhNAL1l3w7mVtr-iKTD4Rk06gw", headshot: "https://lh3.googleusercontent.com/d/11hihz-EOy8lWhLeYC0_1gJ8MZfRHiyHa" },
+  "Pierre Gasly": { team: "Alpine", standingsTeam: "Alpine", color: "#ff87bc", img: "https://lh3.googleusercontent.com/d/1maqM4IhIgFkmRQ_KelrWPQraNPO_qu5_", headshot: "https://lh3.googleusercontent.com/d/15agHTWnibHBmPgyoyodzfEFc4xbBFA7r" },
+  "Franco Colapinto": { team: "Alpine", standingsTeam: "Alpine", color: "#ff87bc", img: "https://lh3.googleusercontent.com/d/1Fnl0mVNwXZZC41s0SQU9AqAwQkD1f198", headshot: "https://lh3.googleusercontent.com/d/1HixFZqNBYmS933gXxneOInA-Be9daQ1K" },
+  "Fernando Alonso": { team: "Aston Martin", standingsTeam: "Aston Martin", color: "#229971", img: "https://lh3.googleusercontent.com/d/1b9pCYfexGdOmo8fLfDTiH4spH5lXJrLU", headshot: "https://lh3.googleusercontent.com/d/1s551SXjYkq2g0E2OWCN5TyUGq_-PPc-L" },
+  "Lance Stroll": { team: "Aston Martin", standingsTeam: "Aston Martin", color: "#229971", img: "https://lh3.googleusercontent.com/d/1VCHnoTG4I8LiJL6AxBMnsXGJU4jpLbAi", headshot: "https://lh3.googleusercontent.com/d/1cIob029sx-tSOm9IGLFWwzc0sqzHxOrB" },
+  "Sergio Pérez": { team: "Cadillac", standingsTeam: "Cadillac", color: "#ffd700", img: "https://lh3.googleusercontent.com/d/1DAVP6b75_8Y0v4LEfCKnXlNxnKhOgHBh", headshot: "https://lh3.googleusercontent.com/d/1U14btMCB4fF9UamzLjbGUHmFCfs-3jSp" },
+  "Valtteri Bottas": { team: "Cadillac", standingsTeam: "Cadillac", color: "#ffd700", img: "https://lh3.googleusercontent.com/d/1j_esvm_OfYqmfPB4lsKvbfPZUMO3FvCq", headshot: "https://lh3.googleusercontent.com/d/106vLZiJ1hTJ1bc8wWOqTAYVB4D4RT7jk" }
 };
 
 const DRIVERS = Object.keys(DRIVER_INFO);
@@ -293,7 +200,6 @@ function buildDriverGrid() {
     const info = DRIVER_INFO[name] || { team: "F1", color: "#888888", img: DEFAULT_DRIVER_IMG };
     const safeName = name.replace(/'/g, "\\'");
     
-    // ดึงลิงก์โลโก้ทีม
     const logoUrl = TEAM_LOGOS[info.team] ? getDriveDirectLink(TEAM_LOGOS[info.team]) : '';
     const logoHtml = logoUrl ? '<img src="' + logoUrl + '" class="driver-pick-team-logo" alt="">' : '';
 
@@ -322,14 +228,12 @@ function openDriverSelector(slotId) {
     titleEl.innerHTML = '<i class="fa-solid fa-helmet-safety text-danger me-2"></i>เลือกนักแข่งสำหรับ ' + (titles[slotId] || '');
   }
 
-  // 1. ล้างสถานะไฮไลต์และป้ายเดิมทั้งหมดออกก่อน
   document.querySelectorAll('.driver-pick-btn').forEach(function(btn) {
     btn.classList.remove('already-selected');
     const badgeContainer = btn.querySelector('.driver-pick-badges');
     if (badgeContainer) badgeContainer.innerHTML = '';
   });
 
-  // 2. ดึงค่าปัจจุบันจากระบบว่านักแข่งคนไหนอยู่ตำแหน่งไหนบ้าง
   const currentPicks = {
     'p1': document.getElementById('pos1') ? document.getElementById('pos1').value : '',
     'p2': document.getElementById('pos2') ? document.getElementById('pos2').value : '',
@@ -340,7 +244,6 @@ function openDriverSelector(slotId) {
   
   const posLabels = { 'p1': 'P1', 'p2': 'P2', 'p3': 'P3', 'p4': 'P4', 'pfl': 'FL' };
 
-  // 3. วนลูปสร้างป้ายแปะทับลงไปบนการ์ดนักแข่งที่ถูกเลือกไปแล้ว
   Object.keys(currentPicks).forEach(function(pos) {
     const driverName = currentPicks[pos];
     if (driverName) {
@@ -364,43 +267,35 @@ function confirmSelectDriver(driverName) {
   triggerHaptic();
   if (!currentSelectingSlot) return;
 
-  // 1. บันทึกค่าและอัปเดต UI ของการ์ดที่กำลังเลือกอยู่
   const selectEl = document.getElementById(currentSelectingSlot);
   if (selectEl) selectEl.value = driverName;
   updateCardUI(currentSelectingSlot, driverName);
 
-  // 2. กำหนดลำดับการเลือก (Flow)
   const slotSequence = ['pos1', 'pos2', 'pos3', 'pos4', 'posFL'];
   const currentIndex = slotSequence.indexOf(currentSelectingSlot);
 
-  // เช็กว่าซ่อนช่อง FL อยู่หรือไม่ (กรณีเป็น Sprint Race)
   const flWrapper = document.getElementById('flWrapper');
   const isSprint = flWrapper && flWrapper.style.display === 'none';
 
   let nextSlot = null;
-  // ถ้าไม่ใช่ช่องสุดท้าย ให้หาช่องถัดไป
   if (currentIndex !== -1 && currentIndex < slotSequence.length - 1) {
     nextSlot = slotSequence[currentIndex + 1];
-    
-    // ถ้าช่องถัดไปคือ FL และเป็นรอบ Sprint ให้ถือว่าจบการเลือก (ไม่มี nextSlot)
     if (isSprint && nextSlot === 'posFL') {
       nextSlot = null; 
     }
   }
 
-  // 3. ไปช่องถัดไป หรือ ปิดหน้าต่าง
   if (nextSlot) {
-    // หน่วงเวลา 150ms ให้ผู้เล่นเห็นว่าเลือกสำเร็จ ก่อนโหลดป้ายสลับไปตำแหน่งถัดไป
     setTimeout(function() {
       openDriverSelector(nextSlot);
     }, 150);
   } else {
-    // ถ้าจบ Flow แล้ว (ครบ P4 ใน Sprint หรือครบ FL ในรอบปกติ) ให้ปิด Modal
     if (driverSelectorModalInstance) {
       driverSelectorModalInstance.hide();
     }
   }
 }
+
 function updateCardUI(slotId, driverName) {
   const card = document.getElementById('card-' + slotId);
   if (!card) return;
@@ -535,7 +430,7 @@ function confirmLoginGate() {
     btn.disabled = false; btn.innerHTML = oldText;
     if (res.success) {
       localStorage.setItem('f1_player_name', selected); 
-      localStorage.setItem('f1_player_pin', pin); // บันทึกรหัส PIN ลงในเครื่องเพื่อใช้ยืนยันตอนส่ง 
+      localStorage.setItem('f1_player_pin', pin); 
       if (pinEl) pinEl.value = '';
       updateUserSessionUI(); 
       loginGateModalInstance.hide(); 
@@ -563,7 +458,6 @@ function forceRefreshData() {
   isRefreshing = true;
   triggerHaptic();
   
-  // ทำให้ปุ่มรีเฟรชหมุนแทนการขึ้นหน้าดำเต็มจอ
   const refreshBtns = document.querySelectorAll('.fa-rotate');
   refreshBtns.forEach(btn => btn.classList.add('fa-spin'));
   
@@ -601,38 +495,18 @@ function renderUI(data) {
   }
   updateUserSessionUI();
 
- const openRaces = globalRaces.filter(function(r) { return r.status === 'OPEN'; });
+  const openRaces = globalRaces.filter(function(r) { return r.status === 'OPEN'; });
   const selRace = document.getElementById('selRace');
   
   if (selRace) {
-    // 1. จำค่าสนามที่ผู้ใช้กำลังเลือกอยู่ตอนนี้
     const currentSelected = selRace.value; 
-    
-    // 2. สร้างตัวเลือกสนามใหม่
     selRace.innerHTML = '<option value="" disabled selected>-- เลือกสนาม --</option>' + openRaces.map(function(r) { return '<option value="' + r.id + '" data-type="' + r.type + '" data-dl="' + r.deadline + '">🟢 ' + r.name + '</option>'; }).join('');
     
-    // 3. คืนค่าสนามเดิมที่เลือกไว้ หรือ Auto-select ถ้ามีเปิดแค่สนามเดียว
     if (currentSelected && openRaces.some(function(r) { return r.id === currentSelected; })) {
       selRace.value = currentSelected;
     } else if (!currentSelected && openRaces.length === 1) {
       selRace.value = openRaces[0].id;
-      setTimeout(onRaceChange, 100); // อัปเดต UI หน้าจอทันที
-    }
-  }
-  
-  if(selRace) {
-    // 1. จำค่าสนามที่ผู้ใช้กำลังเลือกอยู่ตอนนี้
-    const currentSelected = selRace.value; 
-    
-    // 2. สร้างตัวเลือกสนามใหม่
-    selRace.innerHTML = '<option value="" disabled selected>-- เลือกสนาม --</option>' + openRaces.map(function(r) { return '<option value="' + r.id + '" data-type="' + r.type + '" data-dl="' + r.deadline + '">🟢 ' + r.name + '</option>'; }).join('');
-    
-    // 3. ถ้าเลือกค้างไว้ ให้เซ็ตค่ากลับไป / แต่ถ้ายังไม่เลือกและมีสนามเปิดแค่ 1 สนาม ให้เลือกอัตโนมัติเลย
-    if (currentSelected && openRaces.some(r => r.id === currentSelected)) {
-      selRace.value = currentSelected;
-    } else if (!currentSelected && openRaces.length === 1) {
-      selRace.value = openRaces[0].id;
-      setTimeout(() => onRaceChange(), 100); // อัปเดต UI ทันที
+      setTimeout(onRaceChange, 100); 
     }
   }
 
@@ -642,11 +516,9 @@ function renderUI(data) {
   if (globalRaces.length > 0) { document.getElementById('adMediaRace').value = globalRaces[0].id; onAdminMediaRaceChange(); }
   if (openRaces.length > 0) { document.getElementById('selCenterRace').value = openRaces[0].id; document.getElementById('sel2025Race').value = openRaces[0].id; onCenterRaceChange(); on2025RaceChange(); }
 
-  // --- ส่วนสร้างตารางคะแนน (Leaderboard) ---
   const lbContainer = document.getElementById('lbListContainer'); 
   const podiumContainer = document.getElementById('podiumContainer');
 
-  // ✅ แก้ไขเงื่อนไข if / else ให้ถูกต้อง
   if (!globalLeaderboard || globalLeaderboard.length === 0) {
     if (podiumContainer) podiumContainer.innerHTML = ''; 
     if (lbContainer) lbContainer.innerHTML = '<div class="text-center text-muted py-3">ยังไม่มีคะแนนสะสม</div>';
@@ -657,7 +529,6 @@ function renderUI(data) {
     const top3 = globalLeaderboard[2];
     const rest = globalLeaderboard.slice(3);
 
-    // --- 🥇 การ์ดอันดับ 1 (King Card) ---
     if (top1) {
       const team = top1[4] || "F1";
       const teamColor = TEAM_COLORS[team] || "#555555";
@@ -681,7 +552,6 @@ function renderUI(data) {
                     '</div>';
     }
 
-    // --- 🥈🥉 การ์ดอันดับ 2 และ 3 (Prince Cards) ---
     if (top2 || top3) {
       podiumHtml += '<div class="princes-row">';
       [top2, top3].forEach(function(p, idx) {
@@ -716,7 +586,6 @@ function renderUI(data) {
 
     if(podiumContainer) podiumContainer.innerHTML = podiumHtml;
 
-    // ส่วนประกอบร่างการ์ดรูปรถ (อันดับ 4 เป็นต้นไป)
     if(lbContainer) {
       lbContainer.innerHTML = rest.map(function(row) {
         const rank = row[0];
@@ -818,7 +687,6 @@ function updateUserSessionUI() {
     document.getElementById('myCurrentRank').innerText = 'อันดับที่ ' + match[0]; 
     document.getElementById('myTotalScore').innerText = match[2]; 
     
-    // ดึงข้อมูลทีมของตัวเองมาเซ็ตเป็นสีเรืองแสงของแบนเนอร์
     const team = match[4] || "F1";
     const teamColor = TEAM_COLORS[team] || "#e10600";
     if (bannerEl) bannerEl.style.setProperty('--theme-color', teamColor);
@@ -838,7 +706,6 @@ function onRaceChange() {
   const isSprint = opt.dataset.type === 'Sprint'; 
   document.getElementById('flWrapper').style.display = isSprint ? 'none' : 'block';
   
-  // 👇 จุดที่แก้ไข: เปลี่ยนมาใช้ฟังก์ชัน parseThaiDeadline เพื่อป้องกันเวลาเพี้ยน
   let rawDl = (opt.dataset.dl || "").trim(); 
   currentDeadline = parseThaiDeadline(rawDl);
   startCountdown();
@@ -883,44 +750,14 @@ function onRaceChange() {
   } else { histAlert.style.display = 'none'; }
 }
 
-  ['pos1','pos2','pos3','pos4','posFL'].forEach(function(id) { 
-    const el = document.getElementById(id);
-    if (el) el.value = ''; 
-    updateCardUI(id, ''); 
-  });
-
-  const player = localStorage.getItem('f1_player_name'); 
-  const histAlert = document.getElementById('savedPredAlert');
-  if (player) {
-    callGAS("getUserSavedPrediction", { raceId: raceId, playerName: player }).then(function(res) {
-      if (res.found) {
-        histAlert.style.display = 'block'; 
-        document.getElementById('savedPredTime').innerText = 'บันทึกเมื่อ: ' + res.submittedAt; 
-        document.getElementById('savedPredContent').innerHTML = '<strong>P1:</strong> ' + res.p1 + ' | <strong>P2:</strong> ' + res.p2 + '<br><strong>P3:</strong> ' + res.p3 + ' | <strong>P4:</strong> ' + res.p4 + (res.fl ? ' | <strong>FL:</strong> ' + res.fl : '');
-
-        const savedVals = [res.p1, res.p2, res.p3, res.p4, res.fl];
-        ['pos1','pos2','pos3','pos4','posFL'].forEach(function(id, i) { 
-          const val = savedVals[i] || '';
-          const el = document.getElementById(id);
-          if (el) el.value = val; 
-          updateCardUI(id, val);
-        });
-      } else { histAlert.style.display = 'none'; }
-    });
-  } else { histAlert.style.display = 'none'; }
-}
-
-// ฟังก์ชันแปลงข้อความยาง (เช่น "C2 / C3 / C4") ให้เป็นวงกลมสีขอบยาง Pirelli (Hard ขาว / Medium เหลือง / Soft แดง)
 function formatPirelliTires(tireStr) {
   if (!tireStr || tireStr.trim() === '-' || tireStr.trim() === '') return '-';
   
-  // ค้นหาตัวเลขเบอร์ยาง เช่น C1, C2, C3, C4, C5, C6
   const matches = tireStr.toUpperCase().match(/C\d/g);
   if (!matches || matches.length === 0) {
-    return tireStr; // ถ้าไม่ได้พิมพ์ในรูปแบบ C1-C6 ให้แสดงข้อความตามปกติ
+    return tireStr;
   }
 
-  // เรียงลำดับจากเลขน้อยไปมาก (เลขน้อย = แข็ง Hard, เลขกลาง = Medium, เลขมาก = นิ่ม Soft)
   const sorted = matches.slice().sort(function(a, b) {
     return parseInt(a.replace('C', '')) - parseInt(b.replace('C', ''));
   });
@@ -953,7 +790,6 @@ function onCenterRaceChange() {
   currentActiveMedia = currentRace.media || null; 
   const m = currentActiveMedia || {};
 
-  // 1. ควบคุมการแสดงผล "ผลการฝึกซ้อมรวม" (แสดงภาพทันที / ซ่อนถ้าไม่มีลิงก์)
   const practiceWrapper = document.getElementById('practiceSectionWrapper');
   const thumbPrac = document.getElementById('thumbPractice');
   
@@ -967,7 +803,6 @@ function onCenterRaceChange() {
     }
   }
   
-  // 2. ปุ่มดูอัตราต่อรอง
   const oddsBtn = document.getElementById('rcExtLinkBtn');
   if (oddsBtn) { 
     if (m.extLink && m.extLink.trim() !== "") { 
@@ -979,7 +814,6 @@ function onCenterRaceChange() {
     } 
   }
   
-  // 3. ข้อมูล Telemetry Spec Sheet (พร้อมแปลงยาง Pirelli เป็นวงกลมสี)
   const info = currentRace.trackInfo || {};
   document.getElementById('rcTrackType').innerText = info.trackType || '-'; 
   document.getElementById('rcTires').innerHTML = formatPirelliTires(info.tires || '-'); 
@@ -988,7 +822,6 @@ function onCenterRaceChange() {
   document.getElementById('rcPrevWinners').innerText = info.prevWinners || '-'; 
   document.getElementById('rcKeyNote').innerText = info.keyNote || '-';
 
-  // 4. ควบคุมการแสดงผล "รูปแผนผังแทร็ก" ด้านบนการ์ด
   const layoutWrapper = document.getElementById('rcTrackLayoutWrapper');
   const layoutImg = document.getElementById('rcTrackLayoutImg');
   if (layoutWrapper && layoutImg) {
@@ -1013,7 +846,6 @@ function on2025RaceChange() {
   currentActiveMedia = currentRace.media || null; 
   const m = currentActiveMedia || {};
 
-  // อัปเดตจุดไฟสถานะสีเขียวบนปุ่มสวิตช์ว่าโหมดไหนมีรูปบ้าง
   const dotQuali = document.getElementById('dotQuali2025');
   const dotRace = document.getElementById('dotRace2025');
   const hasQuali = !!(m.quali2025 && m.quali2025.trim() !== "");
@@ -1022,7 +854,6 @@ function on2025RaceChange() {
   if (dotQuali) dotQuali.className = hasQuali ? 'seg-dot ready' : 'seg-dot';
   if (dotRace) dotRace.className = hasRace ? 'seg-dot ready' : 'seg-dot';
 
-  // Smart Auto-Fallback: ถ้าโหมดที่เปิดค้างไว้ไม่มีรูป แต่โหมดอื่นมีรูป ให้สลับไปโหมดที่มีรูปอัตโนมัติ
   if (currentArchiveMode === 'quali2025' && !hasQuali && hasRace) {
     currentArchiveMode = 'race2025';
   } else if (currentArchiveMode === 'race2025' && !hasRace && hasQuali) {
@@ -1043,7 +874,6 @@ function switchArchiveMode(mode, skipHaptic) {
   const badge = document.getElementById('archiveFloatingBadge');
   const emptyState = document.getElementById('archiveEmptyState');
 
-  // เปลี่ยนสีปุ่มสวิตช์และข้อความหัวข้อ Sci-Fi
   if (mode === 'quali2025') {
     if (btnQuali) btnQuali.className = 'archive-seg-btn active-quali';
     if (btnRace) btnRace.className = 'archive-seg-btn';
@@ -1088,7 +918,6 @@ function openActiveArchivePreview() {
 function parseThaiDeadline(rawDl) {
   if (!rawDl) return null;
   let cleanStr = rawDl.trim().replace(' ', 'T');
-  // บังคับโซนเวลาไทย (+07:00) ป้องกันบั๊กเวลาเพี้ยนในมือถือบางรุ่น
   if (!cleanStr.includes('Z') && !cleanStr.includes('+') && cleanStr.length <= 19) {
     if (cleanStr.split(':').length === 2) cleanStr += ':00';
     cleanStr += '+07:00';
@@ -1103,7 +932,7 @@ function startCountdown() {
   const submitBtn = document.getElementById('btnPred');
   if (!box) return;
 
-  box.className = 'countdown-box'; // Reset สถานะสี
+  box.className = 'countdown-box'; 
 
   if (!currentDeadline || isNaN(currentDeadline.getTime())) {
     box.style.display = 'block';
@@ -1112,7 +941,6 @@ function startCountdown() {
   }
 
   box.style.display = 'block';
-  // สร้างโครงสร้าง HTML แค่ครั้งเดียว
   box.innerHTML = `
     <div class="timer-units">
       <div><div class="timer-num" id="t-day">00</div><div class="timer-lbl">DAY</div></div>
@@ -1141,9 +969,8 @@ function startCountdown() {
       return;
     }
 
-    // เปลี่ยนสีกรอบตามความเร่งด่วน
-    if (diff <= 900000) { box.className = 'countdown-box status-critical'; } // ต่ำกว่า 15 นาที
-    else if (diff <= 3600000) { box.className = 'countdown-box status-warning'; } // ต่ำกว่า 1 ชม.
+    if (diff <= 900000) { box.className = 'countdown-box status-critical'; } 
+    else if (diff <= 3600000) { box.className = 'countdown-box status-warning'; } 
     else { box.className = 'countdown-box'; }
 
     if (submitBtn && submitBtn.disabled) {
@@ -1156,7 +983,6 @@ function startCountdown() {
     const m = Math.floor((diff / 60000) % 60);
     const s = Math.floor((diff / 1000) % 60);
 
-    // อัปเดตเฉพาะตัวเลขที่เปลี่ยน (ลดการทำงาน CPU)
     if (elDay && elDay.textContent !== pad(d)) elDay.textContent = pad(d);
     if (elHr  && elHr.textContent  !== pad(h)) elHr.textContent  = pad(h);
     if (elMin && elMin.textContent !== pad(m)) elMin.textContent = pad(m);
@@ -1171,9 +997,9 @@ function startCountdown() {
 // 3. ADVANCED SCORING ENGINE (ระบบตรวจคะแนนแบบละเอียด)
 // =========================================================
 const SCORING_RULES = {
-  EXACT_POS: 2,        // ทายถูกตรงตำแหน่งเป๊ะ ได้ 2 คะแนน
-  FASTEST_LAP: 1,      // ทาย Fastest Lap ถูก ได้ 1 คะแนน
-  IN_TOP4_WRONG_POS: 0 // ถ้าอนาคตอยากให้คะแนนคนทายติด Top 4 แต่ผิดอันดับ ให้แก้เลขนี้
+  EXACT_POS: 2,        
+  FASTEST_LAP: 1,      
+  IN_TOP4_WRONG_POS: 0 
 };
 
 function calculateDetailedScore(actual, pred, isSprint = false) {
@@ -1274,7 +1100,6 @@ function openBreakdownModal(raceId) {
     });
 }
 
-// ฟังก์ชันย่อชื่อนักแข่งให้แสดงนามสกุลบนตั๋วได้กระชับสวยงาม
 function getShortDriverName(fullName) {
   if (!fullName || fullName === '-') return '-';
   const parts = fullName.trim().split(' ');
@@ -1290,7 +1115,6 @@ function loadCommunityPredictions() {
   const isCalculated = currentRace && currentRace.status === 'CALCULATED';
 
   callGAS("getCommunityPredictions", { raceId: raceId }).then(function(res) {
-    // 1. กรณีสนามยังไม่ปิดรับ (แสดงตั๋ว Paddock ล็อก พร้อมตราประทับสีแดง LOCKED)
     if (!res.locked) { 
       box.innerHTML = 
         '<div class="locked-ticket-card">' +
@@ -1308,7 +1132,6 @@ function loadCommunityPredictions() {
 
     const total = res.predictions.length;
 
-    // 2. คำนวณเปอร์เซ็นต์โหวตจริงจากโพยทั้งหมดในสนามนั้น (P1 และ FL)
     const p1Counts = {};
     const flCounts = {};
     res.predictions.forEach(function(p) {
@@ -1328,7 +1151,6 @@ function loadCommunityPredictions() {
       if (maxCount === 0) return { driver: fallbackText || '-', pct: 0, count: 0, color: '#e10600' };
       const pct = Math.round((maxCount / total) * 100);
       const dInfo = DRIVER_INFO[topDriver] || { color: '#e10600' };
-      // ถ้าสีทีมเป็นขาวล้วนหรือมืดเกินไป ให้ปรับโทนให้สว่างชัดบนหลอด
       const barColor = dInfo.color || '#e10600';
       return { driver: topDriver, pct: pct, count: maxCount, color: barColor };
     }
@@ -1336,7 +1158,6 @@ function loadCommunityPredictions() {
     const topP1Stat = getTopStat(p1Counts, res.topP1);
     const topFLStat = getTopStat(flCounts, res.topFL);
 
-    // 3. สร้างกล่องหลอดพลังโหวต (Consensus Progress Bar) เติมสีตามทีมนักแข่ง
     let html = 
       '<div class="consensus-telemetry-box">' +
         '<div class="consensus-header">' +
@@ -1344,7 +1165,6 @@ function loadCommunityPredictions() {
           '<span class="badge bg-dark border border-secondary text-light">' + total + ' PADDOCK PASSES</span>' +
         '</div>' +
 
-        // หลอดโหวต P1
         '<div class="consensus-item">' +
           '<div class="consensus-label-row">' +
             '<span class="text-secondary small">🏆 มหาชนเทใจ P1: <strong class="consensus-driver ms-1">' + topP1Stat.driver + '</strong></span>' +
@@ -1355,7 +1175,6 @@ function loadCommunityPredictions() {
           '</div>' +
         '</div>' +
 
-        // หลอดโหวต Fastest Lap
         '<div class="consensus-item">' +
           '<div class="consensus-label-row">' +
             '<span class="text-secondary small">⚡ เต็ง Fastest Lap: <strong class="consensus-driver ms-1">' + topFLStat.driver + '</strong></span>' +
@@ -1367,14 +1186,12 @@ function loadCommunityPredictions() {
         '</div>' +
       '</div>';
 
-    // 4. สร้างตั๋วโพยทายผลของเพื่อนแต่ละคน (Paddock Pass Tickets)
     html += res.predictions.map(function(p, idx) {
       const c1 = (DRIVER_INFO[p.p1] || {}).color || '#64748b';
       const c2 = (DRIVER_INFO[p.p2] || {}).color || '#64748b';
       const c3 = (DRIVER_INFO[p.p3] || {}).color || '#64748b';
       const c4 = (DRIVER_INFO[p.p4] || {}).color || '#64748b';
 
-      // ส่วนหางตั๋วฝั่งขวา: ถ้าแข่งจบแล้วโชว์คะแนนใหญ่ๆ ถ้ายังไม่แข่งโชว์ตราประทับ LOCKED IN
       let stubContent = '';
       if (isCalculated || Number(p.score) > 0) {
         stubContent = 
@@ -1444,15 +1261,13 @@ function handleAdminSaveMediaLinks() {
   const raceId = document.getElementById('adMediaRace').value; 
   if (!pin || !raceId) { showToast('กรุณากรอก Admin PIN', 'error'); return; } 
 
-  // ดึงค่าผังสนาม (trackLayoutImg) เดิมที่โหลดมาจาก Google Sheet เพื่อส่งค่าเดิมกลับไป 
-  // ทำให้ข้อมูลที่คุณวางไว้ใน Sheet ไม่ถูกเขียนทับ
   const currentRace = globalRaces.find(function(r) { return r.id === raceId; });
   const existingLayoutImg = (currentRace && currentRace.media && currentRace.media.trackLayoutImg) ? currentRace.media.trackLayoutImg : "";
 
   const payload = { 
     raceId: raceId, 
-    trackImg: document.getElementById('adTrackImgUrl').value.trim(), // รูปปกสนาม (จากช่องกรอกแอดมิน)
-    trackLayoutImg: existingLayoutImg, // รูปผังสนาม (ดึงค่าเดิมจาก Sheet เสมอ)
+    trackImg: document.getElementById('adTrackImgUrl').value.trim(), 
+    trackLayoutImg: existingLayoutImg, 
     practiceImg: document.getElementById('adPracticeUrl').value.trim(), 
     quali2025: document.getElementById('adQuali2025Url').value.trim(), 
     race2025: document.getElementById('adRace2025Url').value.trim(), 
@@ -1560,10 +1375,10 @@ function handlePrediction(e) {
   }
 
   const btn = document.getElementById('btnPred');
-  const playerPin = localStorage.getItem('f1_player_pin') || ''; // ดึง PIN ที่จำไว้
+  const playerPin = localStorage.getItem('f1_player_pin') || '';
   btn.disabled = true; 
   callGAS("submitPrediction", { 
-    pin: playerPin, // แนบไปให้ Google Apps Script ตรวจสอบ
+    pin: playerPin, 
     data: { playerName: player, raceId: rSel.value, type: rSel.options[rSel.selectedIndex].dataset.type, p1: p1, p2: p2, p3: p3, p4: p4, fl: document.getElementById('posFL').value } 
   }).then(function(res) { 
     btn.disabled = false; showToast(res.msg, res.success ? 'success' : 'error'); 
@@ -1586,7 +1401,7 @@ function handleAdminSubmit(e) {
     if (res.success) { document.getElementById('adminPin').value = ''; adminModalInstance.hide(); forceRefreshData(); } 
   }); 
 }
-// ฟังก์ชันรีเฟรชข้อมูลเฉพาะหน้า Race Center และ Race Archive แบบไม่แสดงหน้าจอดำ (Silent Refresh)
+
 function refreshRaceCenter() {
   triggerHaptic();
   if (isRefreshing) return;
@@ -1622,9 +1437,7 @@ function refreshRaceCenter() {
     showToast('Error: ' + err, 'error'); 
   });
 }
-// ==========================================
-// ฟังก์ชันสลับหน้าตาราง (รองรับ 3 แท็บ)
-// ==========================================
+
 function switchStandings(type) {
   const views = {
     'user': document.getElementById('user-standings-view'),
@@ -1637,31 +1450,25 @@ function switchStandings(type) {
     'team': document.getElementById('btn-team-standings')
   };
 
-  // ซ่อนทุกหน้าและเอา active ออกจากทุกปุ่ม
   Object.keys(views).forEach(key => {
     if (views[key]) views[key].classList.add('d-none');
     if (btns[key]) btns[key].classList.remove('active');
   });
 
-  // แสดงหน้าที่เลือกและไฮไลต์ปุ่ม
   if (views[type]) views[type].classList.remove('d-none');
   if (btns[type]) btns[type].classList.add('active');
 
-  // 👇 ควบคุมการแสดงผลกล่อง "ตรวจผลการแข่งขัน"
   const checkCard = document.getElementById('checkResultCard');
   if (checkCard) {
     if (type === 'user') {
-      checkCard.style.display = 'block'; // แสดงเฉพาะแท็บ PREDICTOR LEAGUE
+      checkCard.style.display = 'block'; 
     } else {
-      checkCard.style.display = 'none';  // ซ่อนเมื่อกดแท็บ F1 Drivers และ F1 Teams
+      checkCard.style.display = 'none';  
     }
   }
 }
-// ==========================================
-// 1. ฟังก์ชันสร้างตารางนักแข่งและตารางทีมในหน้า Standings อัตโนมัติ
-// ==========================================
+
 function initOfficialStandingsDOM() {
-  // 1.1 สร้างตารางนักแข่ง (ใช้รูป info.headshot แยกกับหน้าทายผล)
   const driverListEl = document.getElementById('driverStandingsList');
   if (driverListEl) {
     driverListEl.innerHTML = Object.keys(DRIVER_INFO).map((fullName, idx) => {
@@ -1686,7 +1493,6 @@ function initOfficialStandingsDOM() {
     }).join('');
   }
 
-  // 1.2 สร้างตารางทีม (ใช้โลโก้จาก STANDINGS_TEAM_LOGOS)
   const teamListEl = document.getElementById('teamStandingsList');
   if (teamListEl) {
     const mainTeams = ["Ferrari", "Red Bull Racing", "McLaren", "Mercedes", "Aston Martin", "Alpine", "Williams", "VCARB", "Audi", "Haas", "Cadillac"];
@@ -1713,16 +1519,12 @@ function initOfficialStandingsDOM() {
   }
 }
 
-// ==========================================
-// 2. ระบบดึงคะแนนนักแข่ง F1 อัตโนมัติ (Fetch API)
-// ==========================================
 async function fetchF1Standings() {
   try {
     const response = await fetch('https://api.jolpi.ca/ergast/f1/current/driverStandings.json');
     const data = await response.json();
     const standings = data.MRData.StandingsTable.StandingsLists[0].DriverStandings;
     
-    // ชี้เป้าไปที่ #driverStandingsList ที่เราเพิ่งสร้างขึ้นมา
     const container = document.getElementById('driverStandingsList') || document.querySelector('.f1-official-standings');
     if (!container) return;
     const rows = container.querySelectorAll('.f1-standings-row');
@@ -1755,15 +1557,11 @@ async function fetchF1Standings() {
 
     rowsArray.forEach(row => row.remove());
     rowsArray.forEach(row => container.appendChild(row));
-    console.log("✅ อัปเดตตารางคะแนนนักแข่ง F1 ล่าสุดเรียบร้อย");
   } catch (error) {
     console.error('❌ เกิดข้อผิดพลาดในการดึงข้อมูลนักแข่ง F1 API:', error);
   }
 }
 
-// ==========================================
-// 3. ระบบดึงคะแนนทีม F1 อัตโนมัติ (Constructors)
-// ==========================================
 async function fetchF1TeamStandings() {
   try {
     const response = await fetch('https://api.jolpi.ca/ergast/f1/current/constructorStandings.json');
@@ -1783,7 +1581,6 @@ async function fetchF1TeamStandings() {
         const nameEl = row.querySelector('.team-name');
         if (!nameEl) return false;
         const htmlName = nameEl.innerText.toLowerCase();
-        // รองรับการจับคู่ทั้งชื่อตรง และกรณี Sauber/Audi ใน API
         if (apiTeamId.includes('sauber') && htmlName === 'audi') return true;
         return htmlName.includes(apiTeamId) || apiTeamId.includes(htmlName.split(' ')[0]);
       });
@@ -1803,17 +1600,13 @@ async function fetchF1TeamStandings() {
 
     rowsArray.forEach(row => row.remove());
     rowsArray.forEach(row => container.appendChild(row));
-    console.log("✅ อัปเดตตารางคะแนนทีมเรียบร้อย");
   } catch (error) {
     console.error('❌ เกิดข้อผิดพลาดในการดึงข้อมูลคะแนนทีม:', error);
   }
 }
 
-// ==========================================
-// 4. สั่งให้ระบบสร้าง DOM ตารางก่อน แล้วดึงข้อมูล API ทันทีเมื่อเปิดหน้าเว็บ
-// ==========================================
 document.addEventListener('DOMContentLoaded', () => {
-  initOfficialStandingsDOM(); // 1. สร้างแถวตารางนักแข่งและทีมขึ้นมาก่อน
-  fetchF1Standings();         // 2. ดึงคะแนนนักแข่งจาก API มาใส่
-  fetchF1TeamStandings();     // 3. ดึงคะแนนทีมจาก API มาใส่
+  initOfficialStandingsDOM(); 
+  fetchF1Standings();         
+  fetchF1TeamStandings();     
 });
