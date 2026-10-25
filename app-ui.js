@@ -21,6 +21,7 @@ let lastPendingList = [];
 let currentActiveMedia = null;
 let isRefreshing = false;
 let currentArchiveMode = 'quali2025';
+let playerChartInstance = null;
 
 function showToast(msg, type='success') { 
   const c = document.getElementById('f1ToastContainer'); 
@@ -1088,6 +1089,9 @@ function loadCommunityPredictions() {
   });
 }
 
+// =========================================================
+// PLAYER CAREER STATS (SUPER LICENSE + RACE-BY-RACE CHART)
+// =========================================================
 function showPlayerStats(playerName) {
   triggerHaptic(); 
   statsModalInstance.show(); 
@@ -1139,7 +1143,7 @@ function showPlayerStats(playerName) {
         <!-- 3. Telemetry Line Chart -->
         <div class="d-flex align-items-center mb-2">
           <i class="fa-solid fa-chart-area text-danger me-2"></i>
-          <span class="f1-font fw-bold text-white" style="letter-spacing: 0.5px; font-size: 0.9rem;">SEASON TREND</span>
+          <span class="f1-font fw-bold text-white" style="letter-spacing: 0.5px; font-size: 0.9rem;">RACE-BY-RACE TELEMETRY</span>
         </div>
         
         <div class="chart-container" style="position: relative; height: 220px; width: 100%; background: #0a0a0e; border: 1px solid rgba(255,255,255,0.05); border-radius: 10px; padding: 10px 5px;">
@@ -1151,23 +1155,26 @@ function showPlayerStats(playerName) {
 
     // การวาดกราฟผ่าน Chart.js (แสดงคะแนนรายสนามแบบวิ่งขึ้น-ลงได้)
     if (res.history && res.history.length > 0) {
+      if (playerChartInstance) {
+        playerChartInstance.destroy();
+      }
+
       const ctx = document.getElementById('playerTelemetryChart').getContext('2d');
       
       let labels = [];
       let dataPoints = [];
 
       res.history.forEach((h, i) => {
-        labels.push(`R${i+1}`); // ใช้ชื่อย่อ R1, R2...
+        labels.push(`R${i+1}`);
         const scoreNum = (h.score === '-' || h.score === '') ? 0 : Number(h.score);
-        dataPoints.push(scoreNum); // 📌 ใช้คะแนนของสนามนั้นๆ โดยตรง ไม่บวกสะสม
+        dataPoints.push(scoreNum); // ใช้คะแนนของสนามนั้นๆ โดยตรง ไม่บวกสะสม
       });
 
-      // เอฟเฟกต์สีไล่ระดับใต้เส้นกราฟ
       let gradient = ctx.createLinearGradient(0, 0, 0, 200);
       gradient.addColorStop(0, teamColor + '60'); 
       gradient.addColorStop(1, teamColor + '00'); 
 
-      new Chart(ctx, {
+      playerChartInstance = new Chart(ctx, {
         type: 'line',
         data: {
           labels: labels,
@@ -1182,7 +1189,7 @@ function showPlayerStats(playerName) {
             pointRadius: 4,
             pointHoverRadius: 6,
             fill: true,
-            tension: 0.3 // เส้นโค้งสมูท
+            tension: 0.3
           }]
         },
         options: {
@@ -1202,12 +1209,12 @@ function showPlayerStats(playerName) {
               callbacks: {
                 title: function(context) {
                   const idx = context[0].dataIndex;
-                  return res.history[idx].race; // โชว์ชื่อสนามเต็มเมื่อเอาเมาส์ชี้/แตะ
+                  return res.history[idx].race;
                 },
                 label: function(context) {
                   const idx = context.dataIndex;
                   const ptsEarned = res.history[idx].score;
-                  return `Race Score: +${ptsEarned} PTS`; // แสดงคะแนนของสนามนั้นๆ
+                  return `Race Score: +${ptsEarned} PTS`;
                 }
               }
             }
@@ -1219,8 +1226,9 @@ function showPlayerStats(playerName) {
             },
             y: {
               beginAtZero: true,
+              suggestedMax: 9,
               grid: { color: 'rgba(255, 255, 255, 0.05)', drawBorder: false },
-              ticks: { color: '#94a3b8', font: { family: 'Share Tech Mono', size: 10 }, maxTicksLimit: 5 }
+              ticks: { color: '#94a3b8', font: { family: 'Share Tech Mono', size: 10 }, stepSize: 2 }
             }
           },
           interaction: {
@@ -1230,8 +1238,10 @@ function showPlayerStats(playerName) {
         }
       });
     } else {
-        document.getElementById('playerTelemetryChart').parentElement.innerHTML = `<div class="text-center text-muted small py-5"><i class="fa-solid fa-satellite-dish mb-2 fs-4"></i><br>NO TELEMETRY DATA</div>`;
+      document.getElementById('playerTelemetryChart').parentElement.innerHTML = `<div class="text-center text-muted small py-5"><i class="fa-solid fa-satellite-dish mb-2 fs-4"></i><br>NO TELEMETRY DATA</div>`;
     }
+  });
+}
 
 function handleAdminDeadline() { 
   const pin = document.getElementById('adminPin').value, raceId = document.getElementById('adRaceDead').value, rawDt = document.getElementById('adNewDead').value; 
