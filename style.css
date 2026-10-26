@@ -2812,3 +2812,88 @@ body {
   font-weight: 800;
   line-height: 1;
 }
+/* =========================================================
+   F1 DRIVER HERO MODAL STYLES (Lewis Hamilton Style)
+   ========================================================= */
+.hero-modal-content {
+  background-color: #0a0e1c !important; /* โทนสีมืดแบบพรีเมียม */
+}
+.hero-bg-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  transition: background 0.5s ease;
+}
+.hero-driver-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 3.8rem;
+  line-height: 0.85;
+  letter-spacing: -1px;
+  text-shadow: 0 4px 15px rgba(0,0,0,0.6);
+  text-transform: uppercase;
+}
+.hero-team-icon {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+}
+.hero-driver-photo-container {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 2;
+}
+.hero-driver-cutout {
+  width: 140%; /* ซูมรูปให้ใหญ่ทะลุจอ */
+  max-width: 600px;
+  height: auto;
+  object-fit: contain;
+  transform-origin: bottom;
+  animation: scaleInHero 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.hero-photo-blur {
+  position: absolute;
+  bottom: 0; left: 0; right: 0; height: 50%;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  /* เอฟเฟกต์เบลอไล่ระดับกลืนไปกับพื้นหลัง */
+  mask-image: linear-gradient(to bottom, transparent 0%, black 60%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 60%);
+  pointer-events: none;
+}
+.hero-bottom-stats {
+  animation: fadeSlideUp 0.8s 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+  margin-bottom: 20px;
+}
+.hero-stat-box {
+  padding: 16px 10px;
+  border-radius: 16px;
+}
+.hero-stat-box.glass-panel {
+  background: rgba(20, 20, 30, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+.stat-label {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 700;
+}
+.stat-value {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 2.2rem;
+  font-weight: 800;
+  line-height: 1;
+  margin-top: 4px;
+}
+@keyframes scaleInHero {
+  from { opacity: 0; transform: scale(0.92) translateY(30px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
