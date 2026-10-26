@@ -2846,13 +2846,25 @@ body {
   justify-content: center;
   z-index: 2;
 }
+
 .hero-driver-cutout {
-  width: 140%; /* ซูมรูปให้ใหญ่ทะลุจอ */
+  width: 140%; 
   max-width: 600px;
   height: auto;
   object-fit: contain;
   transform-origin: bottom;
+  
+  /* เพิ่ม margin-bottom เพื่อดันรูปนักแข่งขึ้นให้พ้นจากกล่องสถิติ */
+  /* หากต้องการให้ขึ้นอีกหรือลงอีก สามารถปรับตัวเลข % ตรงนี้ได้ครับ เช่น 15% หรือ 20% */
+  margin-bottom: 15%; 
+  
   animation: scaleInHero 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ปรับระยะ Y ในแอนิเมชันตอนปรากฏตัวให้สอดคล้องกับตำแหน่งใหม่ */
+@keyframes scaleInHero {
+  from { opacity: 0; transform: scale(0.92) translateY(50px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
 }
 .hero-photo-blur {
   position: absolute;
