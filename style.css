@@ -2817,7 +2817,19 @@ body {
    ========================================================= */
 .hero-modal-content {
   background-color: #0a0e1c !important; 
-  transition: background 0.5s ease; /* ⚠️ ย้าย Transition มาไว้ที่นี่แทน */
+  transition: background 0.5s ease;
+  
+  /* เพิ่มคำสั่งบังคับให้เต็มจอทะลุขอบมือถือ */
+  min-height: 100vh;
+  min-height: 100dvh; /* ใช้ 100dvh (Dynamic Viewport) สำหรับมือถือรุ่นใหม่ๆ */
+  border-radius: 0 !important; /* ลบขอบโค้งออกให้แนบสนิทขอบจอ */
+  margin: 0 !important;
+}
+
+/* เพิ่มคำสั่งนี้เพื่อบังคับไม่ให้ Modal Dialog มีขอบบน */
+.modal-fullscreen {
+  padding: 0 !important;
+  margin: 0 !important;
 }
 .hero-driver-title {
   font-family: 'Rajdhani', sans-serif;
