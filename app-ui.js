@@ -1237,7 +1237,7 @@ function showPlayerStats(playerName) {
               beginAtZero: true,
               suggestedMax: 9,
               grid: { color: 'rgba(255, 255, 255, 0.05)', drawBorder: false },
-              ticks: { color: '#94a3b8', font: { family: 'Share Tech Mono', size: 10 }, stepSize: 2 }
+              ticks: { color: '#EDB40B', font: { family: 'Share Tech Mono', size: 12 }, stepSize: 2 }
             }
           },
           interaction: {
