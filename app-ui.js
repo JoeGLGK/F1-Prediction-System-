@@ -1560,6 +1560,36 @@ function animateCountUp(element, target, duration = 2200) {
   window.requestAnimationFrame(step);
 }
 
+// ฟังก์ชันสร้างลูกเล่นตัวเลขวิ่ง (Count-up Animation สไตล์ Cubic Ease-out)
+function animateCountUp(element, target, duration = 2200) {
+  let startTimestamp = null;
+  
+  // แปลงค่าเป้าหมายให้เป็นตัวเลขเสมอ ป้องกันการดึงค่าแล้วติดช่องว่าง
+  const targetNum = parseInt(String(target).replace(/,/g, '').trim(), 10) || 0;
+  
+  // ถ้าเป้าหมายคือ 0 ให้ใส่ 0 ทันที ไม่ต้องวิ่ง
+  if (targetNum === 0) {
+    element.innerText = "0";
+    return;
+  }
+  
+  const step = (timestamp) => {
+    if (!startTimestamp) startTimestamp = timestamp;
+    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+    
+    // สมการความเร่ง Cubic Ease-out (1 - (1-t)^3) ต้นจัด ปลายไหล
+    const easeProgress = 1 - Math.pow(1 - progress, 3); 
+    element.innerText = Math.floor(easeProgress * targetNum);
+    
+    if (progress < 1) {
+      window.requestAnimationFrame(step);
+    } else {
+      element.innerText = targetNum; // จบที่เป้าหมายเป๊ะๆ
+    }
+  };
+  window.requestAnimationFrame(step);
+}
+
 // ฟังก์ชันสำหรับเปิดหน้า F1 Driver Hero
 function openDriverHero(fullName, rowEl) {
   triggerHaptic();
@@ -1577,20 +1607,19 @@ function openDriverHero(fullName, rowEl) {
   document.getElementById('heroTeamName').innerText = info.team;
   document.getElementById('heroTeamLogo').src = getDriveDirectLink(TEAM_LOGOS[info.team] || '');
   
-  // ใช้รูป heroImg เป็นหลัก ถ้าไม่มีค่อยใช้ img 
   document.getElementById('heroDriverImg').src = getDriveDirectLink(info.heroImg || info.img); 
   
-  // ตั้งค่า Championship Position (P1, P2)
   document.getElementById('heroPos').innerText = 'P' + pos;
 
-  // เซ็ตคะแนนเป็น 0 ชั่วคราว และดีเลย์แอนิเมชันให้วิ่งหลัง Modal เปิด
+  // บังคับเซ็ตค่าเริ่มต้นของ element กลับไปเป็น 0 เสมอก่อนเริ่มนับ
   const ptsEl = document.getElementById('heroPoints');
   ptsEl.innerText = "0"; 
+  
+  // ให้ตัวเลขเริ่มวิ่งทันทีที่กดเข้าหน้าต่าง
   setTimeout(() => {
-    animateCountUp(ptsEl, pts, 2200); // เลขวิ่งความยาว 2.2 วินาที
-  }, 500); // หน่วงเวลา 0.5 วินาที รอให้ Modal เด้งขึ้นมาจนสุดก่อน
+    animateCountUp(ptsEl, pts, 2200); 
+  }, 10); 
 
-  // ไล่ระดับสีพื้นหลังตามสีประจำทีม
   document.getElementById('heroBgColor').style.background = `linear-gradient(to bottom, ${info.color}35 0%, #0a0e1c 65%)`;
 
   if (!window.driverHeroModalInstance) {
