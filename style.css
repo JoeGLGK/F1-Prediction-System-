@@ -2843,12 +2843,13 @@ body {
   z-index: 2;
 }
 .hero-driver-cutout {
-  width: 140%; 
-  max-width: 600px;
+  width: 115%; /* ลดขนาดความกว้างลงไม่ให้ล้นเกินไป */
+  max-width: 500px;
+  max-height: 65vh; /* ⚠️ จำกัดความสูงไม่ให้เกิน 65% ของหน้าจอ ป้องกันการบังตัวหนังสือ */
   height: auto;
   object-fit: contain;
-  transform-origin: bottom center; /* ⬅️ เปลี่ยนจุดขยายเป็นตรงกลางฐาน */
-  margin-bottom: 30%; /* ปรับระยะลอยขึ้นให้พ้นตัวเลข (ปรับลด/เพิ่มได้ตามรูปนักแข่ง) */
+  transform-origin: bottom center;
+  margin-bottom: 15vh; /* ใช้ vh เพื่อกะระยะให้พ้นตัวเลขด้านล่างอย่างพอดี */
   animation: scaleInHero 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 .hero-photo-blur {
