@@ -168,83 +168,56 @@
             <select id="posFL" class="driver-opt"></select>
           </div>
 
-          <label class="form-label mb-2"><i class="fa-solid fa-trophy text-warning me-1"></i> เลือกนักแข่งเข้าเส้นชัย (P1 - P4)</label>
-          <div class="row g-2 mb-3">
-            <div class="col-6">
-              <div class="driver-slot-card p1-card" id="card-pos1" onclick="openDriverSelector('pos1')">
+         <!-- Podium Spotlight (P1) -->
+          <label class="form-label mb-2"><i class="fa-solid fa-crown text-warning me-1"></i> RACE WINNER (P1)</label>
+          <div class="row mb-3">
+            <div class="col-12">
+              <div class="driver-slot-card p1-card" id="card-pos1" onclick="openDriverSelector('pos1')" style="height: 180px;">
                 <div class="slot-badge-ui"><span class="pos-badge pos-1 m-0">1</span> P1</div>
                 <div class="slot-empty-state">
                   <i class="fa-solid fa-crosshairs empty-icon"></i>
-                  <div class="telemetry-await">AWAITING INPUT<span class="blink-cursor">_</span></div>
+                  <div class="telemetry-await">AWAITING CHAMPION<span class="blink-cursor">_</span></div>
                 </div>
-                <div class="slot-filled-state d-none">
-                  <div class="driver-name-ui" id="name-pos1">Name</div>
-                  <div class="driver-team-ui" id="team-pos1">Team</div>
-                  <img src="" class="team-logo-mini" id="watermark-pos1" alt="Team">
-                  <img src="" class="driver-img-ui" id="img-pos1" alt="Driver">
-                </div>
-              </div>
-            </div>
-            <div class="col-6">
-              <div class="driver-slot-card p2-card" id="card-pos2" onclick="openDriverSelector('pos2')">
-                <div class="slot-badge-ui"><span class="pos-badge pos-2 m-0">2</span> P2</div>
-                <div class="slot-empty-state">
-                  <i class="fa-solid fa-crosshairs empty-icon"></i>
-                  <div class="telemetry-await">AWAITING INPUT<span class="blink-cursor">_</span></div>
-                </div>
-                <div class="slot-filled-state d-none">
-                  <div class="driver-name-ui" id="name-pos2">Name</div>
-                  <div class="driver-team-ui" id="team-pos2">Team</div>
-                  <img src="" class="team-logo-mini" id="watermark-pos2" alt="Team">
-                  <img src="" class="driver-img-ui" id="img-pos2" alt="Driver">
-                </div>
-              </div>
-            </div>
-            <div class="col-6">
-              <div class="driver-slot-card p3-card" id="card-pos3" onclick="openDriverSelector('pos3')">
-                <div class="slot-badge-ui"><span class="pos-badge pos-3 m-0">3</span> P3</div>
-                <div class="slot-empty-state">
-                  <i class="fa-solid fa-crosshairs empty-icon"></i>
-                  <div class="telemetry-await">AWAITING INPUT<span class="blink-cursor">_</span></div>
-                </div>
-                <div class="slot-filled-state d-none">
-                  <div class="driver-name-ui" id="name-pos3">Name</div>
-                  <div class="driver-team-ui" id="team-pos3">Team</div>
-                  <img src="" class="team-logo-mini" id="watermark-pos3" alt="Team">
-                  <img src="" class="driver-img-ui" id="img-pos3" alt="Driver">
-                </div>
-              </div>
-            </div>
-            <div class="col-6">
-              <div class="driver-slot-card p4-card" id="card-pos4" onclick="openDriverSelector('pos4')">
-                <div class="slot-badge-ui"><span class="pos-badge pos-4 m-0">4</span> P4</div>
-                <div class="slot-empty-state">
-                  <i class="fa-solid fa-crosshairs empty-icon"></i>
-                  <div class="telemetry-await">AWAITING INPUT<span class="blink-cursor">_</span></div>
-                </div>
-                <div class="slot-filled-state d-none">
-                  <div class="driver-name-ui" id="name-pos4">Name</div>
-                  <div class="driver-team-ui" id="team-pos4">Team</div>
-                  <img src="" class="team-logo-mini" id="watermark-pos4" alt="Team">
-                  <img src="" class="driver-img-ui" id="img-pos4" alt="Driver">
+                <div class="slot-filled-state d-none text-center">
+                  <img src="" class="p1-spotlight-img" id="img-pos1" alt="Driver">
+                  <div class="driver-name-ui position-absolute bottom-0 start-50 translate-middle-x pb-2" style="font-size: 2rem; z-index: 5; white-space: nowrap;" id="name-pos1">Name</div>
+                  <!-- ซ่อน Element เก่าไว้เพื่อให้ JS อัปเดตข้อมูลได้โดยไม่พัง -->
+                  <div class="d-none" id="team-pos1">Team</div>
+                  <img src="" class="d-none" id="watermark-pos1" alt="Team">
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="mb-4" id="flWrapper">
-            <label class="form-label mb-2"><i class="fa-solid fa-bolt text-purple me-1"></i> FASTEST LAP (+1 คะแนน)</label>
-            <div class="driver-slot-card fl-card" id="card-posFL" onclick="openDriverSelector('posFL')">
-              <div class="slot-badge-ui"><span class="pos-badge pos-fl m-0"><i class="fa-solid fa-bolt"></i></span> FL</div>
-              <div class="slot-empty-state">
-                <i class="fa-solid fa-crosshairs empty-icon"></i>
-                <div class="telemetry-await">AWAITING INPUT<span class="blink-cursor">_</span></div>
+          <!-- Glass Cards (P2, P3, P4, FL) -->
+          <label class="form-label mb-2"><i class="fa-solid fa-trophy text-warning me-1"></i> PODIUM & POINTS</label>
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <div class="driver-slot-card p2-card" id="card-pos2" onclick="openDriverSelector('pos2')">
+                <div class="slot-badge-ui"><span class="pos-badge pos-2 m-0">2</span> P2</div>
+                <div class="slot-empty-state"><i class="fa-solid fa-crosshairs empty-icon"></i><div class="telemetry-await">AWAITING INPUT<span class="blink-cursor">_</span></div></div>
+                <div class="slot-filled-state d-none"><div class="driver-name-ui" id="name-pos2">Name</div><div class="driver-team-ui" id="team-pos2">Team</div><img src="" class="team-logo-mini" id="watermark-pos2" alt="Team"><img src="" class="driver-img-ui" id="img-pos2" alt="Driver"></div>
               </div>
-              <div class="slot-filled-state d-none">
-                <div class="driver-name-ui" id="name-posFL">Name</div>
-                <div class="driver-team-ui" id="team-posFL">Team</div>
-                <img src="" class="team-logo-mini" id="watermark-posFL" alt="Team">
-                <img src="" class="driver-img-ui" id="img-posFL" alt="Driver">
+            </div>
+            <div class="col-6">
+              <div class="driver-slot-card p3-card" id="card-pos3" onclick="openDriverSelector('pos3')">
+                <div class="slot-badge-ui"><span class="pos-badge pos-3 m-0">3</span> P3</div>
+                <div class="slot-empty-state"><i class="fa-solid fa-crosshairs empty-icon"></i><div class="telemetry-await">AWAITING INPUT<span class="blink-cursor">_</span></div></div>
+                <div class="slot-filled-state d-none"><div class="driver-name-ui" id="name-pos3">Name</div><div class="driver-team-ui" id="team-pos3">Team</div><img src="" class="team-logo-mini" id="watermark-pos3" alt="Team"><img src="" class="driver-img-ui" id="img-pos3" alt="Driver"></div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="driver-slot-card p4-card" id="card-pos4" onclick="openDriverSelector('pos4')">
+                <div class="slot-badge-ui"><span class="pos-badge pos-4 m-0">4</span> P4</div>
+                <div class="slot-empty-state"><i class="fa-solid fa-crosshairs empty-icon"></i><div class="telemetry-await">AWAITING INPUT<span class="blink-cursor">_</span></div></div>
+                <div class="slot-filled-state d-none"><div class="driver-name-ui" id="name-pos4">Name</div><div class="driver-team-ui" id="team-pos4">Team</div><img src="" class="team-logo-mini" id="watermark-pos4" alt="Team"><img src="" class="driver-img-ui" id="img-pos4" alt="Driver"></div>
+              </div>
+            </div>
+            <div class="col-6" id="flWrapper">
+              <div class="driver-slot-card fl-card h-100" id="card-posFL" onclick="openDriverSelector('posFL')">
+                <div class="slot-badge-ui"><span class="pos-badge pos-fl m-0"><i class="fa-solid fa-bolt"></i></span> FL</div>
+                <div class="slot-empty-state"><i class="fa-solid fa-crosshairs empty-icon"></i><div class="telemetry-await">AWAITING INPUT<span class="blink-cursor">_</span></div></div>
+                <div class="slot-filled-state d-none"><div class="driver-name-ui" id="name-posFL">Name</div><div class="driver-team-ui" id="team-posFL">Team</div><img src="" class="team-logo-mini" id="watermark-posFL" alt="Team"><img src="" class="driver-img-ui" id="img-posFL" alt="Driver"></div>
               </div>
             </div>
           </div>
