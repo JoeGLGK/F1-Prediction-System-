@@ -2853,7 +2853,7 @@ body {
   height: auto;
   object-fit: contain;
   transform-origin: bottom center; /* ⬅️ เปลี่ยนจุดขยายเป็นตรงกลางฐาน */
-  margin-bottom: 20%; /* ปรับระยะลอยขึ้นให้พ้นตัวเลข (ปรับลด/เพิ่มได้ตามรูปนักแข่ง) */
+  margin-bottom: 35%; /* ปรับระยะลอยขึ้นให้พ้นตัวเลข (ปรับลด/เพิ่มได้ตามรูปนักแข่ง) */
   animation: scaleInHero 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 .hero-photo-blur {
