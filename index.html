@@ -424,7 +424,58 @@
     <div class="text-center mt-4 text-secondary small d-flex justify-content-between align-items-center px-2"><span>F1 Predictor © 2026</span><span class="secret-lock" onclick="openAdminModal()" title="Admin Access"><i class="fa-solid fa-lock"></i></span></div>
     <div style="height: 40px;"></div>
   </div>
+<!-- F1 Driver Hero Modal (สไตล์ Lewis Hamilton) -->
+  <div class="modal fade" id="driverHeroModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-fullscreen">
+      <div class="modal-content border-0 hero-modal-content">
+        <!-- Header (โลโก้ F1 & ปุ่มปิด) -->
+        <div class="modal-header border-0 position-absolute top-0 w-100 z-3 px-4 pt-4">
+          <img src="https://framerusercontent.com/images/NZPITJ6zDBvxVT7rc1NH2sOU.png" alt="F1" style="height: 24px;">
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
 
+        <!-- Main Content -->
+        <div class="modal-body p-0 position-relative d-flex flex-column justify-content-end overflow-hidden">
+          <!-- เลเยอร์สีพื้นหลัง (จะถูกเปลี่ยนสีตามสีทีมด้วย JS) -->
+          <div class="hero-bg-layer" id="heroBgColor"></div>
+
+          <!-- ข้อมูลนักแข่ง (ชื่อ & ทีม) -->
+          <div class="position-absolute top-0 start-0 w-100 px-4 z-2" style="margin-top: 80px;">
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <img id="heroTeamLogo" src="" alt="Team" class="hero-team-icon">
+              <span class="text-white-50 small text-uppercase fw-bold" id="heroTeamName">Team</span>
+            </div>
+            <h1 class="hero-driver-title text-white m-0" id="heroDriverFirstName">FIRST</h1>
+            <h1 class="hero-driver-title text-white m-0 fw-bold" id="heroDriverLastName">LAST</h1>
+          </div>
+
+          <!-- รูปนักแข่ง & เอฟเฟกต์กระจกเบลอ (Glass Blur Mask) -->
+          <div class="hero-driver-photo-container">
+            <img id="heroDriverImg" src="" class="hero-driver-cutout" alt="Driver">
+            <div class="hero-photo-blur"></div>
+          </div>
+
+          <!-- แผงสถิติด้านล่าง (Bottom Stats Panel) -->
+          <div class="hero-bottom-stats z-3 p-4">
+            <div class="row g-3">
+              <div class="col-6">
+                <div class="hero-stat-box glass-panel text-center">
+                  <div class="stat-label">Season Points</div>
+                  <div class="stat-value text-warning"><span id="heroPoints">0</span><span style="font-size: 1rem; color:#aaa; margin-left: 4px;">PTS</span></div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="hero-stat-box glass-panel text-center">
+                  <div class="stat-label">Championship Pos</div>
+                  <div class="stat-value text-white" id="heroPos">P1</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
   <!-- Modals -->
   <div class="modal fade" id="loginGateModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
