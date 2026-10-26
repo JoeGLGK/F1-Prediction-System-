@@ -427,18 +427,16 @@
 <!-- F1 Driver Hero Modal (สไตล์ Editorial Stack ไร้กรอบ) -->
   <div class="modal fade" id="driverHeroModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-fullscreen">
-      <div class="modal-content border-0 hero-modal-content">
+      <!-- ⚠️ ย้าย id="heroBgColor" มาไว้ที่กล่องนอกสุดตรงนี้ -->
+      <div class="modal-content border-0 hero-modal-content" id="heroBgColor">
         <!-- Header (โลโก้ F1 & ปุ่มปิด) -->
         <div class="modal-header border-0 position-absolute top-0 w-100 z-3 px-4 pt-4">
-          <img src="https://lh3.googleusercontent.com/d/1PiYpgQrTbDaBC_W0dPaFBGuNAfDCIOkI" alt="F1" style="height: 24px;">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/3/33/F1.svg" alt="F1" style="height: 20px;">
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
 
         <!-- Main Content -->
         <div class="modal-body p-0 position-relative d-flex flex-column justify-content-end overflow-hidden">
-          <!-- เลเยอร์สีพื้นหลังตามทีม -->
-          <div class="hero-bg-layer" id="heroBgColor"></div>
-
           <!-- ข้อมูลนักแข่ง (ชื่อ & ทีม) วางชิดซ้ายด้านบน -->
           <div class="position-absolute top-0 start-0 w-100 px-4 z-2" style="margin-top: 80px;">
             <div class="d-flex align-items-center gap-2 mb-1">
