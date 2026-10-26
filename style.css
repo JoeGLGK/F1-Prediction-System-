@@ -2861,7 +2861,7 @@ body {
   height: auto;
   object-fit: contain;
   transform-origin: bottom center;
-  margin-bottom: 15vh; /* ใช้ vh เพื่อกะระยะให้พ้นตัวเลขด้านล่างอย่างพอดี */
+  margin-bottom: 25vh; /* ใช้ vh เพื่อกะระยะให้พ้นตัวเลขด้านล่างอย่างพอดี */
   animation: scaleInHero 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 .hero-photo-blur {
