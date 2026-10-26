@@ -1620,7 +1620,8 @@ function openDriverHero(fullName, rowEl) {
     animateCountUp(ptsEl, pts, 2200); 
   }, 10); 
 
-  document.getElementById('heroBgColor').style.background = `linear-gradient(to bottom, ${info.color}35 0%, #0a0e1c 65%)`;
+ // ไล่ระดับสี: เริ่มจากสีดำขอบจอ (0%) -> สว่างเป็นสีทีม (15%) -> กลืนกลับไปดำที่ฐาน (65%)
+  document.getElementById('heroBgColor').style.background = `linear-gradient(to bottom, #0a0e1c 0%, ${info.color}40 15%, #0a0e1c 65%)`;
 
   if (!window.driverHeroModalInstance) {
     window.driverHeroModalInstance = new bootstrap.Modal(document.getElementById('driverHeroModal'));
