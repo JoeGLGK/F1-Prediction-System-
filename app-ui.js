@@ -1493,7 +1493,7 @@ function initOfficialStandingsDOM() {
       const displayTeam = info.standingsTeam || info.team;
 
       return `
-        <div class="f1-standings-row" data-position="${idx + 1}">
+        <div class="f1-standings-row" data-position="${idx + 1}" style="cursor:pointer;" onclick="openDriverHero('${fullName}', this)">
           <div class="col-pos">${idx + 1}</div>
           <div class="col-driver">
             <img src="${headshotUrl}" alt="${shortName}" class="driver-headshot" loading="lazy" decoding="async">
@@ -1538,3 +1538,39 @@ document.addEventListener('DOMContentLoaded', () => {
   fetchF1Standings();         
   fetchF1TeamStandings();     
 });
+// ฟังก์ชันสำหรับเปิดหน้า F1 Driver Hero
+function openDriverHero(fullName, rowEl) {
+  triggerHaptic();
+  const info = DRIVER_INFO[fullName];
+  if(!info) return;
+
+  // ดึงคะแนนและอันดับจากบรรทัดที่กด
+  const pts = rowEl.querySelector('.col-pts').innerText;
+  const pos = rowEl.querySelector('.col-pos').innerText;
+
+  // แยกชื่อและนามสกุล
+  const parts = fullName.split(' ');
+  const firstName = parts[0];
+  const lastName = parts.slice(1).join(' ');
+
+  // อัปเดตข้อมูลลงใน Modal
+  document.getElementById('heroDriverFirstName').innerText = firstName;
+  document.getElementById('heroDriverLastName').innerText = lastName;
+  document.getElementById('heroTeamName').innerText = info.team;
+  document.getElementById('heroTeamLogo').src = getDriveDirectLink(TEAM_LOGOS[info.team] || '');
+  
+  // ใช้รูปภาพเต็มตัว (img) แทน headshot สำหรับหน้านี้เพื่อให้เอฟเฟกต์เบลอสวยงาม
+  document.getElementById('heroDriverImg').src = getDriveDirectLink(info.img); 
+  
+  document.getElementById('heroPoints').innerText = pts;
+  document.getElementById('heroPos').innerText = 'P' + pos;
+
+  // ไล่ระดับสีพื้นหลังตามสีทีม (สว่างข้างบน มืดข้างล่าง)
+  document.getElementById('heroBgColor').style.background = `linear-gradient(to bottom, ${info.color}35 0%, #0a0e1c 65%)`;
+
+  // เรียกเปิด Modal
+  if (!window.driverHeroModalInstance) {
+    window.driverHeroModalInstance = new bootstrap.Modal(document.getElementById('driverHeroModal'));
+  }
+  window.driverHeroModalInstance.show();
+}
