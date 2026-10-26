@@ -1538,6 +1538,60 @@ document.addEventListener('DOMContentLoaded', () => {
   fetchF1Standings();         
   fetchF1TeamStandings();     
 });
+// ฟังก์ชันสร้างลูกเล่นตัวเลขวิ่ง (Count-up Animation)
+function animateCountUp(element, target, duration = 1800) {
+  let startTimestamp = null;
+  const targetNum = parseInt(target, 10) || 0;
+  
+  const step = (timestamp) => {
+    if (!startTimestamp) startTimestamp = timestamp;
+    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+    // ใช้สูตร Cubic Ease-out เพื่อให้ตัวเลขวิ่งเร็วในตอนแรก แล้วค่อยๆ ชะลอตอนจบ
+    const easeProgress = 1 - Math.pow(1 - progress, 3); 
+    element.innerText = Math.floor(easeProgress * targetNum);
+    
+    if (progress < 1) {
+      window.requestAnimationFrame(step);
+    } else {
+      element.innerText = targetNum;
+    }
+  };
+  window.requestAnimationFrame(step);
+}
+
+// อัปเดตฟังก์ชันเปิดหน้า Hero
+function openDriverHero(fullName, rowEl) {
+  triggerHaptic();
+  const info = DRIVER_INFO[fullName];
+  if(!info) return;
+
+  const pts = rowEl.querySelector('.col-pts').innerText;
+  const pos = rowEl.querySelector('.col-pos').innerText;
+  const parts = fullName.split(' ');
+  const firstName = parts[0];
+  const lastName = parts.slice(1).join(' ');
+
+  document.getElementById('heroDriverFirstName').innerText = firstName;
+  document.getElementById('heroDriverLastName').innerText = lastName;
+  document.getElementById('heroTeamName').innerText = info.team;
+  document.getElementById('heroTeamLogo').src = getDriveDirectLink(TEAM_LOGOS[info.team] || '');
+  document.getElementById('heroDriverImg').src = getDriveDirectLink(info.heroImg || info.img); 
+  document.getElementById('heroPos').innerText = 'P' + pos;
+
+  // เซ็ตคะแนนเป็น 0 ชั่วคราว แล้วใช้ setTimeout ดีเลย์แอนิเมชันให้วิ่งหลัง Modal เปิด
+  const ptsEl = document.getElementById('heroPoints');
+  ptsEl.innerText = "0"; 
+  setTimeout(() => {
+    animateCountUp(ptsEl, pts, 1800); // 1800 คือระยะเวลา 1.8 วินาที (ปรับความเร็วได้)
+  }, 400);
+
+  document.getElementById('heroBgColor').style.background = `linear-gradient(to bottom, ${info.color}35 0%, #0a0e1c 65%)`;
+
+  if (!window.driverHeroModalInstance) {
+    window.driverHeroModalInstance = new bootstrap.Modal(document.getElementById('driverHeroModal'));
+  }
+  window.driverHeroModalInstance.show();
+}
 // ฟังก์ชันสำหรับเปิดหน้า F1 Driver Hero
 function openDriverHero(fullName, rowEl) {
   triggerHaptic();
