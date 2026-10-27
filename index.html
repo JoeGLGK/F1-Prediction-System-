@@ -140,40 +140,38 @@
          ========================================== -->
     <div id="tab-pred" class="tab-pane-custom" style="display: none;">
       <div class="f1-card p-4">
-        <h2 class="section-header-f1"><i class="fa-solid fa-gamepad me-2"></i>PREDICTION FORM</h2>
+        <h2 class="section-header-f1 mb-2"><i class="fa-solid fa-gamepad me-2"></i>PREDICTION FORM</h2>
         
-        <!-- กล่องกติกา: ถอดขอบแข็งออก เปลี่ยนเป็นคลาสที่ใช้แสงเงา และขยาย margin-bottom (mb-4) -->
-        <div class="rule-alert-box mb-4">
-          <i class="fa-solid fa-circle-info text-warning me-1"></i> <strong>กติกา:</strong> ทายตำแหน่งเป๊ะ (P1-P4) ได้ <strong>2 คะแนน/ตำแหน่ง</strong> | ทาย Fastest Lap ถูก ได้ <strong>1 คะแนน</strong>
-        </div>
-        
-        <!-- กล่องประวัติการทาย (เมื่อเคยส่งแล้ว) -->
-        <div id="savedPredAlert" class="history-card" style="display: none;">
-          <div class="d-flex justify-content-between align-items-center mb-2"><span class="small fw-bold text-success"><i class="fa-solid fa-circle-check me-1"></i>คุณได้ส่งคำทายสนามนี้ไว้แล้ว</span><span class="badge bg-success" style="font-size:0.65rem;">บันทึกแล้ว</span></div>
-          <div class="small text-secondary mb-2" id="savedPredTime" style="font-size:0.75rem;">เวลาส่ง: -</div>
-          <!-- เปลี่ยนจุดที่โชว์ผลให้เป็นหลุมลึกแทนขอบแข็ง -->
-          <div class="history-content-box text-start small text-white" id="savedPredContent">-</div>
-          <div class="small text-muted mt-3" style="font-size:0.7rem;">💡 คุณสามารถแตะเปลี่ยนการ์ดนักแข่งด้านล่าง แล้วกด Submit เพื่ออัปเดตคำทายใหม่ได้จนกว่าจะหมดเวลา</div>
-        </div>
-
         <form onsubmit="handlePrediction(event)">
-          <!-- กล่องโปรไฟล์ผู้เล่น: ไร้ขอบ ใช้กระจกฝ้าดันให้ลอยขึ้น -->
-          <div class="player-display-box mb-4 d-flex justify-content-between align-items-center">
-            <div><div class="small text-secondary" style="font-size: 0.75rem;">ส่งคำทายในชื่อ:</div><div class="fw-bold text-white fs-6"><i class="fa-solid fa-user-check text-success me-2"></i><span id="formPlayerDisplay">-</span></div></div>
-            <button type="button" class="btn btn-sm btn-outline-secondary py-1" onclick="openLoginGateModal()">เปลี่ยนชื่อ</button>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">สนามแข่งขัน</label>
-            <select id="selRace" class="form-select" required onchange="onRaceChange()"><option value="" disabled selected>-- แตะเลือกสนาม --</option></select>
-            
-            <div id="trackImageWrapper" class="track-banner-box" style="display: none;" onclick="previewTrackImageById('trackImagePreview')">
-              <img id="trackImagePreview" src="" class="track-banner-img" alt="Circuit Preview">
-              <div class="track-banner-tag"><i class="fa-solid fa-magnifying-glass-plus text-danger me-1"></i>แตะเพื่อดูภาพขยาย</div>
-            </div>
-
-            <div id="countdownBox" class="countdown-box" style="display: none;"></div>
+          <!-- ซ่อนกล่องส่งคำทายในชื่อไว้ (ไม่ให้แสดงผล แต่เก็บ ID ไว้กันระบบรวน) -->
+          <div class="d-none">
+            <span id="formPlayerDisplay">-</span>
           </div>
 
+          <!-- 1. รูปภาพสนามแข่งขัน (อยู่บนสุด เฟดขอบล่างกลืนกับพื้นหลัง) -->
+          <div id="trackBannerContainer" class="track-banner-box" style="display: none;" onclick="openTrackImageModal()">
+            <img id="trackBannerImg" src="" class="track-banner-img" alt="Track Banner">
+            <div class="track-banner-fade"></div>
+          </div>
+
+          <!-- 2. นาฬิกานับถอยหลัง (ไร้กรอบ ลอยทับส่วนล่างของรูปภาพนิดหน่อย) -->
+          <div id="countdownBox" class="countdown-box" style="display: none;">
+            <div id="countdownTimer" class="countdown-timer">00:00:00</div>
+          </div>
+
+          <!-- 3. ตัวเลือกสนามแข่งขัน (อยู่ใต้นาฬิกา ไร้หัวข้อกำกับตามภาพตัวอย่าง) -->
+          <div class="mb-4 px-2">
+            <select class="form-select race-select-cinematic" id="raceSelect" onchange="onRaceChange()" required></select>
+          </div>
+
+          <!-- กล่องแจ้งเตือนเมื่อส่งคำทายแล้ว (ย้ายมาไว้ก่อนเลือกนักแข่ง) -->
+          <div id="savedPredAlert" class="history-card" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-2"><span class="small fw-bold text-success"><i class="fa-solid fa-circle-check me-1"></i>คุณได้ส่งคำทายสนามนี้ไว้แล้ว</span><span class="badge bg-success" style="font-size:0.65rem;">บันทึกแล้ว</span></div>
+            <div class="small text-secondary mb-2" id="savedPredTime" style="font-size:0.75rem;">เวลาส่ง: -</div>
+            <div class="history-content-box text-start small text-white" id="savedPredContent">-</div>
+            <div class="small text-muted mt-3" style="font-size:0.7rem;">💡 คุณสามารถแตะเปลี่ยนการ์ดนักแข่งด้านล่าง แล้วกด Submit เพื่ออัปเดตคำทายใหม่ได้จนกว่าจะหมดเวลา</div>
+          </div>
+          
           <div class="d-none">
             <select id="pos1" class="driver-opt"></select>
             <select id="pos2" class="driver-opt"></select>
