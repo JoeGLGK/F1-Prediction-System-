@@ -655,35 +655,32 @@ body {
 
 /* --- Driver Card UI --- */
 .driver-slot-card {
-  background: rgba(20, 22, 30, 0.6);
-  border: 1px dashed rgba(255, 255, 255, 0.2);
+  background: rgba(20, 22, 30, 0.4);
+  border: none; /* ⬅️ ลบขอบทึบด้านนอกออก ปล่อยให้เนียนไปกับพื้นหลัง */
   border-radius: 12px;
   height: 110px;
   position: relative;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3); /* ⬅️ เพิ่มเงาบางๆ ให้การ์ดลอยขึ้น */
 }
 .driver-slot-card:hover {
-  background: rgba(30, 33, 45, 0.8);
-  border-color: var(--f1-red);
+  background: rgba(30, 33, 45, 0.6);
+  transform: translateY(-2px);
 }
 /* --- สถานะเมื่อเลือกนักแข่งแล้ว (การ์ดเรืองแสง) --- */
 .driver-slot-card.filled {
-  /* ลบขอบทึบออก เปลี่ยนเป็นขอบใสนิดๆ */
-  border: 1px solid rgba(255, 255, 255, 0.08); 
-  
-  /* พื้นหลังโปร่งแสง ไล่ระดับสีให้ดูมีมิติ */
-  background: linear-gradient(145deg, rgba(30, 33, 45, 0.6) 0%, rgba(13, 14, 18, 0.9) 100%);
-  
-  /* หัวใจสำคัญ: แสงเรืองรอง (Glow) ด้านล่างของการ์ดตามสีประจำทีม */
-  box-shadow: 0 10px 25px -8px var(--team-color, rgba(0,0,0,0.5)),
-              inset 0 -3px 10px -5px var(--team-color, transparent);
-  
+  border: none; /* ⬅️ ลบเส้นขอบออกทั้งหมด */
+  background: linear-gradient(145deg, rgba(30, 33, 45, 0.7) 0%, rgba(13, 14, 18, 0.95) 100%);
+  /* ⬅️ เพิ่มเงาขอบกระจกด้านบน (inset ขาว) และเพิ่มแสงเรืองสีทีมที่ขอบล่างให้สว่างขึ้น */
+  box-shadow: 0 12px 30px rgba(0,0,0,0.6), 
+              inset 0 1px 0 rgba(255,255,255,0.05),
+              inset 0 -4px 15px -5px var(--team-color, transparent);
   justify-content: flex-start;
   align-items: flex-start;
   padding: 12px;
@@ -1209,11 +1206,12 @@ body {
    UNIFIED TELEMETRY CARD (F1 Broadcast Spec Sheet)
    ========================================================= */
 .unified-telemetry-card {
-  background: #07080c;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, #0a0c10 0%, #050608 100%);
+  border: none; /* ⬅️ ลบขอบทึบออก */
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+  /* ⬅️ ใช้เงาดำหนาขึ้น และใส่สันกระจก (inset) ด้านบนแทนเส้นขอบ */
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.05);
   position: relative;
 }
 
@@ -1580,12 +1578,12 @@ body {
 
 /* --- 1. กล่องหลอดพลังโหวต (Consensus Telemetry) --- */
 .consensus-telemetry-box {
-  background: linear-gradient(145deg, #0d0f17 0%, #07080c 100%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(145deg, #0f111a 0%, #07080c 100%);
+  border: none; /* ⬅️ ลบขอบทึบออก */
   border-radius: 14px;
   padding: 14px 16px;
   margin-bottom: 18px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.05);
   position: relative;
   overflow: hidden;
 }
@@ -1655,19 +1653,21 @@ body {
 
 /* --- 2. ตั๋วโพยทายผล (Paddock Pass Ticket) --- */
 .pred-ticket {
-  background: linear-gradient(90deg, #10121a 0%, #0b0d13 72%, #0e1017 72%, #090a0f 100%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  /* ⬅️ ปรับพื้นหลังตั๋วให้สว่างขึ้นนิดนึงเพื่อแยกจากฉากหลังโดยไม่ต้องใช้ขอบ */
+  background: linear-gradient(90deg, rgba(20,23,33,0.8) 0%, rgba(13,15,22,0.9) 72%, rgba(18,20,28,0.9) 72%, rgba(10,12,18,1) 100%);
+  border: none; /* ⬅️ ลบขอบทึบออก */
   border-radius: 14px;
   margin-bottom: 12px;
   display: flex;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
-  transition: transform 0.2s ease;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
 }
 .pred-ticket:hover {
-  transform: translateY(-2px);
-  border-color: rgba(255, 255, 255, 0.16);
+  transform: translateY(-3px);
+  /* ⬅️ ขอบบนจะสว่างขึ้นนิดนึงตอนชี้เมาส์ (Hover) */
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 /* รอยเว้าครึ่งวงกลมขอบบน-ล่าง (จำลองรอยฉีกตั๋ว) */
@@ -1678,8 +1678,9 @@ body {
   left: 72%;
   width: 16px;
   height: 16px;
-  background: #0d0e12; /* สีเดียวกับพื้นหลังการ์ดหลัก */
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #0d0e12; 
+  border: none; /* ⬅️ ลบขอบทึบรอยฉีกออกให้เนียนกับตั๋ว */
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.8); /* ⬅️ ใช้เงาดำสร้างความลึกแทน */
   border-radius: 50%;
   transform: translateX(-50%);
   z-index: 3;
@@ -2123,9 +2124,9 @@ body {
 }
 /* --- กรอบช่องว่างแบบ Telemetry HUD (ทำงานเฉพาะตอนที่ยังไม่ได้เลือกนักแข่ง) --- */
 .slot-empty-state:not(.d-none) {
-  border: 1px dashed rgba(255, 255, 255, 0.3);
-  background: rgba(15, 15, 20, 0.5);
-  border-radius: 6px;
+  border: 1px dashed rgba(255, 255, 255, 0.15); /* ⬅️ ลดความแข็งของเส้นประลง */
+  background: rgba(15, 15, 20, 0.4);
+  border-radius: 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2134,6 +2135,11 @@ body {
   width: 100%;
   transition: all 0.3s ease;
   cursor: pointer;
+}
+
+.driver-slot-card:hover .slot-empty-state:not(.d-none) {
+  border-color: rgba(225, 6, 0, 0.5); /* ⬅️ เปลี่ยนเป็นเรืองแสงขอบแดงตอนชี้ (Hover) */
+  background: rgba(25, 25, 35, 0.6);
 }
 
 .driver-slot-card:hover .slot-empty-state:not(.d-none) {
