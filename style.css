@@ -78,12 +78,13 @@ body {
 }
 
 .f1-card { 
-  background: rgba(22, 23, 30, 0.45) !important; 
-  backdrop-filter: blur(16px); 
-  -webkit-backdrop-filter: blur(16px); 
-  border: 1px solid rgba(255, 255, 255, 0.08) !important; 
+  background: linear-gradient(145deg, rgba(22, 23, 30, 0.6) 0%, rgba(10, 12, 16, 0.85) 100%) !important; 
+  backdrop-filter: blur(20px); 
+  -webkit-backdrop-filter: blur(20px); 
+  border: none !important; /* ⬅️ ถอดเส้นขอบออกทั้งหมด */
   border-radius: 16px; 
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5) !important; 
+  /* ⬅️ ใช้เงาดำสร้างมิติ และใช้ inset หนา 1px สีขาวจางๆ สร้างเอฟเฟกต์สันกระจกด้านบน */
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important; 
 }
 
 .tab-pane-custom { 
@@ -127,22 +128,21 @@ body {
 
 .premium-card {
   position: relative;
-  background: #11131a;
+  background: linear-gradient(to bottom, #161822 0%, #0a0c10 100%);
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-top: 3px solid var(--border-color);
+  border: none;
   overflow: hidden;
   padding: 16px;
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+  transition: all 0.3s ease;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.6), inset 0 2px 0 var(--border-color), inset 0 20px 30px -15px rgba(255,255,255,0.03);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
 .premium-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(0,0,0,0.7);
+  transform: translateY(-4px);
+  box-shadow: 0 15px 35px rgba(0,0,0,0.8), inset 0 2px 0 var(--border-color);
 }
 
 /* แสงพื้นหลัง สาดจากตรงกลางขึ้นมา */
@@ -855,8 +855,8 @@ body {
 }
 /* --- Player List Cards (ทรงเพรียว จัดกึ่งกลาง รถอยู่ถัดจากชื่อ) --- */
 .player-list-card {
-  background: #151820; 
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(90deg, rgba(25, 28, 38, 0.7) 0%, rgba(15, 17, 22, 0.9) 100%); 
+  border: none; 
   border-radius: 12px;
   padding: 6px 16px;
   display: flex;
@@ -867,12 +867,13 @@ body {
   position: relative;
   overflow: hidden;
   height: 58px;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.4);
 }
 .player-list-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(0,0,0,0.5);
-  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateX(4px); 
+  background: linear-gradient(90deg, rgba(35, 40, 52, 0.9) 0%, rgba(20, 22, 28, 1) 100%);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.6), inset 2px 0 0 var(--team-color);
 }
 
 /* แถบสี Gradient สาดแสงจากด้านซ้าย */
