@@ -166,26 +166,23 @@
           <!-- โครงสร้าง Cinematic Layout (จัดเรียงตามภาพต้นแบบของคุณ) -->
           <div class="mb-4">
             
-            <!-- 1. รูปภาพสนามแข่งขัน (อยู่บนสุด フェดดำด้านล่าง) -->
-            <div id="trackBannerContainer" class="track-banner-box" style="display: none;" onclick="openTrackImageModal()">
-              <img id="trackBannerImg" src="" class="track-banner-img" alt="Track Banner">
-              <div class="track-banner-fade"></div>
-              
-              <!-- ⚠️ สำคัญมาก: คืนชีพคลาสนี้กลับมาซ่อนไว้ (ถ้าลบ JS จะพังทันที) -->
-              <div class="track-zoom-hint d-none"><i class="fa-solid fa-magnifying-glass-plus text-danger"></i> แตะเพื่อดูภาพขยาย</div>
-            </div>
+            <!-- 1. รูปภาพสนามแข่งขัน (แก้ ID ให้ตรงกับ JS) -->
+          <div id="trackImageWrapper" class="track-banner-box" style="display: none;" onclick="previewTrackImageById('trackImagePreview')">
+            <img id="trackImagePreview" src="" class="track-banner-img" alt="Track Banner">
+            <div class="track-banner-fade"></div>
+          </div>
 
-            <!-- 2. นาฬิกานับถอยหลัง (ไร้กรอบ ลอยทับภาพนิดหน่อย) -->
-            <div id="countdownBox" class="countdown-box" style="display: none;">
-              <div id="countdownTimer" class="countdown-timer">00:00:00</div>
-            </div>
+          <!-- 2. นาฬิกานับถอยหลัง (ไร้กรอบ ลอยทับภาพนิดหน่อย) -->
+          <div id="countdownBox" class="countdown-box" style="display: none;">
+            <div id="countdownTimer" class="countdown-timer">00:00:00</div>
+          </div>
 
-            <!-- 3. ตัวเลือกสนามแข่งขัน -->
-            <div class="px-2">
-              <!-- ⚠️ คืนชีพ Label เดิมแต่ซ่อนไว้กันระบบรวน -->
-              <label class="form-label text-secondary small mb-1 d-none">สนามแข่งขัน</label>
-              <select class="form-select race-select-cinematic" id="raceSelect" onchange="onRaceChange()" required></select>
-            </div>
+          <!-- 3. ตัวเลือกสนามแข่งขัน (เปลี่ยน id เป็น selRace) -->
+          <div class="px-2">
+            <label class="form-label text-secondary small mb-1 d-none">สนามแข่งขัน</label>
+            <select class="form-select race-select-cinematic" id="selRace" onchange="onRaceChange()" required>
+              <option value="" disabled selected>-- กำลังโหลดข้อมูล / เลือกสนาม --</option>
+            </select>
           </div>
           
           <div class="d-none">
