@@ -3051,3 +3051,29 @@ body {
   border-color: rgba(255, 255, 255, 0.2) !important;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.8) !important;
 }
+/* =========================================
+   แก้ไขกรอบและรูปภาพสนามแข่ง (หน้าทายผล)
+========================================= */
+
+/* 1. ดันกล่องภาพให้ห่างจากหัวข้อ PREDICTION FORM */
+.track-banner-box {
+  width: calc(100% + 2rem) !important; 
+  margin-left: -1rem !important;
+  margin-right: -1rem !important;
+  border-radius: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  position: relative !important;
+  margin-top: 24px !important; /* ⬅️ เพิ่มระยะห่างด้านบนให้อากาศถ่ายเท */
+  margin-bottom: 0 !important;
+}
+
+/* 2. ปลดล็อกความสูงภาพ ให้แสดงเต็มสัดส่วนจริง */
+.track-banner-img {
+  width: 100% !important;
+  max-height: none !important; /* ⬅️ ยกเลิกการจำกัดความสูงที่ 200px ทิ้งไป */
+  height: auto !important; /* ⬅️ ให้ภาพขยายความสูงตามสัดส่วนจริงโดยอัตโนมัติ */
+  object-fit: cover !important;
+  display: block !important;
+}
