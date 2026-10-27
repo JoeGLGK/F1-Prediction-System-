@@ -73,6 +73,7 @@ body {
   font-size: 0.8rem; 
   font-weight: 800; 
 }
+/* 1. โครงสร้างรูปปก (ไร้กรอบ ไร้รอยต่อ) */
 .hero-banner-hud {
   position: relative;
   width: 100%;
@@ -81,7 +82,7 @@ body {
   overflow: hidden;
   border: none !important;
   box-shadow: none !important;
-  margin-bottom: 8px !important;
+  margin-bottom: 0 !important;
   background-color: #0d0e12;
 }
 
@@ -89,36 +90,35 @@ body {
   width: 100%;
   height: auto;
   display: block;
-  /* ดึงความคมชัดของภาพนักแข่งขึ้นมาเล็กน้อย */
-  filter: contrast(1.05);
 }
 
-/* 1. ส่วนหัวด้านบน (Top Bar): ไล่เงาดำจากขอบบนลงมา เพื่อให้อ่านโลโก้ F1 PREDICTOR ชัดเจน */
-.hero-top-bar {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  padding: 16px 20px 40px 20px;
-  background: linear-gradient(to bottom, rgba(13, 14, 18, 0.9) 0%, rgba(13, 14, 18, 0.45) 55%, transparent 100%);
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  z-index: 3;
-}
-
-/* 2. ส่วนฐานด้านล่าง (Bottom Dock): ไล่เงาดำจากพื้นขึ้นไป เพื่อรับข้อมูลผู้เล่นและละลายขอบรูปล่างทิ้ง 100% */
-.hero-bottom-dock {
+/* 2. เงาไล่ระดับด้านล่างรูปปก: เฟดเป็นสีดำสนิท #0d0e12 ที่ขอบล่างสุด ताकिกลืนกับพื้นที่ด้านล่าง 100% */
+.hero-overlay-hud {
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
-  padding: 55px 20px 14px 20px;
-  background: linear-gradient(to top, #0d0e12 0%, #0d0e12 18%, rgba(13, 14, 18, 0.85) 55%, transparent 100%);
+  height: 60%; /* กินพื้นที่แค่ครึ่งล่าง ไม่ขึ้นไปกวนหน้านักแข่ง */
+  background: linear-gradient(to top, #0d0e12 0%, rgba(13, 14, 18, 0.85) 45%, transparent 100%);
   display: flex;
-  justify-content: space-between;
   align-items: flex-end;
-  z-index: 3;
+}
+
+/* 3. แถบคะแนนผู้เล่นด้านล่างรูปปก (ไร้กรอบ แต่สาดแสง Glow สีทีมจางๆ บนพื้นหลังดำ) */
+.user-score-banner { 
+  /* สาดแสงสีทีมจางๆ จากด้านบนลงมาหาสีดำสนิท #0d0e12 */
+  background: radial-gradient(ellipse at top, color-mix(in srgb, var(--theme-color, #e10600) 15%, transparent) 0%, #0d0e12 75%) !important;
+  border: none !important; /* ไม่มีเส้นขอบตัดขวาง */
+  border-radius: 0 !important;
+  padding: 14px 20px 18px 20px !important;
+  margin-top: 0 !important;
+  margin-bottom: 8px !important;
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  box-shadow: none !important;
+  position: relative;
+  z-index: 2;
 }
 /* ⬅️ ถอดพื้นหลังและเส้นขอบของการ์ดหน้าหลักออกทั้งหมด ให้เชื่อมกับรูปปกแบบไร้รอยต่อ */
 .f1-card { 
