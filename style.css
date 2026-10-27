@@ -78,13 +78,15 @@ body {
 }
 
 .f1-card { 
-  background: linear-gradient(145deg, rgba(22, 23, 30, 0.6) 0%, rgba(10, 12, 16, 0.85) 100%) !important; 
+  background: linear-gradient(145deg, rgba(22, 23, 30, 0.65) 0%, rgba(10, 12, 16, 0.9) 100%) !important; 
   backdrop-filter: blur(20px); 
   -webkit-backdrop-filter: blur(20px); 
-  border: none !important; /* ⬅️ ถอดเส้นขอบออกทั้งหมด */
-  border-radius: 16px; 
-  /* ⬅️ ใช้เงาดำสร้างมิติ และใช้ inset หนา 1px สีขาวจางๆ สร้างเอฟเฟกต์สันกระจกด้านบน */
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important; 
+  border-left: none !important; 
+  border-right: none !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03) !important;
+  border-radius: 0 !important; /* ⬅️ บังคับให้การ์ดหลักทั้งหมด ไร้ขอบโค้ง แนบสนิท 100% กับหน้าจอ */
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8) !important; 
 }
 
 .tab-pane-custom { 
@@ -98,16 +100,17 @@ body {
 
 .user-score-banner { 
   background: linear-gradient(90deg, #181a24 0%, #15161d 100%); 
-  /* ดึงค่าสีจาก --theme-color มาเป็นสีขอบ ถ้าไม่มีให้ใช้สีแดง F1 */
-  border: 1px solid var(--theme-color, rgba(225, 6, 0, 0.35)); 
-  border-radius: 12px; 
-  padding: 10px 14px; 
+  border-top: 1px solid var(--theme-color, rgba(225, 6, 0, 0.35)); 
+  border-bottom: 1px solid var(--theme-color, rgba(225, 6, 0, 0.35)); 
+  border-left: none; /* ⬅️ ถอดเส้นขอบซ้ายขวา ให้พาดเต็มจอ */
+  border-right: none; 
+  border-radius: 0; /* ⬅️ ถอดมุมโค้งทิ้ง */
+  padding: 14px 20px; /* ⬅️ ขยายช่องไฟให้ข้อความไม่ชนขอบจอ */
   display: flex; 
   justify-content: space-between; 
   align-items: center; 
-  margin-bottom: 12px; 
-  /* สร้างเอฟเฟกต์ไฟเรืองแสง (Glow) ทั้งด้านนอกและด้านในของกรอบ */
-  box-shadow: 0 4px 15px -5px var(--theme-color, rgba(225, 6, 0, 0.4)), inset 0 0 10px -5px var(--theme-color, transparent);
+  margin-bottom: 16px; 
+  box-shadow: 0 8px 20px -5px var(--theme-color, rgba(225, 6, 0, 0.4)), inset 0 0 15px -5px var(--theme-color, transparent);
   transition: all 0.3s ease;
 }
 
@@ -2229,10 +2232,11 @@ body {
   position: relative;
   width: 100%;
   height: auto;
-  border-radius: 12px;
+  border-radius: 0; /* ⬅️ บังคับรูปปกให้เป็นมุมฉาก ชิดขอบจอด้านบน */
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.6);
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12); /* เหลือแค่เส้นกระจกคั่นล่าง */
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8);
 }
 
 .hero-img-hud {
