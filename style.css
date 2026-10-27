@@ -1923,7 +1923,7 @@ body {
 
 /* --- 3. การ์ดตั๋วตอนยังไม่เปิดเผยข้อมูล + ตราประทับ LOCKED --- */
 .locked-ticket-card {
-  .countdown-box {(135deg, #101218 0%, #07080c 100%);
+  background: linear-gradient(135deg, #101218 0%, #07080c 100%);
   border: 1px dashed rgba(225, 6, 0, 0.35);
   border-radius: 16px;
   padding: 28px 18px;
@@ -1987,7 +1987,7 @@ body {
 
 /* สถานะเมื่อเลือกโหมด Qualifying (เรืองแสงโทนฟ้า Cyan) */
 .archive-seg-btn.active-quali {
-  .countdown-box {(135deg, rgba(14, 165, 233, 0.22) 0%, rgba(15, 23, 42, 0.95) 100%);
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.22) 0%, rgba(15, 23, 42, 0.95) 100%);
   color: #ffffff;
   border: 1px solid rgba(56, 189, 248, 0.35);
   box-shadow: 0 4px 15px rgba(14, 165, 233, 0.2);
@@ -1999,7 +1999,7 @@ body {
 
 /* สถานะเมื่อเลือกโหมด Main Race (เรืองแสงโทนแดง-ทอง Racing) */
 .archive-seg-btn.active-race {
-  .countdown-box {(135deg, rgba(225, 6, 0, 0.25) 0%, rgba(15, 23, 42, 0.95) 100%);
+  background: linear-gradient(135deg, rgba(225, 6, 0, 0.25) 0%, rgba(15, 23, 42, 0.95) 100%);
   color: #ffffff;
   border: 1px solid rgba(225, 6, 0, 0.45);
   box-shadow: 0 4px 15px rgba(225, 6, 0, 0.25);
@@ -2039,14 +2039,13 @@ body {
   text-transform: uppercase;
   white-space: nowrap;
 }
-/* --- เปลี่ยนเส้นต่อท้ายหัวข้อเป็นสีแดง F1 --- */
 .archive-scifi-line {
   flex-grow: 1;
   height: 2px;
   margin-left: 12px;
   /* ไล่สีแดง F1 (#e10600) จากซ้ายแล้วค่อยๆ จางหายไปทางขวา */
-  .countdown-box {(90deg, #e10600 0%, rgba(225, 6, 0, 0.4) 50%, transparent 100%) !important;
-  box-shadow: 0 0 8px rgba(225, 6, 0, 0.5); /* เพิ่มแสงเรืองสีแดงจางๆ ให้เข้ากับโทน HUD */
+  background: linear-gradient(90deg, #e10600 0%, rgba(225, 6, 0, 0.4) 50%, transparent 100%) !important;
+  box-shadow: 0 0 8px rgba(225, 6, 0, 0.5); 
 }
 
 /* 3. กรอบภาพ Cinematic Full-Bleed (ไร้กรอบซ้อนกรอบ) */
@@ -2125,17 +2124,15 @@ body {
   min-height: 95px; /* บังคับความสูงของการ์ดให้มีพื้นที่รับรูป */
 }
 
-/* เส้นขีดล่างเรืองแสงสีทีม (ย้ายมาตรงกลาง) */
 .driver-pick-btn::before {
   content: '';
   position: absolute;
   bottom: 0;
   left: 50%;
-  transform: translateX(-50%); /* ดันเส้นให้มาอยู่กึ่งกลางแนวนอนพอดี */
-  width: 75%; /* ความยาวเส้น */
+  transform: translateX(-50%); 
+  width: 75%; 
   height: 2px;
-  /* ไล่สีให้สว่างตรงกลางและจางหายไปที่ปลายทั้งสองข้าง ให้ดูเป็นหน้าจอ HUD */
-  .countdown-box {(90deg, transparent 0%, var(--team-color, #fff) 50%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, var(--team-color, #fff) 50%, transparent 100%);
   box-shadow: 0 -2px 10px var(--team-color, rgba(255,255,255,0.4));
   z-index: 2;
 }
