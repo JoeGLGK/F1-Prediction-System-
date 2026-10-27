@@ -36,39 +36,45 @@
   <div class="container px-0" style="max-width: 540px;">
     
     <!-- โครงสร้างใหม่: Top Bar & Bottom Dock (รวมอยู่ในรูปปกชิ้นเดียว ไร้รอยต่อ) -->
+    <!-- 1. รูปปก: เอาโลโก้ F1 PREDICTOR และปุ่มลงทะเบียนไว้ที่ขอบล่างของรูปเหมือนในภาพตัวอย่าง -->
     <div class="hero-banner-hud">
       <img src="https://lh3.googleusercontent.com/d/1UPM7PH4G6QD3W-9YFb_UTcLFsLWZ2fAj" alt="F1 Racing" class="hero-img-hud">
       
-      <!-- 1. TOP BAR: โลโก้ F1 PREDICTOR และปุ่มลงทะเบียน อยู่ขอบบนสุด -->
-      <div class="hero-top-bar">
-        <div class="d-flex flex-column" onclick="registerSecretClick()" title="Secret Admin Gateway" style="cursor: pointer;">
-          <div class="brand-title-hud f1-font"><span class="f1-badge-hud">F1</span> PREDICTOR</div>
-          <div class="d-flex align-items-center mt-1">
-            <span class="live-dot"></span>
-            <span class="hud-subtitle">2026 FANTASY LEAGUE</span>
+      <div class="hero-overlay-hud">
+        <div class="d-flex justify-content-between align-items-end w-100 px-3 pb-2">
+          
+          <div class="d-flex flex-column" onclick="registerSecretClick()" title="Secret Admin Gateway" style="cursor: pointer;">
+            <div class="d-flex align-items-center mb-1">
+              <div class="brand-title-hud f1-font"><span class="f1-badge-hud">F1</span> PREDICTOR</div>
+            </div>
+            <div class="d-flex align-items-center ps-1 mt-1">
+              <span class="live-dot"></span>
+              <span class="hud-subtitle">2026 OFFICIAL FANTASY LEAGUE</span>
+            </div>
           </div>
+          
+          <button type="button" class="btn-sys-badge" onclick="openRegisterModal()">
+            <i class="fa-solid fa-user"></i><span>ลงทะเบียน</span>
+          </button>
+          
         </div>
-        
-        <button type="button" class="btn-sys-badge" onclick="openRegisterModal()">
-          <i class="fa-solid fa-user"></i><span>ลงทะเบียน</span>
-        </button>
       </div>
+    </div>
 
-      <!-- 2. BOTTOM DOCK: ข้อมูลผู้เล่นและคะแนนสะสม วางบนเงาดำขอบล่างของรูปปก -->
-      <div class="hero-bottom-dock" id="userScoreBanner">
-        <div>
-          <div class="small text-white-50" style="font-size:0.75rem;">
-            <i class="fa-solid fa-id-badge text-danger me-1"></i>ผู้เล่น: <strong class="text-white fs-6 ms-1" id="myPlayerName">--</strong> 
-            <a href="javascript:void(0)" onclick="openLoginGateModal()" class="text-info ms-1 text-decoration-none" style="font-size:0.7rem;">(สลับชื่อ)</a>
-          </div>
-          <div class="small text-white-50 mt-1" style="font-size:0.75rem;">
-            อันดับปัจจุบัน: <strong id="myCurrentRank">-</strong>
-          </div>
+    <!-- 2. แถบคะแนนผู้เล่น: อยู่ถัดลงมาจากรูปปกทันทีแบบไร้กรอบ กลืนเป็นพื้นเดียวกับหน้าจอ -->
+    <div class="user-score-banner" id="userScoreBanner">
+      <div>
+        <div class="small text-secondary" style="font-size:0.75rem;">
+          <i class="fa-solid fa-id-badge text-danger me-1"></i>ผู้เล่น: <strong class="text-white fs-6 ms-1" id="myPlayerName">--</strong> 
+          <a href="javascript:void(0)" onclick="openLoginGateModal()" class="text-info ms-2 text-decoration-none small">(สลับชื่อ)</a>
         </div>
-        <div class="text-end">
-          <div class="small text-white-50 text-uppercase" style="font-size:0.62rem; letter-spacing: 0.5px;">คะแนนสะสมทั้งฤดูกาล</div>
-          <div class="user-score-pts f1-font mt-1"><span id="myTotalScore">0</span> <span style="font-size: 0.8rem; color:#94a3b8; text-shadow:none;">PTS</span></div>
+        <div class="small text-secondary mt-1" style="font-size:0.75rem;">
+          อันดับปัจจุบัน: <strong class="text-info" id="myCurrentRank">-</strong>
         </div>
+      </div>
+      <div class="text-end">
+        <div class="small text-secondary text-uppercase" style="font-size:0.65rem;">คะแนนสะสมทั้งฤดูกาล</div>
+        <div class="user-score-pts f1-font mt-1"><span id="myTotalScore">0</span> <span style="font-size: 0.8rem; color:#94a3b8; text-shadow:none;">PTS</span></div>
       </div>
     </div>
 
