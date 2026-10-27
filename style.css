@@ -99,24 +99,21 @@ body {
 }
 
 .user-score-banner { 
-  background: rgba(255, 255, 255, 0.04) !important; /* ⬅️ ปรับให้เป็นกระจกสว่างใสบางๆ จะได้ไม่จมไปกับสีดำ */
-  backdrop-filter: blur(20px) !important; 
-  -webkit-backdrop-filter: blur(20px) !important; 
-  border: none !important; 
-  border-top: 1px solid rgba(255, 255, 255, 0.15) !important; /* ⬅️ เพิ่มเส้นสันกระจกด้านบนให้คมกริบ */
-  border-radius: 0 !important; 
-  padding: 18px 20px !important; 
+  background: transparent !important; /* ⬅️ ลบสีพื้นหลังทิ้ง โปร่งใส 100% */
+  backdrop-filter: none !important; /* ⬅️ ลบกระจกเบลอทิ้ง */
+  -webkit-backdrop-filter: none !important; 
+  border: none !important; /* ⬅️ ลบเส้นขอบทุกอย่างทิ้ง */
+  padding: 0 20px !important; /* ⬅️ ลบช่องไฟบนล่างของกล่องออก เหลือแค่ขอบซ้าย-ขวา */
   display: flex; 
   justify-content: space-between; 
   align-items: center; 
   
-  margin-top: -65px !important; /* ⬅️ กระชากแผงกระจกขึ้นไป 65px เพื่อให้ซ้อนทับรูป 100% */
-  margin-bottom: 24px !important; 
+  margin-top: -75px !important; /* ⬅️ ดึงตัวหนังสือขึ้นไปวางทับบนพื้นที่เฟดดำของรูปปกพอดี */
+  margin-bottom: 35px !important; /* ⬅️ ดันเนื้อหาส่วน STANDINGS ด้านล่างให้ออกห่างไปอีก */
   
-  box-shadow: 0 25px 45px rgba(0,0,0,0.9) !important; 
+  box-shadow: none !important; /* ⬅️ ลบเงากล่องทิ้งทั้งหมด */
   position: relative; 
   z-index: 3; 
-  transition: all 0.3s ease;
 }
 
 .user-score-pts { 
