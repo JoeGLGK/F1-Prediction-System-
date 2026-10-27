@@ -99,19 +99,19 @@ body {
 }
 
 .user-score-banner { 
-  background: transparent !important; /* ⬅️ ลบสีพื้นหลังทิ้ง โปร่งใส 100% */
-  backdrop-filter: none !important; /* ⬅️ ลบกระจกเบลอทิ้ง */
+  background: transparent !important; 
+  backdrop-filter: none !important; 
   -webkit-backdrop-filter: none !important; 
-  border: none !important; /* ⬅️ ลบเส้นขอบทุกอย่างทิ้ง */
-  padding: 0 20px !important; /* ⬅️ ลบช่องไฟบนล่างของกล่องออก เหลือแค่ขอบซ้าย-ขวา */
+  border: none !important; 
+  padding: 0 20px !important; 
   display: flex; 
   justify-content: space-between; 
   align-items: center; 
   
-  margin-top: -75px !important; /* ⬅️ ดึงตัวหนังสือขึ้นไปวางทับบนพื้นที่เฟดดำของรูปปกพอดี */
-  margin-bottom: 35px !important; /* ⬅️ ดันเนื้อหาส่วน STANDINGS ด้านล่างให้ออกห่างไปอีก */
+  margin-top: -20px !important; /* ⬅️ เลื่อนลงมาให้ต่ำลง จะได้ไม่ลอยไปทับกับโลโก้ F1 */
+  margin-bottom: 25px !important; 
   
-  box-shadow: none !important; /* ⬅️ ลบเงากล่องทิ้งทั้งหมด */
+  box-shadow: none !important; 
   position: relative; 
   z-index: 3; 
 }
