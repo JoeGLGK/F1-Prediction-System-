@@ -147,7 +147,7 @@
           <i class="fa-solid fa-circle-info text-warning me-1"></i> <strong>กติกา:</strong> ทายตำแหน่งเป๊ะ (P1-P4) ได้ <strong>2 คะแนน/ตำแหน่ง</strong>
         </div>
         
-        <!-- ⚠️ กล่องประวัติทายผล (ต้องคงไว้จุดเดิมนอก Form ตามโครงสร้างดั้งเดิม) -->
+        <!-- ⚠️ กล่องประวัติทายผล -->
         <div id="savedPredAlert" class="history-card" style="display: none;">
           <div class="d-flex justify-content-between align-items-center mb-2"><span class="small fw-bold text-success"><i class="fa-solid fa-circle-check me-1"></i>คุณได้ส่งคำทายสนามนี้ไว้แล้ว</span><span class="badge bg-success" style="font-size:0.65rem;">บันทึกแล้ว</span></div>
           <div class="small text-secondary mb-2" id="savedPredTime" style="font-size:0.75rem;">เวลาส่ง: -</div>
@@ -157,32 +157,32 @@
 
         <form onsubmit="handlePrediction(event)">
           
-          <!-- ⚠️ คืนชีพกล่องโปรไฟล์เดิม แต่ใช้ d-none ซ่อนไว้ทั้งหมด เพื่อให้ระบบหา ID เจอ -->
+          <!-- ⚠️ คืนชีพกล่องโปรไฟล์เดิม แต่ใช้ d-none ซ่อนไว้ทั้งหมด -->
           <div class="player-display-box mb-4 d-flex justify-content-between align-items-center d-none">
             <div><div class="small text-secondary" style="font-size: 0.75rem;">ส่งคำทายในชื่อ:</div><div class="fw-bold text-white fs-6"><i class="fa-solid fa-user-check text-success me-2"></i><span id="formPlayerDisplay">-</span></div></div>
             <button type="button" class="btn btn-sm btn-outline-secondary py-1" onclick="openLoginGateModal()">เปลี่ยนชื่อ</button>
           </div>
 
-          <!-- โครงสร้าง Cinematic Layout (จัดเรียงตามภาพต้นแบบของคุณ) -->
+          <!-- โครงสร้าง Cinematic Layout ที่แก้ ID ตรงกับระบบหลังบ้านแล้ว -->
           <div class="mb-4">
-            
-            <!-- 1. รูปภาพสนามแข่งขัน (แก้ ID ให้ตรงกับ JS) -->
-          <div id="trackImageWrapper" class="track-banner-box" style="display: none;" onclick="previewTrackImageById('trackImagePreview')">
-            <img id="trackImagePreview" src="" class="track-banner-img" alt="Track Banner">
-            <div class="track-banner-fade"></div>
-          </div>
+            <!-- 1. รูปภาพสนามแข่งขัน (id="trackImageWrapper") -->
+            <div id="trackImageWrapper" class="track-banner-box" style="display: none;" onclick="previewTrackImageById('trackImagePreview')">
+              <img id="trackImagePreview" src="" class="track-banner-img" alt="Track Banner">
+              <div class="track-banner-fade"></div>
+            </div>
 
-          <!-- 2. นาฬิกานับถอยหลัง (ไร้กรอบ ลอยทับภาพนิดหน่อย) -->
-          <div id="countdownBox" class="countdown-box" style="display: none;">
-            <div id="countdownTimer" class="countdown-timer">00:00:00</div>
-          </div>
+            <!-- 2. นาฬิกานับถอยหลัง -->
+            <div id="countdownBox" class="countdown-box" style="display: none;">
+              <div id="countdownTimer" class="countdown-timer">00:00:00</div>
+            </div>
 
-          <!-- 3. ตัวเลือกสนามแข่งขัน (เปลี่ยน id เป็น selRace) -->
-          <div class="px-2">
-            <label class="form-label text-secondary small mb-1 d-none">สนามแข่งขัน</label>
-            <select class="form-select race-select-cinematic" id="selRace" onchange="onRaceChange()" required>
-              <option value="" disabled selected>-- กำลังโหลดข้อมูล / เลือกสนาม --</option>
-            </select>
+            <!-- 3. ตัวเลือกสนามแข่งขัน (id="selRace") -->
+            <div class="px-2">
+              <label class="form-label text-secondary small mb-1 d-none">สนามแข่งขัน</label>
+              <select class="form-select race-select-cinematic" id="selRace" onchange="onRaceChange()" required>
+                <option value="" disabled selected>-- กำลังโหลดข้อมูล / เลือกสนาม --</option>
+              </select>
+            </div>
           </div>
           
           <div class="d-none">
