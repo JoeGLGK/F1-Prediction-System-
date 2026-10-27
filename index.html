@@ -142,12 +142,12 @@
       <div class="f1-card p-4">
         <h2 class="section-header-f1 mb-2"><i class="fa-solid fa-gamepad me-2"></i>PREDICTION FORM</h2>
         
-        <!-- ⚠️ คืนชีพกล่องกติกา แต่ใช้ d-none ซ่อนไว้ เพื่อไม่ให้ JS Error -->
+        <!-- ⚠️ คืนชีพกล่องกติกาเดิม แต่ใช้ d-none ซ่อนไว้ เพื่อป้องกัน JS Error -->
         <div class="rule-alert-box mb-4 d-none">
           <i class="fa-solid fa-circle-info text-warning me-1"></i> <strong>กติกา:</strong> ทายตำแหน่งเป๊ะ (P1-P4) ได้ <strong>2 คะแนน/ตำแหน่ง</strong>
         </div>
         
-        <!-- ⚠️ คืนชีพกล่องประวัติทายผล ไว้จุดเดิมนอก Form เพื่อกัน Error -->
+        <!-- ⚠️ กล่องประวัติทายผล (ต้องคงไว้จุดเดิมนอก Form ตามโครงสร้างดั้งเดิม) -->
         <div id="savedPredAlert" class="history-card" style="display: none;">
           <div class="d-flex justify-content-between align-items-center mb-2"><span class="small fw-bold text-success"><i class="fa-solid fa-circle-check me-1"></i>คุณได้ส่งคำทายสนามนี้ไว้แล้ว</span><span class="badge bg-success" style="font-size:0.65rem;">บันทึกแล้ว</span></div>
           <div class="small text-secondary mb-2" id="savedPredTime" style="font-size:0.75rem;">เวลาส่ง: -</div>
@@ -156,30 +156,35 @@
         </div>
 
         <form onsubmit="handlePrediction(event)">
-          <!-- ⚠️ คืนชีพกล่องโปรไฟล์ แต่ใช้ d-none ซ่อนไว้ทั้งหมด เพื่อไม่ให้ JS Error -->
+          
+          <!-- ⚠️ คืนชีพกล่องโปรไฟล์เดิม แต่ใช้ d-none ซ่อนไว้ทั้งหมด เพื่อให้ระบบหา ID เจอ -->
           <div class="player-display-box mb-4 d-flex justify-content-between align-items-center d-none">
             <div><div class="small text-secondary" style="font-size: 0.75rem;">ส่งคำทายในชื่อ:</div><div class="fw-bold text-white fs-6"><i class="fa-solid fa-user-check text-success me-2"></i><span id="formPlayerDisplay">-</span></div></div>
             <button type="button" class="btn btn-sm btn-outline-secondary py-1" onclick="openLoginGateModal()">เปลี่ยนชื่อ</button>
           </div>
 
-          <!-- โครงสร้างภาพสนาม นาฬิกา และตัวเลือก (Cinematic) -->
+          <!-- โครงสร้าง Cinematic Layout (จัดเรียงตามภาพต้นแบบของคุณ) -->
           <div class="mb-4">
-            <!-- 1. รูปภาพสนามแข่งขัน -->
+            
+            <!-- 1. รูปภาพสนามแข่งขัน (อยู่บนสุด フェดดำด้านล่าง) -->
             <div id="trackBannerContainer" class="track-banner-box" style="display: none;" onclick="openTrackImageModal()">
               <img id="trackBannerImg" src="" class="track-banner-img" alt="Track Banner">
               <div class="track-banner-fade"></div>
+              
+              <!-- ⚠️ สำคัญมาก: คืนชีพคลาสนี้กลับมาซ่อนไว้ (ถ้าลบ JS จะพังทันที) -->
+              <div class="track-zoom-hint d-none"><i class="fa-solid fa-magnifying-glass-plus text-danger"></i> แตะเพื่อดูภาพขยาย</div>
             </div>
 
-            <!-- 2. นาฬิกานับถอยหลัง -->
+            <!-- 2. นาฬิกานับถอยหลัง (ไร้กรอบ ลอยทับภาพนิดหน่อย) -->
             <div id="countdownBox" class="countdown-box" style="display: none;">
               <div id="countdownTimer" class="countdown-timer">00:00:00</div>
             </div>
 
             <!-- 3. ตัวเลือกสนามแข่งขัน -->
             <div class="px-2">
-              <select class="form-select race-select-cinematic" id="raceSelect" onchange="onRaceChange()" required>
-                <option value="" disabled selected>-- กำลังโหลดข้อมูล / เลือกสนาม --</option>
-              </select>
+              <!-- ⚠️ คืนชีพ Label เดิมแต่ซ่อนไว้กันระบบรวน -->
+              <label class="form-label text-secondary small mb-1 d-none">สนามแข่งขัน</label>
+              <select class="form-select race-select-cinematic" id="raceSelect" onchange="onRaceChange()" required></select>
             </div>
           </div>
           
