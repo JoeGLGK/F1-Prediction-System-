@@ -3275,7 +3275,7 @@ body {
   max-width: 480px !important;
   
   /* ปรับความใสได้ตรงเลขตัวสุดท้าย (ยิ่งใกล้ยิ่ง 0 ยิ่งใส) */
-  background: rgba(50, 55, 65, 0.15) !important; 
+  background: rgba(50, 55, 65, 0.10) !important; 
   backdrop-filter: blur(25px) saturate(150%) !important;
   -webkit-backdrop-filter: blur(25px) saturate(150%) !important;
   
