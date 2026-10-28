@@ -3078,15 +3078,15 @@ body {
   display: block !important;
 }
 /* =========================================================
-   HOLOGRAPHIC TELEMETRY & HUD TARGETING (PREDICTION SLOTS)
+   HOLOGRAPHIC TELEMETRY & HUD TARGETING (COMPLETE SET)
    ========================================================= */
 
-/* 1. โครงสร้างหลักของการ์ด: ลบกล่องทึบออกให้โปร่งใสไร้ขอบ */
+/* 1. โครงสร้างหลักของการ์ด (ปรับความสูงให้พอดี ไม่สูงเกินไป) */
 .driver-slot-card {
   background: rgba(13, 14, 18, 0.25) !important;
   border: none !important;
   border-radius: 8px !important;
-  height: 115px !important;
+  height: 115px !important; 
   position: relative !important;
   overflow: hidden !important;
   box-shadow: none !important;
@@ -3096,15 +3096,13 @@ body {
   height: 95px !important;
 }
 
-/* 2. ตอนยังไม่ได้เลือกนักแข่ง (HUD Targeting Brackets 4 มุม) */
+/* 2. ตอนยังไม่ได้เลือกนักแข่ง (HUD Targeting Brackets) */
 .slot-empty-state:not(.d-none) {
   border: none !important;
   border-radius: 4px !important;
   min-height: 100% !important;
   width: 100% !important;
   position: relative !important;
-  
-  /* วาดเส้นมุมฉาก 4 มุม ⌜ ⌝ ⌞ ⌟ สไตล์ Viewfinder เรดาร์ */
   background-color: rgba(255, 255, 255, 0.015) !important;
   background-image: 
     linear-gradient(to right, rgba(255, 255, 255, 0.22) 2px, transparent 2px),
@@ -3125,7 +3123,6 @@ body {
   transition: all 0.25s ease !important;
 }
 
-/* เอฟเฟกต์เมื่อแตะ/ชี้ช่องว่าง: กรอบเล็งเป้าเปลี่ยนเป็นสีแดง F1 เรืองแสง */
 .driver-slot-card:hover .slot-empty-state:not(.d-none),
 .driver-slot-card:active .slot-empty-state:not(.d-none) {
   background-color: rgba(225, 6, 0, 0.06) !important;
@@ -3141,7 +3138,6 @@ body {
   box-shadow: inset 0 0 25px rgba(225, 6, 0, 0.12) !important;
 }
 
-/* ไอคอนเป้าเล็งตรงกลางเต้นเป็นจังหวะชีพจรเรดาร์ (Pulse) */
 .empty-icon {
   font-size: 1.3rem !important;
   color: rgba(255, 255, 255, 0.3) !important;
@@ -3169,7 +3165,6 @@ body {
 
 /* 3. ตอนเลือกนักแข่งแล้ว (Holographic Telemetry) */
 .driver-slot-card.filled {
-  /* ไล่เฉดแสงสีทีมบางๆ จากด้านซ้าย แล้วเฟดเข้าหาพื้นหลังดำสนิท #0d0e12 */
   background: linear-gradient(90deg, 
     color-mix(in srgb, var(--team-color, #e10600) 16%, transparent) 0%, 
     rgba(18, 20, 28, 0.5) 45%, 
@@ -3180,7 +3175,6 @@ body {
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7) !important;
 }
 
-/* เส้นไฟ Telemetry LED คมกริบคาดด้านซ้ายสุด */
 .driver-slot-card.filled::before {
   content: '' !important;
   position: absolute !important;
@@ -3197,33 +3191,37 @@ body {
   mix-blend-mode: normal !important;
 }
 
-/* ปรับป้ายตำแหน่ง P1 - P4 และ FL ให้คลีนขึ้น */
+/* 4. ป้ายบอกตำแหน่ง (กลับมาขวาบน แต่ย่อขนาดลง 20% ไม่ให้บังหน้า) */
 .slot-badge-ui {
-  top: 8px !important;
-  right: 8px !important;
-  background: rgba(10, 12, 16, 0.75) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  top: 6px !important;
+  right: 6px !important;
+  left: auto !important;
+  background: rgba(10, 12, 16, 0.8) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
   backdrop-filter: blur(8px) !important;
-  padding: 2px 7px !important;
+  padding: 2px 6px !important;
   border-radius: 6px !important;
   z-index: 5 !important;
+  transform: scale(0.8) !important; /* ⬅️ ย่อขนาดป้ายลง 20% */
+  transform-origin: top right !important; /* ⬅️ ให้หดเข้ามุมขวาบน */
 }
 
-/* ปรับตัวอักษรชื่อและทีมให้คมชัดลอยเด่น */
+/* 5. ชื่อนักแข่งและทีม (ดึงกลับขึ้นมาที่เดิม) */
 .driver-name-ui {
+  margin-top: 12px !important; /* ⬅️ ดึงกลับขึ้นมาด้านบน */
   font-family: 'Rajdhani', sans-serif !important;
-  font-size: 1.05rem !important;
+  font-size: 1rem !important;
   font-weight: 800 !important;
   color: #ffffff !important;
-  margin-top: 10px !important;
+  line-height: 1.05 !important;
   letter-spacing: 0.5px !important;
   text-transform: uppercase !important;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9) !important;
-  max-width: 68% !important;
+  max-width: 65% !important;
 }
 .fl-card .driver-name-ui {
-  margin-top: 4px !important;
-  font-size: 1.15rem !important;
+  margin-top: 10px !important;
+  font-size: 1.1rem !important;
 }
 
 .driver-team-ui {
@@ -3235,33 +3233,31 @@ body {
   margin-top: 1px !important;
 }
 
-/* โลโก้ทีมด้านล่างชื่อ */
 .team-logo-mini {
-  margin-top: 8px !important;
-  width: 65px !important;
-  height: 20px !important;
+  margin-top: 6px !important;
+  height: 18px !important;
+  width: auto !important;
+  max-width: 65px !important;
   opacity: 0.85 !important;
 }
 
-/* ภาพนักแข่งโฮโลแกรม: ซูมให้มีมิติและละลายขอบล่าง+ซ้ายเข้ากับความมืด */
+/* 6. ภาพนักแข่ง (ขยับนิดหน่อยเพื่อหลบป้ายด้านบน) */
 .driver-img-ui {
   position: absolute !important;
-  bottom: -10px !important;
-  right: -6px !important;
-  height: 105px !important;
-  width: 100px !important;
+  bottom: -8px !important;
+  right: 0px !important; /* ขยับชิดขวา */
+  height: 110px !important; /* ลดความสูงเล็กน้อยเพื่อเว้นที่ให้ป้าย P1-P4 */
+  width: 105px !important;
   object-fit: cover !important;
   object-position: top center !important;
   z-index: 1 !important;
   filter: contrast(1.08) drop-shadow(-5px 2px 10px rgba(0, 0, 0, 0.8)) !important;
-  
-  /* ละลายขอบด้านล่างและด้านซ้ายของตัวนักแข่งให้กลืนไปกับพื้นหลังการ์ด */
   mask-image: radial-gradient(circle at 75% 35%, rgba(0,0,0,1) 45%, rgba(0,0,0,0) 88%) !important;
   -webkit-mask-image: radial-gradient(circle at 75% 35%, rgba(0,0,0,1) 45%, rgba(0,0,0,0) 88%) !important;
 }
 .fl-card .driver-img-ui {
-  height: 92px !important;
-  width: 92px !important;
-  right: 12px !important;
+  height: 95px !important;
+  width: 95px !important;
+  right: 8px !important;
   bottom: -8px !important;
 }
