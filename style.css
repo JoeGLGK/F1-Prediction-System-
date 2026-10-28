@@ -3274,8 +3274,8 @@ body {
   width: 94% !important; 
   max-width: 480px !important;
   
-  /* สีเทากระจกใส แบบเดียวกับแอป F1 Official */
-  background: rgba(50, 55, 65, 0.45) !important; 
+  /* ปรับความใสได้ตรงเลขตัวสุดท้าย (ยิ่งใกล้ยิ่ง 0 ยิ่งใส) */
+  background: rgba(50, 55, 65, 0.15) !important; 
   backdrop-filter: blur(25px) saturate(150%) !important;
   -webkit-backdrop-filter: blur(25px) saturate(150%) !important;
   
