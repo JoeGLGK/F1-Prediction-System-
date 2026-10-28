@@ -3261,3 +3261,83 @@ body {
   right: 8px !important;
   bottom: -8px !important;
 }
+/* =========================================================
+   F1 OFFICIAL STYLE FLOATING NAV (CAPSULE GLASSMORPHISM)
+   ========================================================= */
+
+/* 1. ปรับทรงกล่องให้เป็นแคปซูลโค้งมน (border-radius: 50px) และเป็นกระจกฝ้าใส */
+.f1-nav-tabs {
+  position: fixed !important;
+  bottom: 25px !important; 
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: 94% !important; 
+  max-width: 480px !important;
+  
+  /* สีเทากระจกใส แบบเดียวกับแอป F1 Official */
+  background: rgba(50, 55, 65, 0.45) !important; 
+  backdrop-filter: blur(25px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(25px) saturate(150%) !important;
+  
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 50px !important; /* ⬅️ ทรงแคปซูล */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
+  padding: 12px 10px 10px 10px !important;
+  z-index: 1050 !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+}
+
+.f1-nav-item {
+  flex: 1 !important;
+  text-align: center !important;
+}
+
+/* 2. รีเซ็ตปุ่มด้านในให้เรียบที่สุด */
+.f1-nav-link, 
+.f1-nav-link:focus, 
+.f1-nav-link:active, 
+.f1-nav-link:hover,
+.f1-nav-link.active {
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 5px !important;
+  position: relative !important;
+}
+
+/* 3. สถานะปกติ (สีเทาขาว เรียบหรู) */
+.f1-nav-link i {
+  font-size: 1.15rem !important;
+  color: rgba(255, 255, 255, 0.8) !important; 
+  transition: color 0.3s ease !important;
+  transform: none !important;
+  filter: none !important;
+}
+.f1-nav-link span {
+  font-size: 0.62rem !important;
+  font-weight: 700 !important;
+  font-family: 'Rajdhani', sans-serif !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+  transition: color 0.3s ease !important;
+  letter-spacing: 0.5px !important;
+  transform: none !important;
+}
+
+/* 4. สถานะ Active: เปลี่ยนเป็นสีแดง F1 เหมือนแอปออฟฟิเชียล */
+.f1-nav-link.active i,
+.f1-nav-link.active span {
+  color: #ff1801 !important; /* ⬅️ แดงสว่าง */
+}
+
+/* ซ่อนเส้นไฟ LED ขีดล่างและบนของเก่าทิ้งทั้งหมด */
+.f1-nav-link::after,
+.f1-nav-link::before {
+  display: none !important;
+}
