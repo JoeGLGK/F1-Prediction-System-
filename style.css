@@ -3276,8 +3276,8 @@ body {
   
   /* ปรับความใสได้ตรงเลขตัวสุดท้าย (ยิ่งใกล้ยิ่ง 0 ยิ่งใส) */
   background: rgba(50, 55, 65, 0.03) !important; 
-  backdrop-filter: blur(7px) saturate(150%) !important;
-  -webkit-backdrop-filter: blur(10px) saturate(150%) !important;
+  backdrop-filter: blur(5px) saturate(130%) !important;
+  -webkit-backdrop-filter: blur(7px) saturate(130%) !important;
   
   border: 1px solid rgba(255, 255, 255, 0.15) !important;
   border-radius: 50px !important; /* ⬅️ ทรงแคปซูล */
