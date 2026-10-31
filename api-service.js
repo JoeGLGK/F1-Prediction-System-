@@ -202,15 +202,12 @@ async function loadResultsSessionData(sessionKey, btnEl) {
     const latestPos = {};
     positions.forEach(p => { latestPos[p.driver_number] = p.position; });
 
-    // คำนวณเวลา Best Lap ของแต่ละคนและจำนวนรอบ
     const bestLaps = {};
-    const lapCounts = {};
     let sessionFastest = Infinity;
 
     if (Array.isArray(laps)) {
       laps.forEach(l => {
         const dNum = l.driver_number;
-        lapCounts[dNum] = Math.max(lapCounts[dNum] || 0, l.lap_number || 0);
         if (l.lap_duration && l.lap_duration > 0) {
           if (!bestLaps[dNum] || l.lap_duration < bestLaps[dNum]) {
             bestLaps[dNum] = l.lap_duration;
@@ -250,8 +247,7 @@ async function loadResultsSessionData(sessionKey, btnEl) {
         team: info.team || d.team_name || 'F1',
         color: info.color || (d.team_colour ? `#${d.team_colour}` : '#888888'),
         headshot: getDriveDirectLink(info.headshot || info.img || DEFAULT_DRIVER_IMG),
-        timeGap: timeDisplay,
-        laps: lapCounts[d.driver_number] || 0
+        timeGap: timeDisplay
       };
     }).sort((a, b) => a.pos - b.pos).filter(r => r.pos !== 99);
     
@@ -260,6 +256,7 @@ async function loadResultsSessionData(sessionKey, btnEl) {
       return;
     }
     
+    // แสดงผลโดยตัดจำนวนรอบ (Laps) ออก คงไว้เฉพาะเวลา / Gap
     list.innerHTML = results.map(r => `
       <div class="f1-standings-row" style="cursor:pointer;" onclick="openDriverHero('${r.fullName.replace(/'/g, "\\'")}', this)">
         <div class="col-pos" style="width: 12%;">${r.pos}</div>
@@ -270,9 +267,8 @@ async function loadResultsSessionData(sessionKey, btnEl) {
             <div class="team-name m-0" style="color: ${r.color};">${r.team}</div>
           </div>
         </div>
-        <div class="col-pts text-end" style="width: 35%; font-family: 'Share Tech Mono', monospace; font-size: 0.82rem;">
+        <div class="col-pts text-end" style="width: 35%; font-family: 'Share Tech Mono', monospace; font-size: 0.85rem;">
            <span class="text-white fw-bold">${r.timeGap}</span>
-           <span class="text-secondary ms-2" style="font-size: 0.72rem;">${r.laps}L</span>
         </div>
       </div>
     `).join('');
