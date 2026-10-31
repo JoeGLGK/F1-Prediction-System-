@@ -55,6 +55,7 @@ window.onload = function() {
 
   buildDriverGrid();
   loadData();
+  loadOpenF1Meetings();
 };
 
 function buildDriverGrid() {
@@ -379,7 +380,7 @@ function renderUI(data) {
   }
 
   const allRaceOpts = '<option value="" disabled selected>-- เลือกสนาม --</option>' + globalRaces.map(function(r) { return '<option value="' + r.id + '" data-type="' + r.type + '">' + (r.status === 'OPEN' ? '🔴' : (r.status === 'CALCULATED' ? '🏁' : '⚡')) + ' ' + r.name + '</option>'; }).join('');
-  ['selCommRace','adminRace','adRaceDead','adRaceCheck','adMediaRace','selCenterRace','sel2025Race', 'selFinishedRace', 'selResultsRace'].forEach(function(id) { let el = document.getElementById(id); if(el) el.innerHTML = allRaceOpts; });
+  ['selCommRace','adminRace','adRaceDead','adRaceCheck','adMediaRace','selCenterRace','sel2025Race', 'selFinishedRace'].forEach(function(id) { let el = document.getElementById(id); if(el) el.innerHTML = allRaceOpts; });
 
   if (globalRaces.length > 0) { document.getElementById('adMediaRace').value = globalRaces[0].id; onAdminMediaRaceChange(); }
   if (openRaces.length > 0) { document.getElementById('selCenterRace').value = openRaces[0].id; document.getElementById('sel2025Race').value = openRaces[0].id; onCenterRaceChange(); on2025RaceChange(); }
@@ -1709,4 +1710,58 @@ function onResultsRaceChange() {
   
   // สั่งให้ดึงข้อมูลของเซสชันแรกอัตโนมัติ
   loadResultsSessionData(sessions[0], btnGroup.firstChild);
+}
+// โหลดรายชื่อสนามจาก OpenF1 ทันทีเมื่อเรียกใช้
+async function loadOpenF1Meetings() {
+  const rSel = document.getElementById('selResultsRace');
+  if (!rSel) return;
+  
+  rSel.innerHTML = '<option value="" disabled selected>-- กำลังโหลดข้อมูลสนามจาก API --</option>';
+  
+  try {
+    // กำหนดปีที่ต้องการดึงข้อมูล (ใช้ 2024 เป็นฐานข้อมูลทดสอบที่สมบูรณ์ของ OpenF1)
+    const res = await fetch('https://api.openf1.org/v1/meetings?year=2024');
+    const meetings = await res.json();
+    
+    let opts = '<option value="" disabled selected>-- เลือกสนาม --</option>';
+    meetings.forEach(m => {
+      opts += `<option value="${m.meeting_key}">${m.meeting_name}</option>`;
+    });
+    rSel.innerHTML = opts;
+  } catch (error) {
+    console.error('OpenF1 Meetings Error:', error);
+    rSel.innerHTML = '<option value="" disabled selected>โหลดข้อมูลสนามล้มเหลว</option>';
+  }
+}
+
+// เมื่อผู้ใช้เลือกสนาม จะวิ่งไปดึงรายการเซสชัน (Sessions) ทั้งหมดของสนามนั้นมาสร้างปุ่ม
+async function onResultsRaceChange() {
+  const rSel = document.getElementById('selResultsRace');
+  const meetingKey = rSel.value;
+  if (!meetingKey) return;
+  
+  const btnGroup = document.getElementById('resultsSessionBtnGroup');
+  btnGroup.innerHTML = '<span class="text-secondary small"><i class="fa-solid fa-spinner fa-spin me-2"></i>กำลังโหลด Sessions...</span>';
+  
+  try {
+    const res = await fetch(`https://api.openf1.org/v1/sessions?meeting_key=${meetingKey}`);
+    const sessions = await res.json();
+    
+    // เรียงเซสชันตามเวลาเริ่มจริง
+    sessions.sort((a, b) => new Date(a.date_start) - new Date(b.date_start));
+    
+    // สร้างปุ่มโดยแนบ session_key ไปตรงๆ ไม่ต้องใช้ชื่อค้นหาแล้ว
+    btnGroup.innerHTML = sessions.map((s, index) => 
+      `<button class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 ${index === 0 ? 'active text-white border-white' : ''}" style="font-family: 'Rajdhani', sans-serif; font-weight: 700;" onclick="loadResultsSessionData('${s.session_key}', this)">${s.session_name.toUpperCase()}</button>`
+    ).join('');
+    
+    // สั่งให้ดึงผลของเซสชันแรกอัตโนมัติ
+    if (sessions.length > 0) {
+      loadResultsSessionData(sessions[0].session_key, btnGroup.firstChild);
+    } else {
+      document.getElementById('resultsSessionDataList').innerHTML = '<div class="text-center text-secondary py-4">ไม่มีข้อมูล Session ในสนามนี้</div>';
+    }
+  } catch (error) {
+    btnGroup.innerHTML = '<span class="text-danger small">โหลดเซสชันล้มเหลว</span>';
+  }
 }
