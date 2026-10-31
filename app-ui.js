@@ -1769,7 +1769,8 @@ function openSelectorModal(type) {
       const opt = rSel.options[i];
       if (opt.value) {
         const isSelected = rSel.value === opt.value ? 'selected' : '';
-        html += `<div class="picker-item ${isSelected}" onclick="selectPickerOption('race', '${opt.value}', '${opt.text.replace(/'/g, "\\'")}')">${opt.text}</div>`;
+        // ใช้การส่ง index ของ option แทนการส่งข้อความตรงๆ เพื่อป้องกัน Error จากอักขระพิเศษ
+        html += `<div class="picker-item ${isSelected}" onclick="selectPickerOptionByIndex(${i})">${opt.text}</div>`;
       }
     }
     container.innerHTML = html;
@@ -1791,26 +1792,15 @@ function openSelectorModal(type) {
   pickerModalInstance.show();
 }
 
-function selectPickerOption(type, val, text) {
+function selectPickerOptionByIndex(index) {
   triggerHaptic();
   const rSel = document.getElementById('selResultsRace');
-  rSel.value = val;
+  rSel.selectedIndex = index;
   onResultsRaceChange();
   
-  // อัปเดตข้อความบนปุ่มแคปซูล
-  document.getElementById('currentRaceLabel').innerText = text.replace(/🏁/g, '').trim();
-  document.getElementById('gpMainTitle').innerText = text.replace(/🏁/g, '').trim();
-  
-  if (pickerModalInstance) pickerModalInstance.hide();
-}
-
-function selectPickerSessionCustom(onclickAttr, sessionText) {
-  triggerHaptic();
-  document.getElementById('currentSessionLabel').innerText = sessionText;
-  
-  // สั่งรัน onclick เดิมของปุ่มเซสชันนั้นๆ
-  const fnBody = new Function(onclickAttr);
-  fnBody();
+  // อัปเดตข้อความบนปุ่มแคปซูลสนามตามชื่อที่เลือก
+  const selectedText = rSel.options[rSel.selectedIndex].text;
+  document.getElementById('currentRaceLabel').innerText = selectedText.replace(/🏁/g, '').trim();
   
   if (pickerModalInstance) pickerModalInstance.hide();
 }
