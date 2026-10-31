@@ -193,7 +193,7 @@ async function loadResultsSessionData(sessionKey, btnEl) {
       fetch(`https://api.openf1.org/v1/drivers?session_key=${sessionKey}`),
       fetch(`https://api.openf1.org/v1/position?session_key=${sessionKey}`),
       fetch(`https://api.openf1.org/v1/laps?session_key=${sessionKey}`),
-      fetch('https://api.jolpi.ca/ergast/f1/current/driverStandings.json') // ดึงคะแนนสะสมจริงจาก Ergast API
+      fetch('https://api.jolpi.ca/ergast/f1/current/driverStandings.json')
     ]);
     
     const drivers = await driversRes.json();
@@ -201,7 +201,6 @@ async function loadResultsSessionData(sessionKey, btnEl) {
     const laps = await lapsRes.json();
     const standingsData = await standingsRes.json();
     
-    // แปลงข้อมูลคะแนนและอันดับสะสมทั้งฤดูกาลจาก Ergast API
     const seasonStandings = {};
     const standingsLists = standingsData.MRData.StandingsTable.StandingsLists;
     if (standingsLists && standingsLists.length > 0) {
@@ -255,7 +254,6 @@ async function loadResultsSessionData(sessionKey, btnEl) {
         timeDisplay = 'Leader';
       }
 
-      // ดึงคะแนนและอันดับสะสมทั้งฤดูกาล (ถ้าไม่มีข้อมูลให้ใช้ค่าเริ่มต้น)
       const seasonData = seasonStandings[lastNameClean] || { points: '0', position: 'P-' };
 
       return {
@@ -276,7 +274,6 @@ async function loadResultsSessionData(sessionKey, btnEl) {
       return;
     }
     
-    // สร้างตารางแถว พร้อมส่งข้อมูลคะแนนและอันดับสะสมไปแสดงใน Modal ผ่านคอลัมน์ซ่อนหรือ attribute
     list.innerHTML = results.map(r => `
       <div class="f1-standings-row" style="cursor:pointer;" onclick="openDriverHeroCustom(this, '${r.fullName.replace(/'/g, "\\'")}', '${r.seasonPoints}', '${r.seasonPos}')">
         <div class="col-pos" style="width: 12%;">${r.pos}</div>
@@ -289,8 +286,6 @@ async function loadResultsSessionData(sessionKey, btnEl) {
         </div>
         <div class="col-pts text-end" style="width: 35%; font-family: 'Share Tech Mono', monospace; font-size: 0.85rem;">
            <span class="text-white fw-bold">${r.timeGap}</span>
-           <span class="d-none col-pts-season">${r.seasonPoints}</span>
-           <span class="d-none col-pos-season">${r.seasonPos}</span>
         </div>
       </div>
     `).join('');
@@ -299,36 +294,4 @@ async function loadResultsSessionData(sessionKey, btnEl) {
     console.error('Session Results Error:', error);
     list.innerHTML = '<div class="text-center text-danger py-4">พบปัญหาในการดึงข้อมูล OpenF1 API<br><span class="small text-secondary">กรุณาลองใหม่อีกครั้ง</span></div>';
   }
-}
-
-// ฟังก์ชันเสริมรองรับการเปิด Modal Hero พร้อมดึงคะแนนทั้งฤดูกาลมาแสดง
-function openDriverHeroCustom(rowEl, fullName, points, championshipPos) {
-  triggerHaptic();
-  const info = DRIVER_INFO[fullName];
-  if(!info) return;
-
-  const parts = fullName.split(' ');
-  const firstName = parts[0];
-  const lastName = parts.slice(1).join(' ');
-
-  document.getElementById('heroDriverFirstName').innerText = firstName;
-  document.getElementById('heroDriverLastName').innerText = lastName;
-  document.getElementById('heroTeamName').innerText = info.team;
-  document.getElementById('heroTeamLogo').src = getDriveDirectLink(TEAM_LOGOS[info.team] || '');
-  document.getElementById('heroDriverImg').src = getDriveDirectLink(info.heroImg || info.img); 
-  document.getElementById('heroPos').innerText = championshipPos;
-
-  const ptsEl = document.getElementById('heroPoints');
-  ptsEl.innerText = "0"; 
-  
-  setTimeout(() => {
-    animateCountUp(ptsEl, points, 2200); 
-  }, 10); 
-
-  document.getElementById('heroBgColor').style.background = `linear-gradient(to bottom, #0a0e1c 0%, ${info.color}40 15%, #0a0e1c 65%)`;
-
-  if (!window.driverHeroModalInstance) {
-    window.driverHeroModalInstance = new bootstrap.Modal(document.getElementById('driverHeroModal'));
-  }
-  window.driverHeroModalInstance.show();
 }
