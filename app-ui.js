@@ -1661,42 +1661,52 @@ function openDriverHero(fullName, rowEl) {
   window.driverHeroModalInstance.show();
 }
 
-// โหลดรายชื่อสนามจาก OpenF1 ทันทีเมื่อเรียกใช้
+// 1. โหลดเฉพาะสนามของปี 2026 ที่เริ่มทำการแข่งขันแล้ว
 async function loadOpenF1Meetings() {
   const rSel = document.getElementById('selResultsRace');
   if (!rSel) return;
   
-  rSel.innerHTML = '<option value="" disabled selected>-- กำลังโหลดข้อมูลสนามจาก API --</option>';
+  rSel.innerHTML = '<option value="" disabled selected>-- กำลังโหลดข้อมูลสนาม 2026 --</option>';
   
   try {
-    // ดึงข้อมูลสนามปีล่าสุด (หากต้องการเปลี่ยนปี เปลี่ยนตัวเลข year ได้เลย)
-    const res = await fetch('https://api.openf1.org/v1/meetings?year=2025');
-    let meetings = await res.json();
+    const res = await fetch('https://api.openf1.org/v1/meetings?year=2026');
+    const meetings = await res.json();
     
-    // fallback ไปปี 2024 หากปีที่ระบุยังไม่มีข้อมูล
-    if (!Array.isArray(meetings) || meetings.length === 0) {
-      const fallbackRes = await fetch('https://api.openf1.org/v1/meetings?year=2024');
-      meetings = await fallbackRes.json();
+    const now = new Date();
+    
+    // กรองเฉพาะสนามที่ถึงกำหนดเวลาเริ่มแข่งแล้ว และตัด Pre-Season Testing ออก
+    const startedMeetings = (Array.isArray(meetings) ? meetings : []).filter(m => {
+      const startDate = new Date(m.date_start);
+      const isTesting = (m.meeting_name || '').toLowerCase().includes('testing');
+      return startDate <= now && !isTesting;
+    });
+    
+    if (startedMeetings.length === 0) {
+      rSel.innerHTML = '<option value="" disabled selected>-- ยังไม่มีสนามที่ทำการแข่งขันในปี 2026 --</option>';
+      return;
     }
+
+    // เรียงลำดับตามวันที่แข่งจากสนามแรกไปสนามล่าสุด
+    startedMeetings.sort((a, b) => new Date(a.date_start) - new Date(b.date_start));
     
     let opts = '<option value="" disabled selected>-- เลือกสนาม --</option>';
-    meetings.forEach(m => {
-      opts += `<option value="${m.meeting_key}">🏁 ${m.meeting_name} (${m.year})</option>`;
+    startedMeetings.forEach(m => {
+      opts += `<option value="${m.meeting_key}">🏁 ${m.meeting_name}</option>`;
     });
     rSel.innerHTML = opts;
 
-    // เลือกสนามล่าสุดให้อัตโนมัติเมื่อโหลดเสร็จ
-    if (meetings.length > 0) {
-      rSel.value = meetings[meetings.length - 1].meeting_key;
-      onResultsRaceChange();
-    }
+    // เลือกสนามล่าสุดที่เพิ่งแข่งไปให้อัตโนมัติ
+    const latestMeeting = startedMeetings[startedMeetings.length - 1];
+    rSel.value = latestMeeting.meeting_key;
+    onResultsRaceChange();
+    
   } catch (error) {
     console.error('OpenF1 Meetings Error:', error);
     rSel.innerHTML = '<option value="" disabled selected>โหลดข้อมูลสนามล้มเหลว</option>';
   }
 }
 
-// เมื่อผู้ใช้เลือกสนาม จะวิ่งไปดึงรายการเซสชัน (Sessions) ทั้งหมดของสนามนั้นมาสร้างปุ่ม
+// 2. เมื่อเลือกสนาม ให้แสดงปุ่มเฉพาะเซสชันที่เริ่มวิ่งแล้วเท่านั้น
 async function onResultsRaceChange() {
   const rSel = document.getElementById('selResultsRace');
   const meetingKey = rSel.value;
@@ -1709,17 +1719,30 @@ async function onResultsRaceChange() {
     const res = await fetch(`https://api.openf1.org/v1/sessions?meeting_key=${meetingKey}`);
     const sessions = await res.json();
     
-    sessions.sort((a, b) => new Date(a.date_start) - new Date(b.date_start));
+    const now = new Date();
     
-    btnGroup.innerHTML = sessions.map((s, index) => 
-      `<button class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 ${index === 0 ? 'active text-white border-white' : ''}" style="font-family: 'Rajdhani', sans-serif; font-weight: 700;" onclick="loadResultsSessionData('${s.session_key}', this)">${s.session_name.toUpperCase()}</button>`
+    // กรองเอาเฉพาะเซสชันที่เริ่มทำการแข่งขันไปแล้ว (เซสชันที่ยังไม่ถึงเวลาจะไม่แสดงปุ่ม)
+    const startedSessions = (Array.isArray(sessions) ? sessions : []).filter(s => {
+      return new Date(s.date_start) <= now;
+    });
+    
+    startedSessions.sort((a, b) => new Date(a.date_start) - new Date(b.date_start));
+    
+    if (startedSessions.length === 0) {
+      btnGroup.innerHTML = '';
+      document.getElementById('resultsSessionDataList').innerHTML = '<div class="text-center text-secondary py-4">ยังไม่มีเซสชันที่เริ่มแข่งขันในสนามนี้</div>';
+      return;
+    }
+
+    // สร้างปุ่มและตั้งค่าให้เลือกเซสชันล่าสุดของสนามนั้นเป็นค่าเริ่มต้น (Active)
+    const lastIdx = startedSessions.length - 1;
+    btnGroup.innerHTML = startedSessions.map((s, index) => 
+      `<button class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 ${index === lastIdx ? 'active text-white border-white' : ''}" style="font-family: 'Rajdhani', sans-serif; font-weight: 700;" onclick="loadResultsSessionData('${s.session_key}', this)">${s.session_name.toUpperCase()}</button>`
     ).join('');
     
-    if (sessions.length > 0) {
-      loadResultsSessionData(sessions[0].session_key, btnGroup.firstChild);
-    } else {
-      document.getElementById('resultsSessionDataList').innerHTML = '<div class="text-center text-secondary py-4">ไม่มีข้อมูล Session ในสนามนี้</div>';
-    }
+    // ดึงข้อมูลของเซสชันล่าสุดมาแสดงทันที (เช่น ถ้าแข่งจบแล้วจะโชว์หน้า RACE ทันที)
+    loadResultsSessionData(startedSessions[lastIdx].session_key, btnGroup.lastElementChild);
+    
   } catch (error) {
     btnGroup.innerHTML = '<span class="text-danger small">โหลดเซสชันล้มเหลว</span>';
   }
