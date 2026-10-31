@@ -173,7 +173,7 @@ async function fetchLiveWeather() {
     console.error('❌ OpenF1 Weather API Error:', error);
   }
 }
-async function loadResultsSessionData(sessionName, btnEl) {
+async function loadResultsSessionData(sessionKey, btnEl) {
   // สลับสถานะปุ่ม Active
   if (btnEl) {
     document.querySelectorAll('#resultsSessionBtnGroup button').forEach(b => {
@@ -186,27 +186,7 @@ async function loadResultsSessionData(sessionName, btnEl) {
   list.innerHTML = '<div class="text-center py-5"><i class="fa-solid fa-spinner fa-spin text-danger fs-3 mb-2"></i><div class="text-secondary small f1-font">FETCHING SESSION RESULTS...</div></div>';
   
   try {
-    // ใช้รหัสสนามจาก dropdown เพื่อหา meeting_key
-    const rSel = document.getElementById('selResultsRace');
-    const raceId = rSel.value; 
-    
-    // หมายเหตุ: โค้ดส่วนนี้คือโครงสร้างสมมติในการดึง meeting_key หากมีตาราง Map รหัสในระบบ
-    // หากทดสอบ ให้ใช้ session_key=latest เพื่อดึงสนามล่าสุดก่อน
-    const meetRes = await fetch('https://api.openf1.org/v1/sessions?session_key=latest');
-    const meetData = await meetRes.json();
-    const meetingKey = meetData[0].meeting_key;
-    
-    const sesRes = await fetch(`https://api.openf1.org/v1/sessions?meeting_key=${meetingKey}&session_name=${encodeURIComponent(sessionName)}`);
-    const sesData = await sesRes.json();
-    
-    if (!sesData || sesData.length === 0) {
-      list.innerHTML = `<div class="text-center text-warning py-4"><i class="fa-solid fa-flag-checkered mb-2 fs-3"></i><br>เซสชันนี้ยังไม่เริ่ม หรือไม่มีข้อมูล</div>`;
-      return;
-    }
-    
-    const sessionKey = sesData[0].session_key;
-    
-    // ดึงรายชื่อนักแข่งและข้อมูลอันดับ
+    // 1. ยิงดึงข้อมูลนักแข่งและอันดับพร้อมกันด้วย sessionKey เลย
     const [driversRes, posRes] = await Promise.all([
       fetch(`https://api.openf1.org/v1/drivers?session_key=${sessionKey}`),
       fetch(`https://api.openf1.org/v1/position?session_key=${sessionKey}`)
@@ -215,15 +195,16 @@ async function loadResultsSessionData(sessionName, btnEl) {
     const drivers = await driversRes.json();
     const positions = await posRes.json();
     
-    // กรองอันดับสุดท้าย
+    // 2. กรองเอาเฉพาะอันดับล่าสุดของรถแต่ละคัน
     const latestPos = {};
     positions.forEach(p => { latestPos[p.driver_number] = p.position; });
     
+    // 3. จับคู่ข้อมูล
     const results = drivers.map(d => {
       const pos = latestPos[d.driver_number] || 99;
-      // ดึงข้อมูลรูปภาพและสีทีมจาก DRIVER_INFO ในแอปของคุณ
+      // เชื่อมรูปและสีจาก DRIVER_INFO ของแอป
       const appDriver = Object.keys(DRIVER_INFO).find(name => name.includes(d.last_name)) || d.full_name;
-      const info = DRIVER_INFO[appDriver] || { team: d.team_name, color: d.team_colour, headshot: DEFAULT_DRIVER_IMG };
+      const info = DRIVER_INFO[appDriver] || { team: d.team_name, color: d.team_colour, headshot: "https://cdn-icons-png.flaticon.com/512/1995/1995470.png" };
       const shortName = d.first_name.charAt(0) + '. ' + d.last_name;
       
       return {
@@ -237,9 +218,32 @@ async function loadResultsSessionData(sessionName, btnEl) {
     }).sort((a, b) => a.pos - b.pos).filter(r => r.pos !== 99);
     
     if (results.length === 0) {
-      list.innerHTML = `<div class="text-center text-secondary py-4">รถยังไม่ออกจากพิต</div>`;
+      list.innerHTML = `<div class="text-center text-secondary py-4">รถยังไม่ออกจากพิตในเซสชันนี้</div>`;
       return;
     }
+    
+    // 4. แสดงผลตารางสไตล์ F1 Drivers
+    list.innerHTML = results.map((r, idx) => `
+      <div class="f1-standings-row" style="cursor:pointer;" onclick="openDriverHero('${r.fullName}', this)">
+        <div class="col-pos" style="width: 15%;">${r.pos}</div>
+        <div class="col-driver" style="width: 55%;">
+          <img src="${r.headshot}" class="driver-headshot" alt="${r.shortName}" loading="lazy">
+          <div class="driver-info">
+            <div class="driver-name text-white">${r.shortName}</div>
+            <div class="team-name m-0" style="color: ${r.color};">${r.team}</div>
+          </div>
+        </div>
+        <div class="col-pts text-end" style="width: 30%;">
+           <span class="text-secondary small fw-bold">${idx === 0 ? 'Leader' : '+Lap Data'}</span>
+        </div>
+      </div>
+    `).join('');
+    
+  } catch (error) {
+    console.error('Session Results Error:', error);
+    list.innerHTML = '<div class="text-center text-danger py-4">พบปัญหาในการดึงข้อมูล OpenF1 API<br><span class="small text-secondary">กรุณาลองใหม่อีกครั้ง</span></div>';
+  }
+}
     
     // สร้างตารางสไตล์ F1 Drivers UI (แสดงหัวคน, ชื่อ, ทีม, ช่องขวาสุดแสดงสถานะ Gap หรือ Interval)
     list.innerHTML = results.map((r, idx) => `
