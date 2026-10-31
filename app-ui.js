@@ -1662,6 +1662,36 @@ function openDriverHero(fullName, rowEl) {
 }
 
 // 1. โหลดเฉพาะสนามของปี 2026 ที่เริ่มทำการแข่งขันแล้ว
+// ฟังก์ชันแม็ปชื่อประเทศหรือสนามให้เป็น Emoji ธงชาติ
+function getCountryFlagEmoji(meetingName, countryName) {
+  const text = (meetingName + ' ' + (countryName || '')).toLowerCase();
+  
+  if (text.includes('bahrain')) return '🇧🇭';
+  if (text.includes('saudi')) return '🇸🇦';
+  if (text.includes('australia')) return '🇦🇺';
+  if (text.includes('japan')) return '🇯🇵';
+  if (text.includes('china')) return '🇨🇳';
+  if (text.includes('miami') || text.includes('united states') || text.includes('las vegas') || text.includes('austin')) return '🇺🇸';
+  if (text.includes('imola') || text.includes('italy') || text.includes('monza')) return '🇮🇹';
+  if (text.includes('monaco')) return '🇲🇨';
+  if (text.includes('canada')) return '🇨🇦';
+  if (text.includes('spain') || text.includes('catalunya')) return '🇪🇸';
+  if (text.includes('austria')) return '🇦🇹';
+  if (text.includes('britain') || text.includes('silverstone')) return '🇬🇧';
+  if (text.includes('hungary')) return '🇭🇺';
+  if (text.includes('belgium')) return '🇧🇪';
+  if (text.includes('netherlands')) return '🇳🇱';
+  if (text.includes('azerbaijan')) return '🇦🇿';
+  if (text.includes('singapore')) return '🇸🇬';
+  if (text.includes('mexico')) return '🇲🇽';
+  if (text.includes('brazil')) return '🇧🇷';
+  if (text.includes('qatar')) return '🇶🇦';
+  if (text.includes('abu dhabi')) return '🇦🇪';
+  
+  return '🏁';
+}
+
+// โหลดเฉพาะสนาม 2026 ที่เริ่มแข่งแล้ว พร้อมใส่ธงชาติ
 async function loadOpenF1Meetings() {
   const rSel = document.getElementById('selResultsRace');
   if (!rSel) return;
@@ -1671,10 +1701,8 @@ async function loadOpenF1Meetings() {
   try {
     const res = await fetch('https://api.openf1.org/v1/meetings?year=2026');
     const meetings = await res.json();
-    
     const now = new Date();
     
-    // กรองเฉพาะสนามที่ถึงกำหนดเวลาเริ่มแข่งแล้ว และตัด Pre-Season Testing ออก
     const startedMeetings = (Array.isArray(meetings) ? meetings : []).filter(m => {
       const startDate = new Date(m.date_start);
       const isTesting = (m.meeting_name || '').toLowerCase().includes('testing');
@@ -1686,6 +1714,28 @@ async function loadOpenF1Meetings() {
       return;
     }
 
+    startedMeetings.sort((a, b) => new Date(a.date_start) - new Date(b.date_start));
+    
+    let opts = '';
+    startedMeetings.forEach(m => {
+      const flag = getCountryFlagEmoji(m.meeting_name, m.country_name);
+      opts += `<option value="${m.meeting_key}">${flag} ${m.meeting_name}</option>`;
+    });
+    rSel.innerHTML = opts;
+
+    const latestMeeting = startedMeetings[startedMeetings.length - 1];
+    rSel.value = latestMeeting.meeting_key;
+    
+    const latestFlag = getCountryFlagEmoji(latestMeeting.meeting_name, latestMeeting.country_name);
+    document.getElementById('currentRaceLabel').innerText = `${latestFlag} ${latestMeeting.meeting_name}`.trim();
+    
+    onResultsRaceChange();
+    
+  } catch (error) {
+    console.error('OpenF1 Meetings Error:', error);
+    rSel.innerHTML = '<option value="" disabled selected>โหลดข้อมูลสนามล้มเหลว</option>';
+  }
+}
     // เรียงลำดับตามวันที่แข่งจากสนามแรกไปสนามล่าสุด
     startedMeetings.sort((a, b) => new Date(a.date_start) - new Date(b.date_start));
     
