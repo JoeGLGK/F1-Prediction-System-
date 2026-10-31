@@ -208,7 +208,6 @@ async function loadResultsSessionData(sessionKey, btnEl) {
   list.innerHTML = '<div class="text-center py-5"><i class="fa-solid fa-spinner fa-spin text-danger fs-3 mb-2"></i><div class="text-secondary small f1-font">FETCHING SESSION RESULTS...</div></div>';
   
   try {
-    // ใช้ fetchOpenF1Cached ร่วมกับ Promise.all เพื่อดึงข้อมูลเซสชันพร้อมกันอย่างรวดเร็ว[cite: 1]
     const [drivers, positions, laps, standingsData] = await Promise.all([
       fetchOpenF1Cached(`https://api.openf1.org/v1/drivers?session_key=${sessionKey}`),
       fetchOpenF1Cached(`https://api.openf1.org/v1/position?session_key=${sessionKey}`),
@@ -216,12 +215,12 @@ async function loadResultsSessionData(sessionKey, btnEl) {
       fetch('https://api.jolpi.ca/ergast/f1/current/driverStandings.json').then(res => res.json())
     ]);
     
-    // แปลงข้อมูลคะแนนและอันดับสะสมทั้งฤดูกาลจาก Ergast API
     const seasonStandings = {};
     const standingsLists = standingsData.MRData.StandingsTable.StandingsLists;
     if (standingsLists && standingsLists.length > 0) {
       standingsLists[0].DriverStandings.forEach(ds => {
-        const familyName = ds.Driver.familyName.toLowerCase();
+        // ตัดอักขระพิเศษจากชื่อของ Ergast API
+        const familyName = ds.Driver.familyName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         seasonStandings[familyName] = {
           points: ds.points || '0',
           position: 'P' + ds.position
@@ -251,8 +250,16 @@ async function loadResultsSessionData(sessionKey, btnEl) {
     
     const results = drivers.map(d => {
       const pos = latestPos[d.driver_number] || 99;
-      const lastNameClean = (d.last_name || '').toLowerCase();
-      const appDriver = Object.keys(DRIVER_INFO).find(name => name.toLowerCase().includes(lastNameClean)) || d.full_name || 'Driver';
+      
+      // ตัดอักขระพิเศษจากนามสกุลของ OpenF1 API (แก้ปัญหา Hülkenberg และ Pérez)
+      const apiLastName = (d.last_name || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      
+      // ค้นหาใน DRIVER_INFO โดยเทียบด้วยชื่อที่ตัดอักขระพิเศษแล้ว
+      const appDriver = Object.keys(DRIVER_INFO).find(name => {
+        const cleanName = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        return cleanName.includes(apiLastName) || apiLastName.includes(cleanName.split(' ').pop());
+      }) || d.full_name || 'Driver';
+      
       const info = DRIVER_INFO[appDriver] || { team: d.team_name, color: d.team_colour ? `#${d.team_colour}` : '#888888', headshot: DEFAULT_DRIVER_IMG };
       const firstChar = d.first_name ? d.first_name.charAt(0) + '. ' : '';
       const shortName = firstChar + (d.last_name || d.full_name || '');
@@ -270,7 +277,7 @@ async function loadResultsSessionData(sessionKey, btnEl) {
         timeDisplay = 'Leader';
       }
 
-      const seasonData = seasonStandings[lastNameClean] || { points: '0', position: 'P-' };
+      const seasonData = seasonStandings[apiLastName] || { points: '0', position: 'P-' };
 
       return {
         pos: pos,
