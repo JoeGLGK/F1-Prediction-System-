@@ -189,16 +189,31 @@ async function loadResultsSessionData(sessionKey, btnEl) {
   list.innerHTML = '<div class="text-center py-5"><i class="fa-solid fa-spinner fa-spin text-danger fs-3 mb-2"></i><div class="text-secondary small f1-font">FETCHING SESSION RESULTS...</div></div>';
   
   try {
-    const [driversRes, posRes, lapsRes] = await Promise.all([
+    const [driversRes, posRes, lapsRes, standingsRes] = await Promise.all([
       fetch(`https://api.openf1.org/v1/drivers?session_key=${sessionKey}`),
       fetch(`https://api.openf1.org/v1/position?session_key=${sessionKey}`),
-      fetch(`https://api.openf1.org/v1/laps?session_key=${sessionKey}`)
+      fetch(`https://api.openf1.org/v1/laps?session_key=${sessionKey}`),
+      fetch('https://api.jolpi.ca/ergast/f1/current/driverStandings.json') // ดึงคะแนนสะสมจริงจาก Ergast API
     ]);
     
     const drivers = await driversRes.json();
     const positions = await posRes.json();
     const laps = await lapsRes.json();
+    const standingsData = await standingsRes.json();
     
+    // แปลงข้อมูลคะแนนและอันดับสะสมทั้งฤดูกาลจาก Ergast API
+    const seasonStandings = {};
+    const standingsLists = standingsData.MRData.StandingsTable.StandingsLists;
+    if (standingsLists && standingsLists.length > 0) {
+      standingsLists[0].DriverStandings.forEach(ds => {
+        const familyName = ds.Driver.familyName.toLowerCase();
+        seasonStandings[familyName] = {
+          points: ds.points || '0',
+          position: 'P' + ds.position
+        };
+      });
+    }
+
     const latestPos = {};
     positions.forEach(p => { latestPos[p.driver_number] = p.position; });
 
@@ -223,7 +238,7 @@ async function loadResultsSessionData(sessionKey, btnEl) {
       const pos = latestPos[d.driver_number] || 99;
       const lastNameClean = (d.last_name || '').toLowerCase();
       const appDriver = Object.keys(DRIVER_INFO).find(name => name.toLowerCase().includes(lastNameClean)) || d.full_name || 'Driver';
-      const info = DRIVER_INFO[appDriver] || { team: d.team_name || 'F1', color: d.team_colour ? `#${d.team_colour}` : '#888888', headshot: DEFAULT_DRIVER_IMG };
+      const info = DRIVER_INFO[appDriver] || { team: d.team_name, color: d.team_colour ? `#${d.team_colour}` : '#888888', headshot: DEFAULT_DRIVER_IMG };
       const firstChar = d.first_name ? d.first_name.charAt(0) + '. ' : '';
       const shortName = firstChar + (d.last_name || d.full_name || '');
       
@@ -240,6 +255,9 @@ async function loadResultsSessionData(sessionKey, btnEl) {
         timeDisplay = 'Leader';
       }
 
+      // ดึงคะแนนและอันดับสะสมทั้งฤดูกาล (ถ้าไม่มีข้อมูลให้ใช้ค่าเริ่มต้น)
+      const seasonData = seasonStandings[lastNameClean] || { points: '0', position: 'P-' };
+
       return {
         pos: pos,
         fullName: appDriver,
@@ -247,7 +265,9 @@ async function loadResultsSessionData(sessionKey, btnEl) {
         team: info.team || d.team_name || 'F1',
         color: info.color || (d.team_colour ? `#${d.team_colour}` : '#888888'),
         headshot: getDriveDirectLink(info.headshot || info.img || DEFAULT_DRIVER_IMG),
-        timeGap: timeDisplay
+        timeGap: timeDisplay,
+        seasonPoints: seasonData.points,
+        seasonPos: seasonData.position
       };
     }).sort((a, b) => a.pos - b.pos).filter(r => r.pos !== 99);
     
@@ -256,9 +276,9 @@ async function loadResultsSessionData(sessionKey, btnEl) {
       return;
     }
     
-    // แสดงผลโดยตัดจำนวนรอบ (Laps) ออก คงไว้เฉพาะเวลา / Gap
+    // สร้างตารางแถว พร้อมส่งข้อมูลคะแนนและอันดับสะสมไปแสดงใน Modal ผ่านคอลัมน์ซ่อนหรือ attribute
     list.innerHTML = results.map(r => `
-      <div class="f1-standings-row" style="cursor:pointer;" onclick="openDriverHero('${r.fullName.replace(/'/g, "\\'")}', this)">
+      <div class="f1-standings-row" style="cursor:pointer;" onclick="openDriverHeroCustom(this, '${r.fullName.replace(/'/g, "\\'")}', '${r.seasonPoints}', '${r.seasonPos}')">
         <div class="col-pos" style="width: 12%;">${r.pos}</div>
         <div class="col-driver" style="width: 53%;">
           <img src="${r.headshot}" class="driver-headshot" alt="${r.shortName}" loading="lazy">
@@ -269,6 +289,8 @@ async function loadResultsSessionData(sessionKey, btnEl) {
         </div>
         <div class="col-pts text-end" style="width: 35%; font-family: 'Share Tech Mono', monospace; font-size: 0.85rem;">
            <span class="text-white fw-bold">${r.timeGap}</span>
+           <span class="d-none col-pts-season">${r.seasonPoints}</span>
+           <span class="d-none col-pos-season">${r.seasonPos}</span>
         </div>
       </div>
     `).join('');
@@ -277,4 +299,36 @@ async function loadResultsSessionData(sessionKey, btnEl) {
     console.error('Session Results Error:', error);
     list.innerHTML = '<div class="text-center text-danger py-4">พบปัญหาในการดึงข้อมูล OpenF1 API<br><span class="small text-secondary">กรุณาลองใหม่อีกครั้ง</span></div>';
   }
+}
+
+// ฟังก์ชันเสริมรองรับการเปิด Modal Hero พร้อมดึงคะแนนทั้งฤดูกาลมาแสดง
+function openDriverHeroCustom(rowEl, fullName, points, championshipPos) {
+  triggerHaptic();
+  const info = DRIVER_INFO[fullName];
+  if(!info) return;
+
+  const parts = fullName.split(' ');
+  const firstName = parts[0];
+  const lastName = parts.slice(1).join(' ');
+
+  document.getElementById('heroDriverFirstName').innerText = firstName;
+  document.getElementById('heroDriverLastName').innerText = lastName;
+  document.getElementById('heroTeamName').innerText = info.team;
+  document.getElementById('heroTeamLogo').src = getDriveDirectLink(TEAM_LOGOS[info.team] || '');
+  document.getElementById('heroDriverImg').src = getDriveDirectLink(info.heroImg || info.img); 
+  document.getElementById('heroPos').innerText = championshipPos;
+
+  const ptsEl = document.getElementById('heroPoints');
+  ptsEl.innerText = "0"; 
+  
+  setTimeout(() => {
+    animateCountUp(ptsEl, points, 2200); 
+  }, 10); 
+
+  document.getElementById('heroBgColor').style.background = `linear-gradient(to bottom, #0a0e1c 0%, ${info.color}40 15%, #0a0e1c 65%)`;
+
+  if (!window.driverHeroModalInstance) {
+    window.driverHeroModalInstance = new bootstrap.Modal(document.getElementById('driverHeroModal'));
+  }
+  window.driverHeroModalInstance.show();
 }
