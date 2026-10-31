@@ -1313,18 +1313,80 @@ function matchDriverOption(selectId, apiName) {
   }
 }
 
-function handleFetchOfficialResults() { 
-  const pin = document.getElementById('adminPin').value, raceId = document.getElementById('adminRace').value, btn = document.getElementById('btnApiFetch'); 
+async function handleFetchOfficialResults() { 
+  const pin = document.getElementById('adminPin').value;
+  const raceId = document.getElementById('adminRace').value; 
+  const btn = document.getElementById('btnApiFetch'); 
+  
   if (!pin || !raceId) return; 
-  btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>'; 
-  callGAS("adminFetchOfficialResults", { pin: pin, raceId: raceId }).then(function(res) { 
-    btn.disabled = false; btn.innerHTML = 'ดึงผลจริง API'; 
-    if (!res.success) { showToast("⚠️ " + res.msg, 'error'); return; } 
-    matchDriverOption('adP1', res.data.p1); matchDriverOption('adP2', res.data.p2); matchDriverOption('adP3', res.data.p3); matchDriverOption('adP4', res.data.p4); 
-    if (res.data.type !== 'Sprint' && res.data.fl) matchDriverOption('adFL', res.data.fl); 
-    if (res.data.url) document.getElementById('adLink').value = res.data.url; 
-    showToast(res.msg, 'success'); 
-  }); 
+  
+  btn.disabled = true; 
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังดึงผล OpenF1...'; 
+  
+  try {
+    // 1. ดึง Profile นักแข่ง
+    const driverRes = await fetch('https://api.openf1.org/v1/drivers?session_key=latest');
+    const drivers = await driverRes.json();
+    
+    // 2. ดึงข้อมูลอันดับ P1-P4
+    const posRes = await fetch('https://api.openf1.org/v1/position?session_key=latest');
+    const positions = await posRes.json();
+    
+    const latestPositions = {};
+    positions.forEach(p => {
+      latestPositions[p.driver_number] = p.position;
+    });
+    
+    let results = { p1: '', p2: '', p3: '', p4: '' };
+    drivers.forEach(d => {
+      const pos = latestPositions[d.driver_number];
+      if (pos === 1) results.p1 = d.full_name;
+      if (pos === 2) results.p2 = d.full_name;
+      if (pos === 3) results.p3 = d.full_name;
+      if (pos === 4) results.p4 = d.full_name;
+    });
+    
+    matchDriverOption('adP1', results.p1); 
+    matchDriverOption('adP2', results.p2); 
+    matchDriverOption('adP3', results.p3); 
+    matchDriverOption('adP4', results.p4); 
+
+    // 3. ดึงข้อมูล Fastest Lap (ตรวจสอบว่าไม่ใช่ Sprint Race)
+    const raceSelect = document.getElementById('adminRace');
+    const isSprint = raceSelect.options[raceSelect.selectedIndex].dataset.type === 'Sprint';
+    
+    if (!isSprint) {
+      const lapsRes = await fetch('https://api.openf1.org/v1/laps?session_key=latest');
+      const laps = await lapsRes.json();
+      
+      let fastestLap = null;
+      let minDuration = Infinity;
+      
+      // วนลูปหาเวลาต่อรอบที่น้อยที่สุด
+      laps.forEach(lap => {
+        if (lap.lap_duration && lap.lap_duration < minDuration) {
+          minDuration = lap.lap_duration;
+          fastestLap = lap;
+        }
+      });
+      
+      // เทียบหมายเลขรถเพื่อหาชื่อนักแข่ง และอัปเดตช่อง adFL
+      if (fastestLap) {
+        const flDriver = drivers.find(d => d.driver_number === fastestLap.driver_number);
+        if (flDriver) {
+          matchDriverOption('adFL', flDriver.full_name);
+        }
+      }
+    }
+    
+    showToast('ดึงผล P1-P4 และ Fastest Lap สำเร็จ!', 'success');
+  } catch (error) {
+    console.error('OpenF1 API Error:', error);
+    showToast('⚠️ ไม่สามารถเชื่อมต่อ OpenF1 ได้', 'error');
+  } finally {
+    btn.disabled = false; 
+    btn.innerHTML = 'ดึงผลจริง API'; 
+  }
 }
 
 function checkAdminSubmissions() { 
