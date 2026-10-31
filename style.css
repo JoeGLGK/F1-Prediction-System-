@@ -3393,3 +3393,81 @@ body {
   color: #fff !important;
   box-shadow: 0 4px 15px rgba(225, 6, 0, 0.4) !important;
 }
+/* =========================================
+   TELEMETRY HUD (SECTORS & SPEED TRAP)
+   ========================================= */
+.f1-telemetry-hud {
+  background: rgba(15, 17, 24, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+}
+.sector-times-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.sector-box {
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 8px;
+  padding: 10px 4px;
+  text-align: center;
+  border-top: 3px solid #b700ff; 
+  box-shadow: inset 0 5px 15px rgba(183, 0, 255, 0.1);
+}
+.sector-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.7rem;
+  color: #94a3b8;
+  font-weight: 700;
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+}
+.driver-tag {
+  display: inline-block;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 800;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border-left: 4px solid var(--team-color);
+  font-size: 0.85rem;
+}
+.sector-time {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-top: 6px;
+  color: #666; /* สีตั้งต้นตอนโหลด */
+}
+.sector-time.text-purple {
+  color: #df80ff; /* สีม่วงเรืองแสงเมื่อมีข้อมูล */
+  text-shadow: 0 0 10px rgba(183, 0, 255, 0.6);
+}
+.speed-trap-box {
+  background: linear-gradient(90deg, rgba(225, 6, 0, 0.1) 0%, rgba(0, 0, 0, 0.4) 100%);
+  border: 1px solid rgba(225, 6, 0, 0.2);
+  border-radius: 8px;
+  padding: 12px 16px;
+}
+.speed-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.9rem;
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+.speed-val {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #fff;
+}
+.speed-val .unit {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-family: 'Rajdhani', sans-serif;
+}
