@@ -134,3 +134,42 @@ async function fetchF1TeamStandings() {
     console.error('❌ เกิดข้อผิดพลาดในการดึงข้อมูลคะแนนทีม:', error);
   }
 }
+async function fetchLiveWeather() {
+  try {
+    const response = await fetch('https://api.openf1.org/v1/weather?session_key=latest');
+    const data = await response.json();
+
+    if (data && data.length > 0) {
+      // ดึงข้อมูล array ตัวสุดท้ายซึ่งเป็นข้อมูลอัปเดตล่าสุด
+      const latestWeather = data[data.length - 1]; 
+      
+      // 1. ตรวจจับ rainfall (0 หรือ 1) เพื่อสลับไอคอนฝน/แดด
+      const isRaining = latestWeather.rainfall > 0;
+      const weatherIcon = isRaining ? '🌧️' : '☀️';
+
+      // 2. จัดรูปแบบ HTML แสดงผลข้อมูล Air, Track, Wind Speed และ Pressure
+      // ใช้คลาสของ Bootstrap เพื่อจัดให้อยู่ชิดขวาและแบ่ง 2 บรรทัด
+      const weatherHtml = `
+        <div class="d-flex flex-column align-items-end">
+          <div>
+            <span class="weather-icon-animated me-1">${weatherIcon}</span>
+            Air: ${latestWeather.air_temperature}°C | Track: ${latestWeather.track_temperature}°C
+          </div>
+          <div style="font-size: 0.7rem; color: #94a3b8; margin-top: 2px;">
+            <i class="fa-solid fa-wind me-1"></i>ลม: ${latestWeather.wind_speed} m/s | 
+            <i class="fa-solid fa-gauge me-1"></i>กดอากาศ: ${latestWeather.pressure} mbar
+          </div>
+        </div>
+      `;
+
+      const weatherEl = document.getElementById('rcWeather');
+      if (weatherEl) {
+        weatherEl.innerHTML = weatherHtml;
+        // เอาคลาส weather-icon-animated ออกจากกล่องหลัก เพราะเราย้ายไปใส่ที่ตัวไอคอนด้านในแล้ว
+        weatherEl.classList.remove('weather-icon-animated');
+      }
+    }
+  } catch (error) {
+    console.error('❌ OpenF1 Weather API Error:', error);
+  }
+}
