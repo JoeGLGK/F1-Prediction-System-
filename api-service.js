@@ -399,3 +399,111 @@ function openDriverHeroCustom(rowEl, fullName, points, championshipPos) {
   }
   window.driverHeroModalInstance.show();
 }
+// =========================================================
+// ฟังก์ชันสำหรับหน้า TELEMETRY (ดึงเวลา Fastest Sector และ Speed Trap)
+// =========================================================
+async function loadTelemetryHUD(sessionKey) {
+  // 1. แสดงสถานะกำลังโหลด (Loading)
+  const loadingHtml = '<i class="fa-solid fa-spinner fa-spin text-secondary"></i>';
+  const noDataHtml = '<span style="font-size:0.8rem; color:#666;">NO DATA</span>';
+  
+  document.getElementById('fastestSec1').innerHTML = `<div class="driver-tag">---</div><div class="sector-time text-secondary">${loadingHtml}</div>`;
+  document.getElementById('fastestSec2').innerHTML = `<div class="driver-tag">---</div><div class="sector-time text-secondary">${loadingHtml}</div>`;
+  document.getElementById('fastestSec3').innerHTML = `<div class="driver-tag">---</div><div class="sector-time text-secondary">${loadingHtml}</div>`;
+  document.getElementById('highestSpeed').innerHTML = `<div class="driver-tag me-3">---</div><div class="speed-val">${loadingHtml}</div>`;
+
+  try {
+    // 2. ดึงข้อมูล laps และ drivers 
+    const [lapsRes, driversRes] = await Promise.all([
+      fetch(`https://api.openf1.org/v1/laps?session_key=${sessionKey}`),
+      fetch(`https://api.openf1.org/v1/drivers?session_key=${sessionKey}`)
+    ]);
+    
+    const laps = await lapsRes.json();
+    const drivers = await driversRes.json();
+
+    // 3. เตรียมตัวแปรเก็บสถิติที่ดีที่สุด
+    let best = {
+      sec1: { time: Infinity, driverNum: null },
+      sec2: { time: Infinity, driverNum: null },
+      sec3: { time: Infinity, driverNum: null },
+      speed: { val: 0, driverNum: null }
+    };
+
+    // 4. คำนวณหาเวลาที่น้อยที่สุด และความเร็วที่มากที่สุด
+    if (Array.isArray(laps)) {
+      laps.forEach(lap => {
+        if (lap.duration_sector_1 && lap.duration_sector_1 < best.sec1.time) {
+          best.sec1 = { time: lap.duration_sector_1, driverNum: lap.driver_number };
+        }
+        if (lap.duration_sector_2 && lap.duration_sector_2 < best.sec2.time) {
+          best.sec2 = { time: lap.duration_sector_2, driverNum: lap.driver_number };
+        }
+        if (lap.duration_sector_3 && lap.duration_sector_3 < best.sec3.time) {
+          best.sec3 = { time: lap.duration_sector_3, driverNum: lap.driver_number };
+        }
+        if (lap.st_speed && lap.st_speed > best.speed.val) {
+          best.speed = { val: lap.st_speed, driverNum: lap.driver_number };
+        }
+      });
+    }
+
+    // 5. ฟังก์ชันค้นหาชื่อย่อนักแข่งและสีทีม
+    const getDriverUI = (dNum) => {
+      const d = drivers.find(x => x.driver_number === dNum);
+      if (!d) return { tag: '---', color: '#888888' };
+      
+      const apiLastName = (d.last_name || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      const appDriver = Object.keys(DRIVER_INFO).find(name => {
+        const cleanName = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        return cleanName.includes(apiLastName) || apiLastName.includes(cleanName.split(' ').pop());
+      }) || d.full_name;
+      
+      const info = DRIVER_INFO[appDriver] || { color: d.team_colour ? `#${d.team_colour}` : '#888888' };
+      const shortName = d.name_acronym || (d.last_name || '').substring(0, 3).toUpperCase();
+      
+      return { tag: shortName, color: info.color };
+    };
+
+    // 6. อัปเดตขึ้นหน้าจอ UI
+    // Sector 1
+    if (best.sec1.driverNum) {
+      const d = getDriverUI(best.sec1.driverNum);
+      document.getElementById('fastestSec1').innerHTML = `<div class="driver-tag" style="--team-color: ${d.color};">${d.tag}</div><div class="sector-time text-purple">${best.sec1.time.toFixed(3)}</div>`;
+    } else {
+      document.getElementById('fastestSec1').innerHTML = `<div class="driver-tag">---</div><div class="sector-time text-secondary">${noDataHtml}</div>`;
+    }
+
+    // Sector 2
+    if (best.sec2.driverNum) {
+      const d = getDriverUI(best.sec2.driverNum);
+      document.getElementById('fastestSec2').innerHTML = `<div class="driver-tag" style="--team-color: ${d.color};">${d.tag}</div><div class="sector-time text-purple">${best.sec2.time.toFixed(3)}</div>`;
+    } else {
+      document.getElementById('fastestSec2').innerHTML = `<div class="driver-tag">---</div><div class="sector-time text-secondary">${noDataHtml}</div>`;
+    }
+
+    // Sector 3
+    if (best.sec3.driverNum) {
+      const d = getDriverUI(best.sec3.driverNum);
+      document.getElementById('fastestSec3').innerHTML = `<div class="driver-tag" style="--team-color: ${d.color};">${d.tag}</div><div class="sector-time text-purple">${best.sec3.time.toFixed(3)}</div>`;
+    } else {
+      document.getElementById('fastestSec3').innerHTML = `<div class="driver-tag">---</div><div class="sector-time text-secondary">${noDataHtml}</div>`;
+    }
+
+    // Speed Trap
+    if (best.speed.driverNum) {
+      const d = getDriverUI(best.speed.driverNum);
+      document.getElementById('highestSpeed').innerHTML = `<div class="driver-tag me-3" style="--team-color: ${d.color};">${d.tag}</div><div class="speed-val">${best.speed.val} <span class="unit">km/h</span></div>`;
+    } else {
+      document.getElementById('highestSpeed').innerHTML = `<div class="driver-tag me-3">---</div><div class="speed-val text-secondary">${noDataHtml}</div>`;
+    }
+
+  } catch (error) {
+    console.error('Telemetry HUD Error:', error);
+    const errorHtml = '<span class="text-danger" style="font-size:0.8rem;">API ERROR</span>';
+    document.getElementById('fastestSec1').innerHTML = errorHtml;
+    document.getElementById('fastestSec2').innerHTML = errorHtml;
+    document.getElementById('fastestSec3').innerHTML = errorHtml;
+    document.getElementById('highestSpeed').innerHTML = errorHtml;
+  }
+}
