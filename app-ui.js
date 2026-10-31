@@ -703,8 +703,12 @@ function onCenterRaceChange() {
       layoutWrapper.style.display = 'none';
     }
   }
-}
 
+  // 🎯 สั่งให้โหลดข้อมูล Sector และ Speed Trap เมื่อเปลี่ยนสนาม
+  if (typeof loadTelemetryHUD === 'function') {
+    loadTelemetryHUD(raceId);
+  }
+}
 function on2025RaceChange() {
   const raceId = document.getElementById('sel2025Race').value; 
   const currentRace = globalRaces.find(function(r) { return r.id === raceId; }); 
