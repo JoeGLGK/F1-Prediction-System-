@@ -388,6 +388,55 @@
             </div>
           </div>
 
+          <!-- 🎯 วางโค้ด FASTEST SECTORS & SPEED TRAP HUD ตรงนี้ 🎯 -->
+          <div class="f1-telemetry-hud mt-4 mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h6 class="text-white mb-0" style="font-family: 'Rajdhani', sans-serif; font-weight: 700; letter-spacing: 1px;">
+                <i class="fa-solid fa-stopwatch me-2 text-danger"></i>SESSION BESTS
+              </h6>
+            </div>
+
+            <!-- กล่องแสดงเวลา Sector 1, 2, 3 -->
+            <div class="sector-times-grid">
+              <!-- Sector 1 -->
+              <div class="sector-box">
+                <div class="sector-title">SECTOR 1</div>
+                <div class="sector-data" id="fastestSec1">
+                  <div class="driver-tag" style="--team-color: #888888;">---</div>
+                  <div class="sector-time">--.---</div>
+                </div>
+              </div>
+              <!-- Sector 2 -->
+              <div class="sector-box">
+                <div class="sector-title">SECTOR 2</div>
+                <div class="sector-data" id="fastestSec2">
+                  <div class="driver-tag" style="--team-color: #888888;">---</div>
+                  <div class="sector-time">--.---</div>
+                </div>
+              </div>
+              <!-- Sector 3 -->
+              <div class="sector-box">
+                <div class="sector-title">SECTOR 3</div>
+                <div class="sector-data" id="fastestSec3">
+                  <div class="driver-tag" style="--team-color: #888888;">---</div>
+                  <div class="sector-time">--.---</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- แถบแสดงความเร็วสูงสุด (Speed Trap) -->
+            <div class="speed-trap-box mt-3">
+              <div class="d-flex justify-content-between align-items-center">
+                <div class="speed-title"><i class="fa-solid fa-gauge-high me-2 text-danger"></i>SPEED TRAP</div>
+                <div class="speed-data d-flex align-items-center" id="highestSpeed">
+                  <div class="driver-tag me-3" style="--team-color: #888888;">---</div>
+                  <div class="speed-val">--- <span class="unit">km/h</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- 🎯 สิ้นสุดส่วน HUD 🎯 -->
+
           <div class="mb-3" id="rcExtLinkArea">
             <a href="#" target="_blank" id="rcExtLinkBtn" class="btn-odds-menu">
               <div class="d-flex align-items-center gap-2">
@@ -412,7 +461,6 @@
         </div>
       </div>
     </div>
-
     <!-- ==========================================
          4. Race Archive Tab
          ========================================== -->
