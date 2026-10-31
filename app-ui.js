@@ -379,7 +379,7 @@ function renderUI(data) {
   }
 
   const allRaceOpts = '<option value="" disabled selected>-- เลือกสนาม --</option>' + globalRaces.map(function(r) { return '<option value="' + r.id + '" data-type="' + r.type + '">' + (r.status === 'OPEN' ? '🔴' : (r.status === 'CALCULATED' ? '🏁' : '⚡')) + ' ' + r.name + '</option>'; }).join('');
-  ['selCommRace','adminRace','adRaceDead','adRaceCheck','adMediaRace','selCenterRace','sel2025Race'].forEach(function(id) { let el = document.getElementById(id); if(el) el.innerHTML = allRaceOpts; });
+  ['selCommRace','adminRace','adRaceDead','adRaceCheck','adMediaRace','selCenterRace','sel2025Race', 'selFinishedRace', 'selResultsRace'].forEach(function(id) { let el = document.getElementById(id); if(el) el.innerHTML = allRaceOpts; });
 
   if (globalRaces.length > 0) { document.getElementById('adMediaRace').value = globalRaces[0].id; onAdminMediaRaceChange(); }
   if (openRaces.length > 0) { document.getElementById('selCenterRace').value = openRaces[0].id; document.getElementById('sel2025Race').value = openRaces[0].id; onCenterRaceChange(); on2025RaceChange(); }
@@ -1519,12 +1519,14 @@ function switchStandings(type) {
   const views = {
     'user': document.getElementById('user-standings-view'),
     'driver': document.getElementById('driver-standings-view'),
-    'team': document.getElementById('team-standings-view')
+    'team': document.getElementById('team-standings-view'),
+    'results': document.getElementById('results-standings-view') // เพิ่มบรรทัดนี้
   };
   const btns = {
     'user': document.getElementById('btn-user-standings'),
     'driver': document.getElementById('btn-driver-standings'),
-    'team': document.getElementById('btn-team-standings')
+    'team': document.getElementById('btn-team-standings'),
+    'results': document.getElementById('btn-results-standings') // เพิ่มบรรทัดนี้
   };
 
   Object.keys(views).forEach(key => {
@@ -1537,11 +1539,8 @@ function switchStandings(type) {
 
   const checkCard = document.getElementById('checkResultCard');
   if (checkCard) {
-    if (type === 'user') {
-      checkCard.style.display = 'block'; 
-    } else {
-      checkCard.style.display = 'none';  
-    }
+    if (type === 'user') checkCard.style.display = 'block'; 
+    else checkCard.style.display = 'none';  
   }
 }
 
@@ -1690,4 +1689,24 @@ function openDriverHero(fullName, rowEl) {
     window.driverHeroModalInstance = new bootstrap.Modal(document.getElementById('driverHeroModal'));
   }
   window.driverHeroModalInstance.show();
+}
+function onResultsRaceChange() {
+  const rSel = document.getElementById('selResultsRace');
+  if (!rSel || !rSel.options[rSel.selectedIndex]) return;
+  
+  // เช็กว่าเป็น Sprint หรือ Normal
+  const isSprint = rSel.options[rSel.selectedIndex].dataset.type === 'Sprint';
+  const btnGroup = document.getElementById('resultsSessionBtnGroup');
+  
+  const sessions = isSprint 
+    ? ['Practice 1', 'Sprint Qualifying', 'Sprint', 'Qualifying', 'Race'] 
+    : ['Practice 1', 'Practice 2', 'Practice 3', 'Qualifying', 'Race'];
+
+  // สร้างปุ่ม (ปุ่มแรกจะถูกเซ็ตเป็น active เริ่มต้น)
+  btnGroup.innerHTML = sessions.map((s, index) => 
+    `<button class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 ${index === 0 ? 'active text-white border-white' : ''}" style="font-family: 'Rajdhani', sans-serif; font-weight: 700;" onclick="loadResultsSessionData('${s}', this)">${s.toUpperCase()}</button>`
+  ).join('');
+  
+  // สั่งให้ดึงข้อมูลของเซสชันแรกอัตโนมัติ
+  loadResultsSessionData(sessions[0], btnGroup.firstChild);
 }
