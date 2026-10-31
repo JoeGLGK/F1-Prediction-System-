@@ -1605,11 +1605,8 @@ document.addEventListener('DOMContentLoaded', () => {
 // ฟังก์ชันสร้างลูกเล่นตัวเลขวิ่ง (Count-up Animation สไตล์ Cubic Ease-out)
 function animateCountUp(element, target, duration = 2200) {
   let startTimestamp = null;
-  
-  // แปลงค่าเป้าหมายให้เป็นตัวเลขเสมอ ป้องกันการดึงค่าแล้วติดช่องว่าง
   const targetNum = parseInt(String(target).replace(/,/g, '').trim(), 10) || 0;
   
-  // ถ้าเป้าหมายคือ 0 ให้ใส่ 0 ทันที ไม่ต้องวิ่ง
   if (targetNum === 0) {
     element.innerText = "0";
     return;
@@ -1618,15 +1615,13 @@ function animateCountUp(element, target, duration = 2200) {
   const step = (timestamp) => {
     if (!startTimestamp) startTimestamp = timestamp;
     const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-    
-    // สมการความเร่ง Cubic Ease-out (1 - (1-t)^3) ต้นจัด ปลายไหล
     const easeProgress = 1 - Math.pow(1 - progress, 3); 
     element.innerText = Math.floor(easeProgress * targetNum);
     
     if (progress < 1) {
       window.requestAnimationFrame(step);
     } else {
-      element.innerText = targetNum; // จบที่เป้าหมายเป๊ะๆ
+      element.innerText = targetNum;
     }
   };
   window.requestAnimationFrame(step);
@@ -1648,21 +1643,16 @@ function openDriverHero(fullName, rowEl) {
   document.getElementById('heroDriverLastName').innerText = lastName;
   document.getElementById('heroTeamName').innerText = info.team;
   document.getElementById('heroTeamLogo').src = getDriveDirectLink(TEAM_LOGOS[info.team] || '');
-  
   document.getElementById('heroDriverImg').src = getDriveDirectLink(info.heroImg || info.img); 
-  
   document.getElementById('heroPos').innerText = 'P' + pos;
 
-  // บังคับเซ็ตค่าเริ่มต้นของ element กลับไปเป็น 0 เสมอก่อนเริ่มนับ
   const ptsEl = document.getElementById('heroPoints');
   ptsEl.innerText = "0"; 
   
-  // ให้ตัวเลขเริ่มวิ่งทันทีที่กดเข้าหน้าต่าง
   setTimeout(() => {
     animateCountUp(ptsEl, pts, 2200); 
   }, 10); 
 
- // ไล่ระดับสี: เริ่มจากสีดำขอบจอ (0%) -> สว่างเป็นสีทีม (15%) -> กลืนกลับไปดำที่ฐาน (65%)
   document.getElementById('heroBgColor').style.background = `linear-gradient(to bottom, #0a0e1c 0%, ${info.color}40 15%, #0a0e1c 65%)`;
 
   if (!window.driverHeroModalInstance) {
@@ -1679,15 +1669,27 @@ async function loadOpenF1Meetings() {
   rSel.innerHTML = '<option value="" disabled selected>-- กำลังโหลดข้อมูลสนามจาก API --</option>';
   
   try {
-    // กำหนดปีที่ต้องการดึงข้อมูล (ใช้ 2024 เป็นฐานข้อมูลทดสอบที่สมบูรณ์ของ OpenF1)
-    const res = await fetch('https://api.openf1.org/v1/meetings?year=2024');
-    const meetings = await res.json();
+    // ดึงข้อมูลสนามปีล่าสุด (หากต้องการเปลี่ยนปี เปลี่ยนตัวเลข year ได้เลย)
+    const res = await fetch('https://api.openf1.org/v1/meetings?year=2025');
+    let meetings = await res.json();
+    
+    // fallback ไปปี 2024 หากปีที่ระบุยังไม่มีข้อมูล
+    if (!Array.isArray(meetings) || meetings.length === 0) {
+      const fallbackRes = await fetch('https://api.openf1.org/v1/meetings?year=2024');
+      meetings = await fallbackRes.json();
+    }
     
     let opts = '<option value="" disabled selected>-- เลือกสนาม --</option>';
     meetings.forEach(m => {
-      opts += `<option value="${m.meeting_key}">${m.meeting_name}</option>`;
+      opts += `<option value="${m.meeting_key}">🏁 ${m.meeting_name} (${m.year})</option>`;
     });
     rSel.innerHTML = opts;
+
+    // เลือกสนามล่าสุดให้อัตโนมัติเมื่อโหลดเสร็จ
+    if (meetings.length > 0) {
+      rSel.value = meetings[meetings.length - 1].meeting_key;
+      onResultsRaceChange();
+    }
   } catch (error) {
     console.error('OpenF1 Meetings Error:', error);
     rSel.innerHTML = '<option value="" disabled selected>โหลดข้อมูลสนามล้มเหลว</option>';
@@ -1707,15 +1709,12 @@ async function onResultsRaceChange() {
     const res = await fetch(`https://api.openf1.org/v1/sessions?meeting_key=${meetingKey}`);
     const sessions = await res.json();
     
-    // เรียงเซสชันตามเวลาเริ่มจริง
     sessions.sort((a, b) => new Date(a.date_start) - new Date(b.date_start));
     
-    // สร้างปุ่มโดยแนบ session_key ไปตรงๆ ไม่ต้องใช้ชื่อค้นหาแล้ว
     btnGroup.innerHTML = sessions.map((s, index) => 
       `<button class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 ${index === 0 ? 'active text-white border-white' : ''}" style="font-family: 'Rajdhani', sans-serif; font-weight: 700;" onclick="loadResultsSessionData('${s.session_key}', this)">${s.session_name.toUpperCase()}</button>`
     ).join('');
     
-    // สั่งให้ดึงผลของเซสชันแรกอัตโนมัติ
     if (sessions.length > 0) {
       loadResultsSessionData(sessions[0].session_key, btnGroup.firstChild);
     } else {
