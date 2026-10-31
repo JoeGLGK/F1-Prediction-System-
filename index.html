@@ -127,55 +127,26 @@
           <div id="teamStandingsList" class="f1-team-cards-container d-flex flex-column mt-2"></div>
         </div>
 
-        <!-- 6. คอนเทนต์ 4: ตารางผลการแข่งขันแต่ละเซสชัน (RESULTS สไตล์ F1 Official แบบกระชับ) -->
-<div id="results-standings-view" class="d-none">
-  
-  <!-- แถบปุ่มแคปซูลคู่ด้านบน (เลือกสนาม และ เลือกเซสชัน) -->
-  <div class="f1-official-selectors mb-3">
-    <!-- ปุ่มเลือกสนาม -->
-    <button type="button" class="f1-pill-selector" onclick="openSelectorModal('race')">
-      <span id="currentRaceLabel"><i class="fa-solid fa-flag-checkered me-2"></i>เลือกสนาม</span>
-      <i class="fa-solid fa-chevron-down ms-2 fs-7"></i>
-    </button>
-    
-    <!-- ปุ่มเลือกเซสชัน -->
-    <button type="button" class="f1-pill-selector" onclick="openSelectorModal('session')">
-      <span id="currentSessionLabel"><i class="fa-solid fa-stopwatch me-2"></i>เซสชัน</span>
-      <i class="fa-solid fa-chevron-down ms-2 fs-7"></i>
-    </button>
-  </div>
-  
-  <!-- ตารางแสดงอันดับสไตล์ F1 Drivers -->
-  <div class="f1-official-standings">
-    <div class="f1-standings-header">
-      <div class="col-pos" style="width: 12%;">Pos.</div>
-      <div class="col-driver" style="width: 53%;">DRIVER</div>
-      <div class="col-pts text-end" style="width: 35%;">TIME/GAP</div>
-    </div>
-    <div id="resultsSessionDataList">
-      <div class="text-center text-secondary py-4">กรุณาเลือกสนามเพื่อดูผลการแข่งขัน</div>
-    </div>
-  </div>
-</div>
-
-<!-- Modal สำหรับเลือกสนามหรือเซสชัน -->
-<div class="modal fade bottom-sheet-modal" id="f1PickerModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-bottom">
-    <div class="modal-content f1-card text-white p-3">
-      <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary">
-        <h6 class="modal-title f1-font m-0 text-white" id="f1PickerTitle">เลือกรายการ</h6>
-        <button type="button" class="btn btn-sm btn-light fw-bold px-3 py-1 rounded-pill" data-bs-dismiss="modal" style="font-size: 0.75rem;">Done</button>
+        <!-- 6. คอนเทนต์ 4: ตารางผลการแข่งขันแต่ละเซสชัน (RESULTS) -->
+        <div id="results-standings-view" class="d-none">
+          <div class="mb-3">
+            <select id="selResultsRace" class="form-select" onchange="onResultsRaceChange()">
+              <option value="" disabled selected>-- เลือกสนาม --</option>
+            </select>
+          </div>
+          <div id="resultsSessionBtnGroup" class="d-flex gap-2 mb-3" style="overflow-x: auto; white-space: nowrap; padding-bottom: 5px;"></div>
+          <div class="f1-official-standings">
+            <div class="f1-standings-header">
+              <div class="col-pos" style="width: 12%;">Pos.</div>
+              <div class="col-driver" style="width: 53%;">DRIVER</div>
+              <div class="col-pts text-end" style="width: 35%;">TIME/GAP (LAPS)</div>
+            </div>
+            <div id="resultsSessionDataList">
+              <div class="text-center text-secondary py-4">กรุณาเลือกสนามเพื่อดูผลการแข่งขัน</div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="picker-scroll-list py-2" id="f1PickerOptionsContainer" style="max-height: 50vh; overflow-y: auto;">
-        <!-- ตัวเลือกจะถูกสร้างด้วย JS -->
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Hidden Selectors ไว้เก็บบันทึกค่าเดิมเพื่อเชื่อมกับระบบฟังก์ชันหลัก -->
-<select id="selResultsRace" class="d-none" onchange="onResultsRaceChange()"></select>
-<div id="resultsSessionBtnGroup" class="d-none"></div>
 
       <!-- ส่วนตรวจผลการแข่งขัน (แสดงเฉพาะหน้า PREDICTOR LEAGUE) -->
       <div class="f1-card p-3" id="checkResultCard">
