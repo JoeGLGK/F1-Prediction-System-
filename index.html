@@ -93,14 +93,13 @@
 
         <!-- 2. ปุ่ม Toggle สลับหน้าตาราง -->
         <div class="standings-toggle-wrapper mb-3" style="overflow-x: auto; white-space: nowrap; padding-bottom: 5px;">
-  <div class="standings-toggle">
-    <button class="toggle-btn active" id="btn-user-standings" onclick="switchStandings('user')">PREDICTOR LEAGUE</button>
-    <button class="toggle-btn" id="btn-driver-standings" onclick="switchStandings('driver')">F1 DRIVERS</button>
-    <button class="toggle-btn" id="btn-team-standings" onclick="switchStandings('team')">F1 TEAMS</button>
-    <!-- เพิ่มปุ่มนี้เข้าไป -->
-    <button class="toggle-btn" id="btn-results-standings" onclick="switchStandings('results')">RESULTS</button>
-  </div>
-</div>
+          <div class="standings-toggle">
+            <button class="toggle-btn active" id="btn-user-standings" onclick="switchStandings('user')">PREDICTOR LEAGUE</button>
+            <button class="toggle-btn" id="btn-driver-standings" onclick="switchStandings('driver')">F1 DRIVERS</button>
+            <button class="toggle-btn" id="btn-team-standings" onclick="switchStandings('team')">F1 TEAMS</button>
+            <button class="toggle-btn" id="btn-results-standings" onclick="switchStandings('results')">RESULTS</button>
+          </div>
+        </div>
 
         <!-- 3. คอนเทนต์ 1: ตารางคะแนนคนทายผล -->
         <div id="user-standings-view">
@@ -111,7 +110,7 @@
           </div>
         </div>
 
-        <!-- 4. คอนเทนต์ 2: ตารางคะแนนนักแข่ง F1 Official (สร้างผ่าน JS) -->
+        <!-- 4. คอนเทนต์ 2: ตารางคะแนนนักแข่ง F1 Official -->
         <div id="driver-standings-view" class="d-none">
           <div class="f1-official-standings">
             <div class="f1-standings-header">
@@ -123,37 +122,31 @@
           </div>
         </div>
 
-        <!-- 5. คอนเทนต์ 3: ตารางคะแนนทีมผู้ผลิต (สร้างผ่าน JS) -->
+        <!-- 5. คอนเทนต์ 3: ตารางคะแนนทีมผู้ผลิต -->
         <div id="team-standings-view" class="d-none">
           <div id="teamStandingsList" class="f1-team-cards-container d-flex flex-column mt-2"></div>
         </div>
+
+        <!-- 6. คอนเทนต์ 4: ตารางผลการแข่งขันแต่ละเซสชัน (RESULTS) -->
+        <div id="results-standings-view" class="d-none">
+          <div class="mb-3">
+            <select id="selResultsRace" class="form-select" onchange="onResultsRaceChange()">
+              <option value="" disabled selected>-- เลือกสนาม --</option>
+            </select>
+          </div>
+          <div id="resultsSessionBtnGroup" class="d-flex gap-2 mb-3" style="overflow-x: auto; white-space: nowrap; padding-bottom: 5px;"></div>
+          <div class="f1-official-standings">
+            <div class="f1-standings-header">
+              <div class="col-pos" style="width: 12%;">Pos.</div>
+              <div class="col-driver" style="width: 53%;">DRIVER</div>
+              <div class="col-pts text-end" style="width: 35%;">TIME/GAP (LAPS)</div>
+            </div>
+            <div id="resultsSessionDataList">
+              <div class="text-center text-secondary py-4">กรุณาเลือกสนามเพื่อดูผลการแข่งขัน</div>
+            </div>
+          </div>
+        </div>
       </div>
-      <!-- 6. คอนเทนต์ 4: ตารางผลการแข่งขันแต่ละเซสชัน (RESULTS) -->
-<div id="results-standings-view" class="d-none">
-  <!-- Dropdown เลือกสนาม -->
-  <div class="mb-3">
-    <select id="selResultsRace" class="form-select" onchange="onResultsRaceChange()">
-      <option value="" disabled selected>-- เลือกสนาม --</option>
-    </select>
-  </div>
-  
-  <!-- กลุ่มปุ่มเลือกเซสชัน (สลับอัตโนมัติตามประเภทสนาม) -->
-  <div id="resultsSessionBtnGroup" class="d-flex gap-2 mb-3" style="overflow-x: auto; white-space: nowrap; padding-bottom: 5px;">
-    <!-- ปุ่มจะถูกสร้างผ่าน JS -->
-  </div>
-  
-  <!-- ตารางแสดงอันดับสไตล์ F1 Drivers -->
-  <div class="f1-official-standings">
-    <div class="f1-standings-header">
-      <div class="col-pos" style="width: 15%;">Pos.</div>
-      <div class="col-driver" style="width: 55%;">DRIVER</div>
-      <div class="col-pts text-end" style="width: 30%;">TIME/GAP</div>
-    </div>
-    <div id="resultsSessionDataList">
-      <div class="text-center text-secondary py-4">กรุณาเลือกสนามเพื่อดูผลการแข่งขัน</div>
-    </div>
-  </div>
-</div>
 
       <!-- ส่วนตรวจผลการแข่งขัน (แสดงเฉพาะหน้า PREDICTOR LEAGUE) -->
       <div class="f1-card p-3" id="checkResultCard">
