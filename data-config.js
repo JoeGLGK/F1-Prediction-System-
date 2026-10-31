@@ -27,8 +27,8 @@ const TEAM_COLORS = {
   "Alpine": "#ff87bc", 
   "Williams": "#005aff", 
   "VCARB": "#6692ff", 
-  "Audi": #f50537, 
-  "Sauber": #f50537, 
+  "Audi": "#f50537", 
+  "Sauber": "#f50537", 
   "Haas": "#ffffff", 
   "Cadilac": "#ffd700",
   "Cadillac": "#ffd700" 
