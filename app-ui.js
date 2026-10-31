@@ -1747,3 +1747,70 @@ async function onResultsRaceChange() {
     btnGroup.innerHTML = '<span class="text-danger small">โหลดเซสชันล้มเหลว</span>';
   }
 }
+let currentPickerType = 'race';
+let pickerModalInstance = null;
+
+function openSelectorModal(type) {
+  currentPickerType = type;
+  triggerHaptic();
+  
+  if (!pickerModalInstance) {
+    pickerModalInstance = new bootstrap.Modal(document.getElementById('f1PickerModal'));
+  }
+  
+  const titleEl = document.getElementById('f1PickerTitle');
+  const container = document.getElementById('f1PickerOptionsContainer');
+  
+  if (type === 'race') {
+    titleEl.innerText = 'SELECT GRAND PRIX';
+    const rSel = document.getElementById('selResultsRace');
+    let html = '';
+    for (let i = 0; i < rSel.options.length; i++) {
+      const opt = rSel.options[i];
+      if (opt.value) {
+        const isSelected = rSel.value === opt.value ? 'selected' : '';
+        html += `<div class="picker-item ${isSelected}" onclick="selectPickerOption('race', '${opt.value}', '${opt.text.replace(/'/g, "\\'")}')">${opt.text}</div>`;
+      }
+    }
+    container.innerHTML = html;
+  } else {
+    titleEl.innerText = 'SELECT SESSION';
+    const btnGroup = document.querySelectorAll('#resultsSessionBtnGroup button');
+    if (btnGroup.length === 0) {
+      container.innerHTML = '<div class="text-center text-secondary py-3">กรุณาเลือกสนามก่อน</div>';
+    } else {
+      let html = '';
+      btnGroup.forEach(btn => {
+        const isActive = btn.classList.contains('active') ? 'selected' : '';
+        html += `<div class="picker-item ${isActive}" onclick="selectPickerSessionCustom('${btn.getAttribute('onclick')}', '${btn.innerText.replace(/'/g, "\\'")}')">${btn.innerText}</div>`;
+      });
+      container.innerHTML = html;
+    }
+  }
+  
+  pickerModalInstance.show();
+}
+
+function selectPickerOption(type, val, text) {
+  triggerHaptic();
+  const rSel = document.getElementById('selResultsRace');
+  rSel.value = val;
+  onResultsRaceChange();
+  
+  // อัปเดตข้อความบนปุ่มแคปซูล
+  document.getElementById('currentRaceLabel').innerText = text.replace(/🏁/g, '').trim();
+  document.getElementById('gpMainTitle').innerText = text.replace(/🏁/g, '').trim();
+  
+  if (pickerModalInstance) pickerModalInstance.hide();
+}
+
+function selectPickerSessionCustom(onclickAttr, sessionText) {
+  triggerHaptic();
+  document.getElementById('currentSessionLabel').innerText = sessionText;
+  
+  // สั่งรัน onclick เดิมของปุ่มเซสชันนั้นๆ
+  const fnBody = new Function(onclickAttr);
+  fnBody();
+  
+  if (pickerModalInstance) pickerModalInstance.hide();
+}
