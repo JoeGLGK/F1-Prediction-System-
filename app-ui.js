@@ -1601,27 +1601,6 @@ document.addEventListener('DOMContentLoaded', () => {
   fetchF1Standings();         
   fetchF1TeamStandings();     
 });
-// ฟังก์ชันสร้างลูกเล่นตัวเลขวิ่ง (Count-up Animation สไตล์ Cubic Ease-out)
-function animateCountUp(element, target, duration = 2200) {
-  let startTimestamp = null;
-  const targetNum = parseInt(target, 10) || 0;
-  
-  const step = (timestamp) => {
-    if (!startTimestamp) startTimestamp = timestamp;
-    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-    
-    // สมการความเร่ง Cubic Ease-out (1 - (1-t)^3) ต้นจัด ปลายไหล
-    const easeProgress = 1 - Math.pow(1 - progress, 3); 
-    element.innerText = Math.floor(easeProgress * targetNum);
-    
-    if (progress < 1) {
-      window.requestAnimationFrame(step);
-    } else {
-      element.innerText = targetNum;
-    }
-  };
-  window.requestAnimationFrame(step);
-}
 
 // ฟังก์ชันสร้างลูกเล่นตัวเลขวิ่ง (Count-up Animation สไตล์ Cubic Ease-out)
 function animateCountUp(element, target, duration = 2200) {
@@ -1691,26 +1670,7 @@ function openDriverHero(fullName, rowEl) {
   }
   window.driverHeroModalInstance.show();
 }
-function onResultsRaceChange() {
-  const rSel = document.getElementById('selResultsRace');
-  if (!rSel || !rSel.options[rSel.selectedIndex]) return;
-  
-  // เช็กว่าเป็น Sprint หรือ Normal
-  const isSprint = rSel.options[rSel.selectedIndex].dataset.type === 'Sprint';
-  const btnGroup = document.getElementById('resultsSessionBtnGroup');
-  
-  const sessions = isSprint 
-    ? ['Practice 1', 'Sprint Qualifying', 'Sprint', 'Qualifying', 'Race'] 
-    : ['Practice 1', 'Practice 2', 'Practice 3', 'Qualifying', 'Race'];
 
-  // สร้างปุ่ม (ปุ่มแรกจะถูกเซ็ตเป็น active เริ่มต้น)
-  btnGroup.innerHTML = sessions.map((s, index) => 
-    `<button class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 ${index === 0 ? 'active text-white border-white' : ''}" style="font-family: 'Rajdhani', sans-serif; font-weight: 700;" onclick="loadResultsSessionData('${s}', this)">${s.toUpperCase()}</button>`
-  ).join('');
-  
-  // สั่งให้ดึงข้อมูลของเซสชันแรกอัตโนมัติ
-  loadResultsSessionData(sessions[0], btnGroup.firstChild);
-}
 // โหลดรายชื่อสนามจาก OpenF1 ทันทีเมื่อเรียกใช้
 async function loadOpenF1Meetings() {
   const rSel = document.getElementById('selResultsRace');
