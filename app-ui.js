@@ -1864,3 +1864,14 @@ async function loadTelemetryHUD(sessionKey) {
     document.getElementById('highestSpeed').innerHTML = errorHtml;
   }
 }
+// ฟังก์ชันสำหรับเรียกโหลดข้อมูลหน้า Telemetry 
+function refreshTelemetryDashboard(sessionKey = 'latest') {
+  triggerHaptic();
+  
+  // เรียกใช้ฟังก์ชันหลักจาก api-service.js (ถ้าฟังก์ชันโหลดพร้อมแล้ว)
+  if (typeof loadTelemetryHUD === 'function') {
+    loadTelemetryHUD(sessionKey);
+  } else {
+    console.warn("ไม่พบฟังก์ชัน loadTelemetryHUD กรุณาตรวจสอบไฟล์ api-service.js");
+  }
+}
