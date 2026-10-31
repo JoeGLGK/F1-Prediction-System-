@@ -205,98 +205,146 @@ async function loadResultsSessionData(sessionKey, btnEl) {
 
   const list = document.getElementById('resultsSessionDataList');
   if (!list) return;
-  list.innerHTML = '<div class="text-center py-5"><i class="fa-solid fa-spinner fa-spin text-danger fs-3 mb-2"></i><div class="text-secondary small f1-font">FETCHING SESSION RESULTS...</div></div>';
+  list.innerHTML = '<div class="text-center py-5"><i class="fa-solid fa-spinner fa-spin text-danger fs-3 mb-2"></i><div class="text-secondary small f1-font">CALCULATING TRUE RESULTS...</div></div>';
   
   try {
-    const [drivers, positions, laps, standingsData] = await Promise.all([
-      fetchOpenF1Cached(`https://api.openf1.org/v1/drivers?session_key=${sessionKey}`),
-      fetchOpenF1Cached(`https://api.openf1.org/v1/position?session_key=${sessionKey}`),
-      fetchOpenF1Cached(`https://api.openf1.org/v1/laps?session_key=${sessionKey}`),
-      fetch('https://api.jolpi.ca/ergast/f1/current/driverStandings.json').then(res => res.json())
+    // 1. ดึงข้อมูลใหม่สดๆ ด้วย fetch ป้องกันปัญหา Cache สลับสนาม
+    const [sessionRes, driversRes, lapsRes, standingsRes] = await Promise.all([
+      fetch(`https://api.openf1.org/v1/sessions?session_key=${sessionKey}`),
+      fetch(`https://api.openf1.org/v1/drivers?session_key=${sessionKey}`),
+      fetch(`https://api.openf1.org/v1/laps?session_key=${sessionKey}`),
+      fetch('https://api.jolpi.ca/ergast/f1/current/driverStandings.json')
     ]);
     
+    const sessionData = await sessionRes.json();
+    const drivers = await driversRes.json();
+    const laps = await lapsRes.json();
+    const standingsData = await standingsRes.json();
+
+    // เช็กว่าเป็นรอบแข่งจริง (Race/Sprint) หรือรอบซ้อม
+    const sessionName = (sessionData[0] && sessionData[0].session_name) ? sessionData[0].session_name.toLowerCase() : '';
+    const isRace = sessionName === 'race' || sessionName === 'sprint';
+    
     const seasonStandings = {};
-    const standingsLists = standingsData.MRData.StandingsTable.StandingsLists;
+    const standingsLists = standingsData.MRData?.StandingsTable?.StandingsLists;
     if (standingsLists && standingsLists.length > 0) {
       standingsLists[0].DriverStandings.forEach(ds => {
-        // ตัดอักขระพิเศษจากชื่อของ Ergast API
         const familyName = ds.Driver.familyName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        seasonStandings[familyName] = {
-          points: ds.points || '0',
-          position: 'P' + ds.position
-        };
+        seasonStandings[familyName] = { points: ds.points || '0', position: 'P' + ds.position };
       });
     }
 
-    const latestPos = {};
-    positions.forEach(p => { latestPos[p.driver_number] = p.position; });
-
-    const bestLaps = {};
-    let sessionFastest = Infinity;
+    // 2. คำนวณข้อมูลสถิติของรถแต่ละคันจาก /laps (FIA Logic)
+    const driverStats = {};
+    let sessionFastestLap = Infinity;
 
     if (Array.isArray(laps)) {
       laps.forEach(l => {
         const dNum = l.driver_number;
+        if (!driverStats[dNum]) {
+          driverStats[dNum] = { maxLap: 0, bestLap: Infinity, finishTime: Infinity };
+        }
+        
+        // หา Best Lap
         if (l.lap_duration && l.lap_duration > 0) {
-          if (!bestLaps[dNum] || l.lap_duration < bestLaps[dNum]) {
-            bestLaps[dNum] = l.lap_duration;
-          }
-          if (l.lap_duration < sessionFastest) {
-            sessionFastest = l.lap_duration;
+          if (l.lap_duration < driverStats[dNum].bestLap) driverStats[dNum].bestLap = l.lap_duration;
+          if (l.lap_duration < sessionFastestLap) sessionFastestLap = l.lap_duration;
+        }
+        
+        // หารอบสูงสุดที่วิ่งได้ และเวลาเข้าเส้นชัยในรอบนั้น
+        if (l.lap_number && l.lap_number >= driverStats[dNum].maxLap) {
+          driverStats[dNum].maxLap = l.lap_number;
+          if (l.date_start && l.lap_duration) {
+             driverStats[dNum].finishTime = new Date(l.date_start).getTime() + (l.lap_duration * 1000);
           }
         }
       });
     }
     
-    const results = drivers.map(d => {
-      const pos = latestPos[d.driver_number] || 99;
+    // 3. แม็ปปิ้งข้อมูลนักแข่งเข้าด้วยกัน
+    let results = drivers.map(d => {
+      const dNum = d.driver_number;
+      const stats = driverStats[dNum] || { maxLap: 0, bestLap: Infinity, finishTime: Infinity };
       
-      // ตัดอักขระพิเศษจากนามสกุลของ OpenF1 API (แก้ปัญหา Hülkenberg และ Pérez)
       const apiLastName = (d.last_name || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-      
-      // ค้นหาใน DRIVER_INFO โดยเทียบด้วยชื่อที่ตัดอักขระพิเศษแล้ว
       const appDriver = Object.keys(DRIVER_INFO).find(name => {
         const cleanName = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         return cleanName.includes(apiLastName) || apiLastName.includes(cleanName.split(' ').pop());
       }) || d.full_name || 'Driver';
       
       const info = DRIVER_INFO[appDriver] || { team: d.team_name, color: d.team_colour ? `#${d.team_colour}` : '#888888', headshot: DEFAULT_DRIVER_IMG };
-      const firstChar = d.first_name ? d.first_name.charAt(0) + '. ' : '';
-      const shortName = firstChar + (d.last_name || d.full_name || '');
-      
-      const myBest = bestLaps[d.driver_number];
-      let timeDisplay = '-';
-      if (myBest) {
-        if (myBest === sessionFastest) {
-          timeDisplay = formatLapTime(myBest);
-        } else {
-          const diff = (myBest - sessionFastest).toFixed(3);
-          timeDisplay = `+${diff}s`;
-        }
-      } else if (pos === 1) {
-        timeDisplay = 'Leader';
-      }
-
+      const shortName = (d.first_name ? d.first_name.charAt(0) + '. ' : '') + (d.last_name || d.full_name || '');
       const seasonData = seasonStandings[apiLastName] || { points: '0', position: 'P-' };
 
       return {
-        pos: pos,
+        driver_number: dNum,
         fullName: appDriver,
         shortName: shortName,
         team: info.team || d.team_name || 'F1',
         color: info.color || (d.team_colour ? `#${d.team_colour}` : '#888888'),
         headshot: getDriveDirectLink(info.headshot || info.img || DEFAULT_DRIVER_IMG),
-        timeGap: timeDisplay,
         seasonPoints: seasonData.points,
-        seasonPos: seasonData.position
+        seasonPos: seasonData.position,
+        maxLap: stats.maxLap,
+        bestLap: stats.bestLap,
+        finishTime: stats.finishTime,
+        timeGap: '-'
       };
-    }).sort((a, b) => a.pos - b.pos).filter(r => r.pos !== 99);
-    
+    });
+
+    // กรองรถที่ไม่ลงวิ่งออก
+    results = results.filter(r => r.maxLap > 0 || r.bestLap !== Infinity);
+
+    // 4. เรียงลำดับนักแข่งตามประเภทเซสชัน
+    if (isRace) {
+      // 🏎️ แข่งจริง: เรียงตามจำนวนรอบ (มากไปน้อย) -> เวลาเข้าเส้นชัย (น้อยไปมาก)
+      results.sort((a, b) => {
+        if (b.maxLap !== a.maxLap) return b.maxLap - a.maxLap; 
+        return a.finishTime - b.finishTime; 
+      });
+      
+      if (results.length > 0) {
+         const raceWinnerFinishTime = results[0].finishTime;
+         const winnerLaps = results[0].maxLap;
+         
+         results.forEach((r, idx) => {
+            r.pos = idx + 1;
+            if (idx === 0) {
+               r.timeGap = 'Winner';
+            } else if (r.maxLap < winnerLaps) {
+               const lapsBehind = winnerLaps - r.maxLap;
+               r.timeGap = `+${lapsBehind} Laps`; // โดนน็อกรอบ
+            } else if (r.finishTime !== Infinity && raceWinnerFinishTime !== Infinity) {
+               const diffSec = (r.finishTime - raceWinnerFinishTime) / 1000;
+               r.timeGap = `+${diffSec.toFixed(3)}s`; // ตามหลังผู้นำ
+            } else {
+               r.timeGap = 'DNF';
+            }
+         });
+      }
+    } else {
+      // ⏱️ ซ้อม/ควอลิฟาย: เรียงตาม Best Lap Time
+      results.sort((a, b) => a.bestLap - b.bestLap);
+      
+      results.forEach((r, idx) => {
+        r.pos = idx + 1;
+        if (r.bestLap === Infinity) {
+          r.timeGap = 'NO TIME';
+        } else if (idx === 0) {
+          r.timeGap = formatLapTime(r.bestLap);
+        } else {
+          const diff = r.bestLap - sessionFastestLap;
+          r.timeGap = `+${diff.toFixed(3)}s`;
+        }
+      });
+    }
+
     if (results.length === 0) {
-      list.innerHTML = `<div class="text-center text-secondary py-4">ไม่มีข้อมูลผลการแข่งขันในเซสชันนี้</div>`;
+      list.innerHTML = `<div class="text-center text-secondary py-4">ไม่มีข้อมูลรถวิ่งในเซสชันนี้</div>`;
       return;
     }
     
+    // 5. วาดตาราง
     list.innerHTML = results.map(r => `
       <div class="f1-standings-row" style="cursor:pointer;" onclick="openDriverHeroCustom(this, '${r.fullName.replace(/'/g, "\\'")}', '${r.seasonPoints}', '${r.seasonPos}')">
         <div class="col-pos" style="width: 12%;">${r.pos}</div>
