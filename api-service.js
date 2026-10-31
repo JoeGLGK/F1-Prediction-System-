@@ -245,6 +245,29 @@ async function loadResultsSessionData(sessionKey, btnEl) {
   }
 }
     
+    // 4. แสดงผลตารางสไตล์ F1 Drivers
+    list.innerHTML = results.map((r, idx) => `
+      <div class="f1-standings-row" style="cursor:pointer;" onclick="openDriverHero('${r.fullName}', this)">
+        <div class="col-pos" style="width: 15%;">${r.pos}</div>
+        <div class="col-driver" style="width: 55%;">
+          <img src="${r.headshot}" class="driver-headshot" alt="${r.shortName}" loading="lazy">
+          <div class="driver-info">
+            <div class="driver-name text-white">${r.shortName}</div>
+            <div class="team-name m-0" style="color: ${r.color};">${r.team}</div>
+          </div>
+        </div>
+        <div class="col-pts text-end" style="width: 30%;">
+           <span class="text-secondary small fw-bold">${idx === 0 ? 'Leader' : '+Lap Data'}</span>
+        </div>
+      </div>
+    `).join('');
+    
+  } catch (error) {
+    console.error('Session Results Error:', error);
+    list.innerHTML = '<div class="text-center text-danger py-4">พบปัญหาในการดึงข้อมูล OpenF1 API<br><span class="small text-secondary">กรุณาลองใหม่อีกครั้ง</span></div>';
+  }
+}
+    
     // สร้างตารางสไตล์ F1 Drivers UI (แสดงหัวคน, ชื่อ, ทีม, ช่องขวาสุดแสดงสถานะ Gap หรือ Interval)
     list.innerHTML = results.map((r, idx) => `
       <div class="f1-standings-row" style="cursor:pointer;" onclick="openDriverHero('${r.fullName}', this)">
