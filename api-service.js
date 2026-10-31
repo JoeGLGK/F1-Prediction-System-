@@ -7,6 +7,25 @@ const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwZ_VB9I7ClOgDpd8bD
 const apiCache = new Map();
 const pendingRequests = new Map();
 
+// ระบบแคชสำหรับ OpenF1 API เพื่อเพิ่มความเร็วและลดอาการหน่วง (เก็บข้อมูลไว้ในหน่วยความจำชั่วคราว 2 นาที)[cite: 1]
+const openF1Cache = new Map();
+const OPENF1_CACHE_TTL = 120000; 
+
+async function fetchOpenF1Cached(url) {
+  const now = Date.now();
+  if (openF1Cache.has(url)) {
+    const cached = openF1Cache.get(url);
+    if (now - cached.timestamp < OPENF1_CACHE_TTL) {
+      return cached.data;
+    }
+  }
+
+  const response = await fetch(url);
+  const data = await response.json();
+  openF1Cache.set(url, { data, timestamp: now });
+  return data;
+}
+
 async function callGAS(action, payload = {}, options = { useCache: false, ttl: 30000 }) {
   const cacheKey = action + "_" + JSON.stringify(payload);
 
@@ -137,8 +156,8 @@ async function fetchF1TeamStandings() {
 
 async function fetchLiveWeather() {
   try {
-    const response = await fetch('https://api.openf1.org/v1/weather?session_key=latest');
-    const data = await response.json();
+    // ใช้ฟังก์ชันแคช OpenF1 เพื่อดึงข้อมูลสภาพอากาศได้อย่างรวดเร็ว[cite: 1]
+    const data = await fetchOpenF1Cached('https://api.openf1.org/v1/weather?session_key=latest');
 
     if (data && data.length > 0) {
       const latestWeather = data[data.length - 1]; 
@@ -189,17 +208,13 @@ async function loadResultsSessionData(sessionKey, btnEl) {
   list.innerHTML = '<div class="text-center py-5"><i class="fa-solid fa-spinner fa-spin text-danger fs-3 mb-2"></i><div class="text-secondary small f1-font">FETCHING SESSION RESULTS...</div></div>';
   
   try {
-    const [driversRes, posRes, lapsRes, standingsRes] = await Promise.all([
-      fetch(`https://api.openf1.org/v1/drivers?session_key=${sessionKey}`),
-      fetch(`https://api.openf1.org/v1/position?session_key=${sessionKey}`),
-      fetch(`https://api.openf1.org/v1/laps?session_key=${sessionKey}`),
-      fetch('https://api.jolpi.ca/ergast/f1/current/driverStandings.json') // ดึงคะแนนสะสมจริงจาก Ergast API
+    // ใช้ fetchOpenF1Cached ร่วมกับ Promise.all เพื่อดึงข้อมูลเซสชันพร้อมกันอย่างรวดเร็ว[cite: 1]
+    const [drivers, positions, laps, standingsData] = await Promise.all([
+      fetchOpenF1Cached(`https://api.openf1.org/v1/drivers?session_key=${sessionKey}`),
+      fetchOpenF1Cached(`https://api.openf1.org/v1/position?session_key=${sessionKey}`),
+      fetchOpenF1Cached(`https://api.openf1.org/v1/laps?session_key=${sessionKey}`),
+      fetch('https://api.jolpi.ca/ergast/f1/current/driverStandings.json').then(res => res.json())
     ]);
-    
-    const drivers = await driversRes.json();
-    const positions = await posRes.json();
-    const laps = await lapsRes.json();
-    const standingsData = await standingsRes.json();
     
     // แปลงข้อมูลคะแนนและอันดับสะสมทั้งฤดูกาลจาก Ergast API
     const seasonStandings = {};
@@ -255,7 +270,6 @@ async function loadResultsSessionData(sessionKey, btnEl) {
         timeDisplay = 'Leader';
       }
 
-      // ดึงคะแนนและอันดับสะสมทั้งฤดูกาล (ถ้าไม่มีข้อมูลให้ใช้ค่าเริ่มต้น)
       const seasonData = seasonStandings[lastNameClean] || { points: '0', position: 'P-' };
 
       return {
@@ -276,7 +290,6 @@ async function loadResultsSessionData(sessionKey, btnEl) {
       return;
     }
     
-    // สร้างตารางแถว พร้อมส่งข้อมูลคะแนนและอันดับสะสมไปแสดงใน Modal ผ่านคอลัมน์ซ่อนหรือ attribute
     list.innerHTML = results.map(r => `
       <div class="f1-standings-row" style="cursor:pointer;" onclick="openDriverHeroCustom(this, '${r.fullName.replace(/'/g, "\\'")}', '${r.seasonPoints}', '${r.seasonPos}')">
         <div class="col-pos" style="width: 12%;">${r.pos}</div>
@@ -301,7 +314,6 @@ async function loadResultsSessionData(sessionKey, btnEl) {
   }
 }
 
-// ฟังก์ชันเสริมรองรับการเปิด Modal Hero พร้อมดึงคะแนนทั้งฤดูกาลมาแสดง
 function openDriverHeroCustom(rowEl, fullName, points, championshipPos) {
   triggerHaptic();
   const info = DRIVER_INFO[fullName];
