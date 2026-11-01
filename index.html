@@ -174,14 +174,6 @@
           <i class="fa-solid fa-circle-info text-warning me-1"></i> <strong>กติกา:</strong> ทายตำแหน่งเป๊ะ (P1-P4) ได้ <strong>2 คะแนน/ตำแหน่ง</strong>
         </div>
         
-        <!-- ⚠️ กล่องประวัติทายผล -->
-        <div id="savedPredAlert" class="history-card" style="display: none;">
-          <div class="d-flex justify-content-between align-items-center mb-2"><span class="small fw-bold text-success"><i class="fa-solid fa-circle-check me-1"></i>คุณได้ส่งคำทายสนามนี้ไว้แล้ว</span><span class="badge bg-success" style="font-size:0.65rem;">บันทึกแล้ว</span></div>
-          <div class="small text-secondary mb-2" id="savedPredTime" style="font-size:0.75rem;">เวลาส่ง: -</div>
-          <div class="history-content-box text-start small text-white" id="savedPredContent">-</div>
-          <div class="small text-muted mt-3" style="font-size:0.7rem;">💡 คุณสามารถแตะเปลี่ยนการ์ดนักแข่งด้านล่าง แล้วกด Submit เพื่ออัปเดตคำทายใหม่ได้จนกว่าจะหมดเวลา</div>
-        </div>
-
         <form onsubmit="handlePrediction(event)">
           
           <!-- ⚠️ คืนชีพกล่องโปรไฟล์เดิม แต่ใช้ d-none ซ่อนไว้ทั้งหมด -->
@@ -211,6 +203,14 @@
               </select>
             </div>
           </div>
+
+          <!-- ⚠️ กล่องประวัติทายผล -->
+        <div id="savedPredAlert" class="history-card" style="display: none;">
+          <div class="d-flex justify-content-between align-items-center mb-2"><span class="small fw-bold text-success"><i class="fa-solid fa-circle-check me-1"></i>คุณได้ส่งคำทายสนามนี้ไว้แล้ว</span><span class="badge bg-success" style="font-size:0.65rem;">บันทึกแล้ว</span></div>
+          <div class="small text-secondary mb-2" id="savedPredTime" style="font-size:0.75rem;">เวลาส่ง: -</div>
+          <div class="history-content-box text-start small text-white" id="savedPredContent">-</div>
+          <div class="small text-muted mt-3" style="font-size:0.7rem;">💡 คุณสามารถแตะเปลี่ยนการ์ดนักแข่งด้านล่าง แล้วกด Submit เพื่ออัปเดตคำทายใหม่ได้จนกว่าจะหมดเวลา</div>
+        </div>
           
           <div class="d-none">
             <select id="pos1" class="driver-opt"></select>
