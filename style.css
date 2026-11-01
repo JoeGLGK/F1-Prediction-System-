@@ -3394,106 +3394,129 @@ body {
   box-shadow: 0 4px 15px rgba(225, 6, 0, 0.4) !important;
 }
 /* =========================================
-   TELEMETRY HUD - PREMIUM GLASSMORPHISM
+   TELEMETRY HUD - HORIZONTAL LAP FLOW
    ========================================= */
 .f1-telemetry-hud {
-  background: linear-gradient(145deg, rgba(15, 18, 28, 0.7) 0%, rgba(10, 12, 20, 0.85) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(15, 17, 24, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 16px 20px;
 }
 
-.f1-telemetry-hud h6 {
-  font-size: 0.95rem;
-  text-transform: uppercase;
-}
-
-.sector-times-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-}
-
-.sector-box {
-  background: rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  border-top: 3px solid #df80ff;
-  border-radius: 10px;
-  padding: 14px 6px;
-  text-align: center;
+.lap-flow-style {
+  display: flex;
+  justify-content: space-between;
   position: relative;
-  box-shadow: inset 0 15px 20px -15px rgba(223, 128, 255, 0.3);
-  transition: all 0.3s ease;
+  margin-bottom: 10px;
 }
 
-.sector-title {
+/* สร้างเส้นประจำลองลู่วิ่ง (Track Line) พาดผ่านกลาง */
+.lap-flow-style::before {
+  content: '';
+  position: absolute;
+  top: 62%;
+  left: 8%;
+  right: 8%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.2) 15%, rgba(255, 255, 255, 0.2) 85%, transparent 100%);
+  z-index: 1;
+}
+
+.lap-flow-style .sector-box {
+  flex: 1;
+  text-align: center;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  position: relative;
+  z-index: 2;
+}
+
+.lap-flow-style .sector-title {
   font-family: 'Rajdhani', sans-serif;
   font-size: 0.75rem;
-  color: #94a3b8;
+  color: #64748b;
   font-weight: 700;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
   letter-spacing: 1px;
 }
 
-.driver-tag {
-  display: inline-block;
-  font-family: 'Rajdhani', sans-serif;
-  font-weight: 800;
-  color: #fff;
-  background: linear-gradient(90deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
-  padding: 3px 10px;
-  border-radius: 4px;
-  border-left: 4px solid var(--team-color);
-  font-size: 0.9rem;
-  letter-spacing: 0.5px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+/* จัดเรียงป้ายชื่อนักแข่งให้อยู่ห่างจากเวลา เพื่อเว้นที่ให้เส้นลอดผ่าน */
+.lap-flow-style .sector-data {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px; 
 }
 
-.sector-time {
+/* ปรับป้ายนักแข่งให้คลีน ใช้ขีดเส้นใต้สีทีมแทนกรอบหนาๆ */
+.lap-flow-style .driver-tag {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  color: #e2e8f0;
+  background: transparent;
+  padding: 0 4px 4px 4px;
+  border: none;
+  border-bottom: 3px solid var(--team-color);
+  font-size: 0.95rem;
+  letter-spacing: 0.5px;
+  box-shadow: none;
+}
+
+/* ตัวเลขเวลาแบบ Solid คมชัด ไม่ฟุ้งเบลอ */
+.lap-flow-style .sector-time {
   font-family: 'Share Tech Mono', monospace;
   font-size: 1.25rem;
   font-weight: 700;
-  margin-top: 10px;
-  color: #666;
+  color: #475569;
+  background: #11131a; /* บังเส้นแนวนอนด้านหลังให้ดูเนียนตา */
+  padding: 0 6px;
+  border-radius: 4px;
 }
 
-.sector-time.text-purple {
-  color: #f0b3ff;
-  text-shadow: 0 0 12px rgba(223, 128, 255, 0.8), 0 0 25px rgba(223, 128, 255, 0.4);
+.lap-flow-style .sector-time.text-purple {
+  color: #b700ff; /* สีม่วงทึบ ตัดแสงนีออนทิ้ง */
+  text-shadow: none;
 }
 
-.speed-trap-box {
-  background: linear-gradient(90deg, rgba(225, 6, 0, 0.15) 0%, rgba(0, 0, 0, 0.6) 100%);
-  border: 1px solid rgba(225, 6, 0, 0.2);
-  border-left: 4px solid #e10600;
-  border-radius: 10px;
-  padding: 16px 20px;
-  box-shadow: inset 5px 0 20px -5px rgba(225, 6, 0, 0.2);
+/* ดีไซน์กล่อง Speed Trap ใหม่ให้ดูกลืนกับพื้นหลัง */
+.f1-telemetry-hud .speed-trap-box {
+  background: transparent;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: none;
+  border-left: none;
+  border-right: none;
+  box-shadow: none;
 }
 
-.speed-title {
+.f1-telemetry-hud .speed-title {
   font-family: 'Rajdhani', sans-serif;
-  font-size: 0.95rem;
-  color: #fff;
+  font-size: 0.85rem;
+  color: #94a3b8;
   font-weight: 700;
   letter-spacing: 1px;
 }
 
-.speed-val {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: #fff;
-  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+.f1-telemetry-hud .speed-data .driver-tag {
+  border-bottom: none;
+  border-left: 3px solid var(--team-color);
+  padding: 0 0 0 8px;
+  background: transparent;
+  box-shadow: none;
+  font-size: 1rem;
 }
 
-.speed-val .unit {
-  font-size: 0.8rem;
-  color: #94a3b8;
+.f1-telemetry-hud .speed-val {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #e2e8f0;
+  text-shadow: none;
+}
+
+.f1-telemetry-hud .speed-val .unit {
+  font-size: 0.75rem;
+  color: #64748b;
   font-family: 'Rajdhani', sans-serif;
-  font-weight: 600;
-  margin-left: 4px;
 }
