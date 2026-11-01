@@ -3450,18 +3450,19 @@ body {
   gap: 12px; 
 }
 
-/* ปรับป้ายนักแข่งให้คลีน ใช้ขีดเส้นใต้สีทีมแทนกรอบหนาๆ */
+/* ปรับป้ายนักแข่งเป็นกล่องมน พื้นดำทึบ มีแถบสีทีมด้านซ้าย */
 .lap-flow-style .driver-tag {
   font-family: 'Rajdhani', sans-serif;
-  font-weight: 700;
-  color: #e2e8f0;
-  background: transparent;
-  padding: 0 4px 4px 4px;
+  font-weight: 800;
+  color: #ffffff;
+  background: #181a24; /* พื้นหลังสีเทาดำ */
+  padding: 4px 12px;
   border: none;
-  border-bottom: 3px solid var(--team-color);
-  font-size: 0.95rem;
+  border-left: 5px solid var(--team-color); /* แถบสีทีมด้านซ้าย */
+  border-radius: 6px; /* มุมโค้งมน */
+  font-size: 1rem;
   letter-spacing: 0.5px;
-  box-shadow: none;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4); /* เพิ่มเงาให้มีมิติ */
 }
 
 /* ตัวเลขเวลาแบบ Solid คมชัด ไม่ฟุ้งเบลอ */
