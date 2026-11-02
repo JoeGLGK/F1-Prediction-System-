@@ -3414,7 +3414,7 @@ body {
 .lap-flow-style::before {
   content: '';
   position: absolute;
-  top: 62%;
+  top: 66%; /* เปลี่ยนจาก 62% เป็น 66% เพื่อขยับเส้นลงมาให้อยู่ระหว่างกลางพอดี */
   left: 8%;
   right: 8%;
   height: 1px;
@@ -3450,19 +3450,20 @@ body {
   gap: 12px; 
 }
 
-/* ปรับป้ายนักแข่งเป็นกล่องมน พื้นดำทึบ มีแถบสีทีมด้านซ้าย */
+/* ปรับป้ายนักแข่งเป็นกล่องมน พื้นดำทึบ มีแถบสีทีมด้านซ้าย (ขนาดย่อส่วนลง) */
 .lap-flow-style .driver-tag {
   font-family: 'Rajdhani', sans-serif;
   font-weight: 800;
   color: #ffffff;
-  background: #181a24; /* พื้นหลังสีเทาดำ */
-  padding: 4px 12px;
+  background: #181a24;
+  padding: 2px 8px; /* ลดระยะขอบด้านในให้กล่องเล็กลง */
   border: none;
-  border-left: 5px solid var(--team-color); /* แถบสีทีมด้านซ้าย */
-  border-radius: 6px; /* มุมโค้งมน */
-  font-size: 1rem;
+  border-left: 3px solid var(--team-color); /* ลดความหนาเส้นสีทีม */
+  border-radius: 4px;
+  font-size: 0.85rem; /* ลดขนาดตัวอักษรลง */
   letter-spacing: 0.5px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4); /* เพิ่มเงาให้มีมิติ */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+  margin-bottom: 2px; /* ดันกล่องขึ้นไม่ให้ชิดเส้นเกินไป */
 }
 
 /* ตัวเลขเวลาแบบ Solid คมชัด ไม่ฟุ้งเบลอ */
