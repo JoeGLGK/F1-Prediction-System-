@@ -20,6 +20,30 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   
   <link rel="stylesheet" href="style.css">
+  <!-- OneSignal Web Push SDK -->
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+  <script>
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(async function(OneSignal) {
+      await OneSignal.init({
+        appId: "YOUR_APP_ID_ตรงนี้",
+        notifyButton: {
+          enable: true, // เปิดปุ่มกระดิ่งมุมจอให้คนกดรับแจ้งเตือน
+          displayPredicate: () => OneSignal.isPushNotificationsEnabled().then(is => !is),
+          colors: {
+            'circle.background': '#e10600',
+            'circle.foreground': 'white',
+          }
+        }
+      });
+      
+      // เมื่อผู้ใช้ล็อกอิน ให้ผูกชื่อกับ OneSignal ทันที
+      const playerName = localStorage.getItem('f1_player_name');
+      if (playerName) {
+        OneSignal.login(playerName);
+      }
+    });
+  </script>
 </head>
 <body class="pt-0 pb-5">
   <div id="f1ToastContainer"></div>
