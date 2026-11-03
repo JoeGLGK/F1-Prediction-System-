@@ -614,14 +614,16 @@
     <div class="modal-dialog modal-dialog-centered modal-fullscreen">
       <!-- ⚠️ ย้าย id="heroBgColor" มาไว้ที่กล่องนอกสุดตรงนี้ -->
       <div class="modal-content border-0 hero-modal-content" id="heroBgColor">
+        
         <!-- Header (โลโก้ F1 & ปุ่มปิด) -->
         <div class="modal-header border-0 position-absolute top-0 w-100 z-3 px-4 pt-4">
           <img src="https://upload.wikimedia.org/wikipedia/commons/3/33/F1.svg" alt="F1" style="height: 20px;">
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
 
-        <!-- Main Content -->
-        <div class="modal-body p-0 position-relative d-flex flex-column justify-content-end overflow-hidden">
+        <!-- Main Content (เปลี่ยน overflow-hidden เป็น overflow-auto เพื่อให้เลื่อนดูกราฟได้) -->
+        <div class="modal-body p-0 position-relative d-flex flex-column justify-content-end overflow-auto">
+          
           <!-- ข้อมูลนักแข่ง (ชื่อ & ทีม) วางชิดซ้ายด้านบน -->
           <div class="position-absolute top-0 start-0 w-100 px-4 z-2" style="margin-top: 80px;">
             <div class="d-flex align-items-center gap-2 mb-1">
@@ -639,7 +641,7 @@
           </div>
 
           <!-- แผงสถิติด้านล่าง (Editorial Stack - ไร้กรอบ ชิดซ้าย) -->
-          <div class="hero-bottom-stats z-3 px-4 pb-5 position-absolute bottom-0 start-0 w-100">
+          <div class="hero-bottom-stats z-3 px-4 pb-4 position-relative w-100">
             <div class="d-flex flex-column gap-3">
               
               <!-- บรรทัดบน: POINTS (ตัวเลขสีทอง) -->
@@ -658,6 +660,26 @@
               
             </div>
           </div>
+
+          <!-- 🎯 วางโค้ดกราฟเรดาร์และปุ่มต่อท้ายตรงนี้ (อยู่ด้านล่างสถิติ) -->
+          
+          <!-- 1. พื้นที่วาดกราฟ Radar -->
+          <div class="driver-radar-container mx-4 mb-3 z-3">
+            <h6 class="text-center text-white mb-2" style="font-family: 'Rajdhani', sans-serif; letter-spacing: 1px; font-size: 0.85rem;">
+              <i class="fa-solid fa-satellite-dish text-info me-2"></i>FORM ANALYSIS
+            </h6>
+            <div class="position-relative mx-auto" style="height: 220px; width: 100%;">
+              <canvas id="driverRadarChart"></canvas>
+            </div>
+          </div>
+
+          <!-- 2. ปุ่มกดเลือกนักแข่ง (จะแสดงเฉพาะตอนกดมาจากหน้าทายผล) -->
+          <div id="heroPredictAction" class="px-4 pb-5 z-3" style="display: none;">
+            <button id="btnConfirmHeroPick" class="btn btn-warning fw-bold w-100 py-3 shadow" style="font-family: 'Rajdhani', sans-serif; font-size: 1.1rem; letter-spacing: 1px; border-radius: 8px;">
+              <i class="fa-solid fa-check-circle me-2"></i>SELECT FOR <span id="lblHeroSlot"></span>
+            </button>
+          </div>
+
         </div>
       </div>
     </div>
