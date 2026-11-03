@@ -537,16 +537,9 @@
          ========================================== -->
     <div id="tab-community" class="tab-pane-custom" style="display: none;">
       <div class="f1-card p-3">
-        <h2 class="section-header-f1"><i class="fa-solid fa-users-viewfinder me-2"></i>RACE GRID & CONSENSUS</h2>
         
-        <div class="mb-3">
-          <label class="form-label">เลือกสนามเพื่อดูโพยเพื่อน</label>
-          <select id="selCommRace" class="form-select" onchange="loadCommunityPredictions()">
-            <option value="" disabled selected>-- เลือกสนาม --</option>
-          </select>
-        </div>
-        <!-- 📰 LATEST PADDOCK NEWS (Cinematic Full-Card Design) -->
-        <div class="mb-4 mt-2">
+        <!-- 📰 LATEST PADDOCK NEWS (ย้ายขึ้นมาไว้บนสุด) -->
+        <div class="mb-4">
           <h6 class="section-header-f1" style="font-size: 0.95rem; border-left-color: #0dcaf0;">
             <i class="fa-regular fa-newspaper me-2"></i>LATEST PADDOCK NEWS
           </h6>
@@ -579,6 +572,19 @@
               </div>
             </a>
           </div>
+        </div>
+
+        <!-- เส้นคั่นแบ่งสัดส่วนเนื้อหาให้ดูเป็นระเบียบ -->
+        <hr style="border-color: rgba(255,255,255,0.1); margin-bottom: 20px;">
+
+        <!-- 🏎️ RACE GRID & CONSENSUS (ย้ายลงมาไว้ด้านล่าง) -->
+        <h2 class="section-header-f1"><i class="fa-solid fa-users-viewfinder me-2"></i>RACE GRID & CONSENSUS</h2>
+        
+        <div class="mb-3">
+          <label class="form-label">เลือกสนามเพื่อดูโพยเพื่อน</label>
+          <select id="selCommRace" class="form-select" onchange="loadCommunityPredictions()">
+            <option value="" disabled selected>-- เลือกสนาม --</option>
+          </select>
         </div>
 
         <!-- 🎯 กล่องกราฟ CONSENSUS TELEMETRY (ซ่อนไว้เป็นค่าเริ่มต้น) -->
@@ -619,6 +625,7 @@
         <div id="commContent">
           <div class="text-secondary text-center small py-4">แตะเลือกสนามเพื่อตรวจสอบคำทายและสถิติของกลุ่ม</div>
         </div>
+
       </div>
     </div>
 
