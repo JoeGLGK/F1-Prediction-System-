@@ -1858,60 +1858,64 @@ function renderConsensusChart(predictionsData, isParcFermeClosed) {
   }
 }
 // ==========================================
-// โค้ดดึงโพยเพื่อน (ดีไซน์ตั๋ว Paddock Pass Ticket)
-// นำมาวางทับฟังก์ชันเดิมที่ด้านล่างสุดของไฟล์ app-ui.js
+// 1. ฟังก์ชันตัวช่วย: ย่อชื่อนักแข่ง (ป้องกันการถูกลบหาย)
+// ==========================================
+function getShortDriverName(fullName) {
+  if (!fullName || fullName === '-') return '-';
+  const parts = fullName.trim().split(' ');
+  return parts.length > 1 ? parts[parts.length - 1] : fullName;
+}
+
+// ==========================================
+// 2. โค้ดดึงโพยเพื่อน (ดีไซน์ตั๋ว Paddock Pass Ticket)
 // ==========================================
 function loadCommunityPredictions() {
   const raceId = document.getElementById('selCommRace').value; 
   const box = document.getElementById('commContent'); 
   box.innerHTML = '<div class="text-center text-secondary py-4"><i class="fa-solid fa-spinner fa-spin me-2"></i>กำลังดึงตั๋วโพยเพื่อน...</div>';
 
-  // เช็กสถานะสนามว่าคำนวณคะแนนแล้วหรือยัง (เพื่อกำหนดป้ายที่หางตั๋ว)
   const currentRace = globalRaces.find(function(r) { return r.id === raceId; });
   const isCalculated = currentRace && currentRace.status === 'CALCULATED';
 
   callGAS("getCommunityPredictions", { raceId: raceId }).then(function(res) {
     const predictionsData = res.data || res.predictions || []; 
     
-    // เรียกใช้ฟังก์ชันวาดกราฟโดนัท
+    // วาดกราฟโดนัทมหาชน
     if (typeof renderConsensusChart === "function") {
       renderConsensusChart(predictionsData, res.locked);
     }
 
-    // ถ้ายังไม่ถึงเวลาปิดรับทายผล (โชว์การ์ดล็อก)
+    // ถ้ายังไม่ถึงเวลาปิดรับทายผล (ล็อกตั๋วไว้)
     if (!res.locked) { 
       box.innerHTML = 
         '<div class="locked-ticket-card">' +
           '<div class="rubber-stamp-locked"><i class="fa-solid fa-lock me-2"></i>LOCKED</div>' +
           '<div class="text-white fw-bold mb-1" style="font-family:\'Rajdhani\',sans-serif; font-size:1.05rem; letter-spacing:0.5px;">PADDOCK PARC FERMÉ</div>' +
-          '<div class="small text-secondary">' + res.msg + '</div>' +
+          '<div class="small text-secondary">' + (res.msg || 'ข้อมูลถูกซ่อนไว้จนกว่าจะหมดเวลา') + '</div>' +
         '</div>'; 
       return; 
     } 
 
-    // ถ้าเปิดเผยโพยได้แล้ว
     box.innerHTML = ''; 
     if (predictionsData.length === 0) {
       box.innerHTML = '<div class="text-center text-secondary small py-4">ยังไม่มีผู้ทายผลในสนามนี้</div>';
       return;
     }
 
-    // วาดการ์ดโพยของเพื่อนๆ (ดีไซน์ตั๋ว Paddock Pass แบบพรีเมียม)
+    // วาดการ์ดตั๋ว Paddock Pass
     predictionsData.forEach(function(p, index) {
-      // เตรียมข้อมูลนักแข่ง
       const p1 = p.p1 || p.pos1 || '-';
       const p2 = p.p2 || p.pos2 || '-';
       const p3 = p.p3 || p.pos3 || '-';
       const p4 = p.p4 || p.pos4 || '-';
       const fl = p.fl || p.posFL || '';
 
-      // ดึงสีทีมของแต่ละตำแหน่ง
-      const c1 = (DRIVER_INFO[p1] || {}).color || '#64748b';
-      const c2 = (DRIVER_INFO[p2] || {}).color || '#64748b';
-      const c3 = (DRIVER_INFO[p3] || {}).color || '#64748b';
-      const c4 = (DRIVER_INFO[p4] || {}).color || '#64748b';
+      // ดึงสีทีม (แบบปลอดภัย เผื่อไม่มีชื่อในฐานข้อมูล)
+      const c1 = (typeof DRIVER_INFO !== 'undefined' && DRIVER_INFO[p1]) ? DRIVER_INFO[p1].color : '#64748b';
+      const c2 = (typeof DRIVER_INFO !== 'undefined' && DRIVER_INFO[p2]) ? DRIVER_INFO[p2].color : '#64748b';
+      const c3 = (typeof DRIVER_INFO !== 'undefined' && DRIVER_INFO[p3]) ? DRIVER_INFO[p3].color : '#64748b';
+      const c4 = (typeof DRIVER_INFO !== 'undefined' && DRIVER_INFO[p4]) ? DRIVER_INFO[p4].color : '#64748b';
 
-      // จัดการส่วนหางตั๋ว (แสดงคะแนน หรือ แสดงป้าย Locked In)
       let stubContent = '';
       if (isCalculated || Number(p.score) > 0) {
         stubContent = 
@@ -1926,7 +1930,6 @@ function loadCommunityPredictions() {
       const passNum = String(index + 1).padStart(2, '0');
       const playerName = p.playerName || p.player || 'Unknown';
 
-      // โครงสร้าง HTML แบบตั๋ว
       const cardHtml = `
         <div class="pred-ticket">
            <div class="ticket-main">
@@ -1951,6 +1954,8 @@ function loadCommunityPredictions() {
     });
     
   }).catch(function(err) {
-      box.innerHTML = '<div class="text-center text-danger small py-4">เกิดข้อผิดพลาดในการโหลดข้อมูล</div>';
+      // ผมเพิ่ม console.error ให้แสดงสาเหตุที่แท้จริงไว้ด้วย เผื่อมี Error อื่นครับ
+      console.error("Community Rendering Error:", err);
+      box.innerHTML = '<div class="text-center text-danger small py-4">เกิดข้อผิดพลาดในการโหลดข้อมูล<br><span style="font-size:0.7rem; color:#888;">(กรุณารีเฟรชหรือดู Console)</span></div>';
   });
 }
