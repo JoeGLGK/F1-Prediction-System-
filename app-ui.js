@@ -972,35 +972,6 @@ function getShortDriverName(fullName) {
   return parts.length > 1 ? parts[parts.length - 1] : fullName;
 }
 
-function loadCommunityPredictions() {
-  const raceId = document.getElementById('selCommRace').value; 
-  const box = document.getElementById('commContent'); 
-  box.innerHTML = '<div class="text-center text-secondary py-4"><i class="fa-solid fa-spinner fa-spin me-2"></i>กำลังดึงตั๋วโพยเพื่อน...</div>';
-
-  const currentRace = globalRaces.find(function(r) { return r.id === raceId; });
-  const isCalculated = currentRace && currentRace.status === 'CALCULATED';
-
-  callGAS("getCommunityPredictions", { raceId: raceId }).then(function(res) {
-    
-    // 🎯 1. เรียกใช้งานกราฟโดนัท (แทรกตรงนี้เพื่อให้วาดกราฟและอัปเดตแผ่นล็อก)
-    // ใช้ res.data หรือชื่อตัวแปรที่คุณใช้เก็บอาเรย์โพยจาก GAS
-    const predictionsData = res.data || []; 
-    renderConsensusChart(predictionsData, res.locked);
-
-    // 2. เงื่อนไขเดิมของคุณ: ถ้ายังไม่ถึงเวลา Parc Ferme (ซ่อนโพย)
-    if (!res.locked) { 
-      box.innerHTML = 
-        '<div class="locked-ticket-card">' +
-          '<div class="rubber-stamp-locked"><i class="fa-solid fa-lock me-2"></i>LOCKED</div>' +
-          '<div class="text-white fw-bold mb-1" style="font-family:\'Rajdhani\',sans-serif; font-size:1.05rem; letter-spacing:0.5px;">PADDOCK PARC FERMÉ</div>' +
-          '<div class="small text-secondary">' + res.msg + '</div>' +
-        '</div>'; 
-      return; 
-    } 
-
-    // 3. ถ้าเลยเวลา Parc Ferme แล้ว (เปิดเผยโพยได้)
-    box.innerHTML = ''; // เคลียร์กล่องเพื่อเตรียมใส่การ์ดโพย
-    
     if (predictionsData.length === 0) {
       box.innerHTML = '<div class="text-center text-secondary small py-4">ยังไม่มีผู้ทายผลในสนามนี้</div>';
       return;
@@ -2004,4 +1975,62 @@ function renderConsensusChart(predictionsData, isParcFermeClosed) {
     document.getElementById('consensusFlPercent').innerText = `${flPercent}% (${topFlCount}/${totalVotes})`;
     document.getElementById('consensusFlBar').style.width = `${flPercent}%`;
   }
+}
+// ==========================================
+// 2. โค้ดดึงโพยเพื่อน (นำมาวางต่อท้ายสุดของไฟล์)
+// ==========================================
+function loadCommunityPredictions() {
+  const raceId = document.getElementById('selCommRace').value; 
+  const box = document.getElementById('commContent'); 
+  box.innerHTML = '<div class="text-center text-secondary py-4"><i class="fa-solid fa-spinner fa-spin me-2"></i>กำลังดึงตั๋วโพยเพื่อน...</div>';
+
+  callGAS("getCommunityPredictions", { raceId: raceId }).then(function(res) {
+    const predictionsData = res.data || res.predictions || []; 
+    
+    // เรียกใช้ฟังก์ชันวาดกราฟโดนัท
+    if (typeof renderConsensusChart === "function") {
+      renderConsensusChart(predictionsData, res.locked);
+    }
+
+    // ถ้ายังไม่ถึงเวลาปิดรับทายผล (โชว์การ์ดล็อก)
+    if (!res.locked) { 
+      box.innerHTML = 
+        '<div class="locked-ticket-card">' +
+          '<div class="rubber-stamp-locked"><i class="fa-solid fa-lock me-2"></i>LOCKED</div>' +
+          '<div class="text-white fw-bold mb-1" style="font-family:\'Rajdhani\',sans-serif; font-size:1.05rem; letter-spacing:0.5px;">PADDOCK PARC FERMÉ</div>' +
+          '<div class="small text-secondary">' + res.msg + '</div>' +
+        '</div>'; 
+      return; 
+    } 
+
+    // ถ้าเปิดเผยโพยได้แล้ว
+    box.innerHTML = ''; 
+    if (predictionsData.length === 0) {
+      box.innerHTML = '<div class="text-center text-secondary small py-4">ยังไม่มีผู้ทายผลในสนามนี้</div>';
+      return;
+    }
+
+    // วาดการ์ดโพยของเพื่อนๆ
+    predictionsData.forEach(function(p, index) {
+      const cardHtml = `
+        <div class="f1-card p-3 mb-2" style="background: #111217; border: 1px solid rgba(255,255,255,0.05);">
+          <div class="d-flex justify-content-between mb-2">
+            <span class="fw-bold text-white"><i class="fa-solid fa-user text-secondary me-2"></i>${p.playerName || p.player || 'Unknown'}</span>
+            <span class="badge bg-dark text-secondary">PASS #${index + 1}</span>
+          </div>
+          <div class="row g-1 small text-secondary">
+             <div class="col-6"><span class="text-warning">P1:</span> <span class="text-white">${p.p1 || p.pos1 || '-'}</span></div>
+             <div class="col-6"><span>P2:</span> <span class="text-white">${p.p2 || p.pos2 || '-'}</span></div>
+             <div class="col-6"><span>P3:</span> <span class="text-white">${p.p3 || p.pos3 || '-'}</span></div>
+             <div class="col-6"><span>P4:</span> <span class="text-white">${p.p4 || p.pos4 || '-'}</span></div>
+             <div class="col-12 mt-1"><span class="text-info"><i class="fa-solid fa-bolt"></i> FL:</span> <span class="text-white">${p.fl || p.posFL || '-'}</span></div>
+           </div>
+        </div>
+      `;
+      box.insertAdjacentHTML('beforeend', cardHtml);
+    });
+    
+  }).catch(function(err) {
+      box.innerHTML = '<div class="text-center text-danger small py-4">เกิดข้อผิดพลาดในการโหลดข้อมูล</div>';
+  });
 }
