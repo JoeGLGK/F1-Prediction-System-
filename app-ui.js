@@ -1813,6 +1813,7 @@ function renderConsensusChart(predictionsData, isParcFermeClosed) {
                     text: `${label} (${percentage}% - ${value}/${total})`,
                     fillStyle: color,
                     strokeStyle: color,
+                    fontColor: '#ffffff',
                     lineWidth: 0,
                     hidden: isNaN(dataset.data[i]) || chart.getDatasetMeta(0).data[i].hidden,
                     index: i
