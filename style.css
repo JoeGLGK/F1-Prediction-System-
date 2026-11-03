@@ -3553,3 +3553,11 @@ body {
   font-size: 0.8rem;
   margin-top: 5px;
 }
+/* 🎯 ถอดกรอบและพื้นหลังของกล่อง Consensus Telemetry ออกให้โปร่งใส */
+.consensus-card {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin-bottom: 20px;
+}
