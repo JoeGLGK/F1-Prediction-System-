@@ -3562,13 +3562,13 @@ body {
   margin-bottom: 20px;
 }
 /* =========================================================
-   LATEST PADDOCK NEWS (CINEMATIC FULL-CARD DESIGN)
+   LATEST PADDOCK NEWS (CINEMATIC FULL-CARD DESIGN - LARGE)
    ========================================================= */
 .news-scroll-container {
   display: flex;
-  gap: 14px;
+  gap: 16px; /* ขยายช่องว่างระหว่างการ์ดเล็กน้อย */
   overflow-x: auto;
-  padding-bottom: 15px; /* เผื่อพื้นที่ให้เงาการ์ดด้านล่าง */
+  padding-bottom: 15px; 
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
@@ -3581,15 +3581,16 @@ body {
   position: relative;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end; /* 🎯 ดันข้อความลงไปชิดขอบล่างสุด */
-  flex: 0 0 260px; /* ความกว้างของการ์ด */
-  height: 190px; /* ความสูงของการ์ด */
+  justify-content: flex-end; 
+  flex: 0 0 88%; /* 🎯 ปรับความกว้างเป็น 88% ของหน้าจอ (เกือบเต็มจอ) */
+  max-width: 380px; /* จำกัดขนาดสูงสุดไม่ให้ใหญ่เกินไปบนจอคอมพิวเตอร์ */
+  height: 340px; /* 🎯 เพิ่มความสูงของการ์ดให้ดูใหญ่อลังการเหมือนแอปหลัก */
   background: #000;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
   overflow: hidden;
   text-decoration: none;
-  scroll-snap-align: start;
+  scroll-snap-align: start; /* ล็อกการ์ดให้ชิดซ้ายพอดีเวลาปัด */
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
   transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
@@ -3600,7 +3601,7 @@ body {
   border-color: rgba(255, 255, 255, 0.2);
 }
 
-/* 🎯 รูปภาพพื้นหลังเต็มการ์ด */
+/* รูปภาพพื้นหลังเต็มการ์ด */
 .news-bg-img {
   position: absolute;
   top: 0;
@@ -3614,38 +3615,37 @@ body {
 }
 .news-card-cinematic:hover .news-bg-img,
 .news-card-cinematic:active .news-bg-img {
-  transform: scale(1.05); /* เอฟเฟกต์ซูมออกแบบเนียนๆ ตอนกด */
+  transform: scale(1.05); 
 }
 
-/* 🎯 เลเยอร์ไล่สีดำจางๆ (Gradient Fade) จากข้างล่างขึ้นข้างบน */
+/* เลเยอร์ไล่สีดำจางๆ (Gradient Fade) */
 .news-gradient-overlay {
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 80%; /* ดึงเงาดำขึ้นมาให้สูงพอที่ตัวหนังสือจะอ่านง่าย */
+  height: 70%; /* ไล่เฉดสีดำครอบคลุมพื้นที่ด้านล่าง */
   background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.6) 45%, transparent 100%);
   z-index: 2;
   pointer-events: none;
 }
 
-/* กล่องครอบตัวอักษรพาดหัวข่าว (ดันชิดขอบล่าง) */
+/* กล่องครอบตัวอักษรพาดหัวข่าว */
 .news-content-overlay {
   position: relative;
   z-index: 3;
-  padding: 16px 16px 14px 16px; /* จัดระยะขอบให้สวยงาม */
+  padding: 20px 18px 18px 18px; /* ขยายระยะขอบข้อความให้สมดุลกับจอใหญ่ */
 }
 
-/* 🎯 ตัวหนังสือพาดหัวข่าว */
+/* ตัวหนังสือพาดหัวข่าว */
 .news-headline-overlay {
-  font-family: 'Rajdhani', 'Kanit', sans-serif; /* ใช้ฟอนต์ให้ดูมีความสปอร์ต */
-  font-size: 1.05rem;
+  font-family: 'Rajdhani', 'Kanit', sans-serif; 
+  font-size: 1.25rem; /* 🎯 ขยายขนาดตัวอักษรให้ใหญ่ขึ้นสัมพันธ์กับการ์ด */
   font-weight: 600;
   color: #ffffff;
-  line-height: 1.25;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9); /* เพิ่มเงาตัวหนังสือให้ลอยเด่น */
+  line-height: 1.3;
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.9); 
   
-  /* บังคับตัดคำ 2 บรรทัดเป๊ะๆ ถ้าเกินให้ขึ้น ... */
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
