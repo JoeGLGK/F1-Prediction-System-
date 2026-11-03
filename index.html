@@ -621,7 +621,7 @@
       </div>
 
       <!-- Main Content -->
-      <div class="modal-body p-0 position-relative d-flex flex-column justify-content-end overflow-auto">
+      <div class="modal-body p-0 position-relative d-flex flex-column justify-content-end overflow-auto" style="z-index: 1;">
         
         <!-- ข้อมูลนักแข่ง (ชื่อ & ทีม) วางชิดซ้ายด้านบน -->
         <div class="position-absolute top-0 start-0 w-100 px-4 z-2" style="margin-top: 80px;">
@@ -633,15 +633,15 @@
           <h1 class="hero-driver-title text-white m-0 fw-bold" id="heroDriverLastName">LAST</h1>
         </div>
 
-        <!-- รูปนักแข่ง & เอฟเฟกต์กระจกเบลอ -->
-        <div class="hero-driver-photo-container">
+        <!-- รูปนักแข่ง & เอฟเฟกต์กระจกเบลอ (ตั้ง z-index ต่ำลงเพื่อไม่ให้บังปุ่ม) -->
+        <div class="hero-driver-photo-container" style="z-index: 1;">
           <img id="heroDriverImg" src="" class="hero-driver-cutout" alt="Driver">
           <div class="hero-photo-blur"></div>
         </div>
 
-        <!-- 🎯 1. แผงสถิติดั้งเดิม (แสดงเฉพาะตอนกดมาจากหน้า Standings) -->
-        <div id="heroStandardStats" class="hero-bottom-stats z-3 px-4 pb-5 position-absolute bottom-0 start-0 w-100">
-          <div class="d-flex flex-column gap-3">
+        <!-- 🎯 1. แผงสถิติแต้มและอันดับ (แสดงผลทั้งในหน้า Standings และหน้าทายผล) -->
+        <div id="heroStandardStats" class="hero-bottom-stats z-3 px-4 pb-3 position-relative w-100">
+          <div class="d-flex flex-column gap-2">
             <div class="editorial-stat-block">
               <div class="stat-label-mini">POINTS</div>
               <div class="stat-value-massive text-gold">
@@ -655,18 +655,18 @@
           </div>
         </div>
 
-        <!-- 🎯 2. พื้นที่กราฟ Radar และปุ่มเลือก (แสดงเฉพาะตอนกดมาจากหน้าทายผล) -->
-        <div id="heroPredictSection" style="display: none;">
-          <div class="driver-radar-container mx-4 mb-3 z-3">
+        <!-- 🎯 2. พื้นที่กราฟ Radar และปุ่มเลือก (แสดงเฉพาะตอนกดมาจากหน้าทายผล อยู่ใน z-index สูงสุด) -->
+        <div id="heroPredictSection" class="z-3 px-4 pb-5 pt-2" style="display: none; position: relative;">
+          <div class="driver-radar-container mb-3">
             <h6 class="text-center text-white mb-2" style="font-family: 'Rajdhani', sans-serif; letter-spacing: 1px; font-size: 0.85rem;">
               <i class="fa-solid fa-satellite-dish text-info me-2"></i>FORM ANALYSIS
             </h6>
-            <div class="position-relative mx-auto" style="height: 220px; width: 100%;">
+            <div class="position-relative mx-auto" style="height: 200px; width: 100%;">
               <canvas id="driverRadarChart"></canvas>
             </div>
           </div>
 
-          <div class="px-4 pb-5 z-3">
+          <div>
             <button id="btnConfirmHeroPick" class="btn btn-warning fw-bold w-100 py-3 shadow" style="font-family: 'Rajdhani', sans-serif; font-size: 1.1rem; letter-spacing: 1px; border-radius: 8px;">
               <i class="fa-solid fa-check-circle me-2"></i>SELECT FOR <span id="lblHeroSlot"></span>
             </button>
