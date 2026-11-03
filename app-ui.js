@@ -1897,7 +1897,13 @@ function getShortDriverName(fullName) {
 // ==========================================
 function loadCommunityPredictions() {
   const raceId = document.getElementById('selCommRace').value; 
-  const box = document.getElementById('commContent'); 
+  const box = document.getElementById('commContent');
+  
+  // 🎯 สั่งแสดงกล่องกราฟทันทีเมื่อมีการเลือกสนามแล้ว
+  const consensusBox = document.getElementById('consensusContainer');
+  if (consensusBox) {
+    consensusBox.style.display = 'block';
+  }
   box.innerHTML = '<div class="text-center text-secondary py-4"><i class="fa-solid fa-spinner fa-spin me-2"></i>กำลังดึงตั๋วโพยเพื่อน...</div>';
 
   const currentRace = globalRaces.find(function(r) { return r.id === raceId; });
