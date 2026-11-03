@@ -56,6 +56,7 @@ window.onload = function() {
   buildDriverGrid();
   loadData();
   loadOpenF1Meetings();
+  loadLatestNews();
 };
 
 function buildDriverGrid() {
@@ -1946,4 +1947,65 @@ function loadCommunityPredictions() {
       console.error("Community Error:", err);
       box.innerHTML = '<div class="text-center text-danger small py-4">เกิดข้อผิดพลาดในการโหลดข้อมูล<br><span style="font-size:0.7rem; color:#888;">(กรุณารีเฟรช)</span></div>';
   });
+}
+// =========================================================
+// 📰 LATEST PADDOCK NEWS (ระบบดึงข่าวอัตโนมัติจาก RSS)
+// =========================================================
+async function loadLatestNews() {
+  const container = document.getElementById('newsScrollContainer');
+  if (!container) return;
+
+  try {
+    // ใช้ rss2json ดึงข่าวจาก Motorsport.com F1 Feed
+    const rssUrl = 'https://www.motorsport.com/rss/f1/news/';
+    const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}&api_key=`;
+    
+    const response = await fetch(apiUrl);
+    const data = await response.json();
+
+    if (data.status !== 'ok' || !data.items || data.items.length === 0) {
+      container.innerHTML = '<div class="text-secondary small py-5 text-center w-100">ไม่สามารถเชื่อมต่อศูนย์ข่าวได้</div>';
+      return;
+    }
+
+    // เอาเฉพาะ 6 ข่าวล่าสุด
+    const latestNews = data.items.slice(0, 6);
+    let newsHtml = '';
+    
+    latestNews.forEach(item => {
+      // 1. ดึง URL รูปภาพปกข่าว
+      let imgUrl = 'https://lh3.googleusercontent.com/d/1UPM7PH4G6QD3W-9YFb_UTcLFsLWZ2fAj'; // รูปสำรองกรณีไม่มีรูป
+      if (item.enclosure && item.enclosure.link) {
+        imgUrl = item.enclosure.link;
+      } else if (item.thumbnail) {
+        imgUrl = item.thumbnail;
+      }
+
+      // 2. คำนวณเวลาว่าลงข่าวผ่านไปกี่ชั่วโมง/วันแล้ว
+      const pubDate = new Date(item.pubDate.replace(' ', 'T'));
+      const diffHrs = Math.floor((new Date() - pubDate) / (1000 * 60 * 60));
+      const diffDays = Math.floor(diffHrs / 24);
+      let timeText = diffHrs < 1 ? 'Just now' : (diffHrs < 24 ? `${diffHrs} hrs ago` : `${diffDays} days ago`);
+
+      // 3. สร้าง HTML ของการ์ดข่าว (Cinematic Card)
+      newsHtml += `
+        <a href="${item.link}" class="news-card-cinematic" target="_blank">
+          <img src="${imgUrl}" class="news-bg-img" alt="News Image" onerror="this.src='https://lh3.googleusercontent.com/d/1UPM7PH4G6QD3W-9YFb_UTcLFsLWZ2fAj'">
+          <div class="news-gradient-overlay"></div>
+          <div class="news-content-overlay">
+            <div style="color: #0dcaf0; font-size: 0.75rem; font-family: 'Rajdhani', sans-serif; font-weight: 700; margin-bottom: 6px; letter-spacing: 0.5px; text-shadow: 0 1px 3px rgba(0,0,0,0.8);">
+              ${timeText} • Motorsport.com
+            </div>
+            <div class="news-headline-overlay">${item.title}</div>
+          </div>
+        </a>
+      `;
+    });
+
+    container.innerHTML = newsHtml;
+
+  } catch (error) {
+    console.error("News Fetch Error:", error);
+    container.innerHTML = '<div class="text-danger small py-5 text-center w-100">เกิดข้อผิดพลาดในการโหลดข่าวสาร</div>';
+  }
 }
