@@ -1879,3 +1879,109 @@ function refreshTelemetryDashboard(sessionKey = 'latest') {
     console.warn("ไม่พบฟังก์ชัน loadTelemetryHUD กรุณาตรวจสอบไฟล์ api-service.js");
   }
 }
+// ตัวแปรเก็บกราฟ (ป้องกันการวาดซ้อนกันเมื่อเปลี่ยนสนาม)
+let communityChartInstance = null;
+
+// สีประจำทีมคร่าวๆ สำหรับกราฟโดนัท
+const driverColors = {
+  "Verstappen": "#3671C6", "Perez": "#3671C6", "Hadjar": "#3671C6", // Red Bull
+  "Norris": "#FF8000", "Piastri": "#FF8000", // McLaren
+  "Leclerc": "#E80020", "Hamilton": "#E80020", "Bearman": "#E80020", // Ferrari
+  "Russell": "#27F4D2", "Antonelli": "#27F4D2", // Mercedes
+  "Alonso": "#229971", "Stroll": "#229971", // Aston Martin
+};
+
+// ฟังก์ชันหลักสำหรับประมวลผลสถิติ
+function renderConsensusChart(predictionsData, isParcFermeClosed) {
+  const lockOverlay = document.getElementById('parcFermeLock');
+  const totalBadge = document.getElementById('totalVotersBadge');
+  
+  // อัปเดตจำนวนผู้ทายผลทั้งหมด
+  const totalVotes = predictionsData.length;
+  totalBadge.innerHTML = `${totalVotes} PADDOCK PASSES`;
+
+  // ตรวจสอบระบบล็อก Parc Fermé
+  if (!isParcFermeClosed) {
+    lockOverlay.style.display = 'flex'; // ล็อกกราฟไว้
+    return; 
+  } else {
+    lockOverlay.style.display = 'none'; // ปลดล็อก
+  }
+
+  // หากไม่มีข้อมูลเลย
+  if (totalVotes === 0) return;
+
+  // 1. นับคะแนนโหวตแชมป์ (P1) และ Fastest Lap (FL)
+  let p1Counts = {};
+  let flCounts = {};
+
+  predictionsData.forEach(p => {
+    // สมมติว่าโครงสร้างข้อมูลมี p.p1 และ p.fl (ปรับชื่อ key ตามที่คุณดึงมาจาก Sheets)
+    const p1 = p.p1 || p.pos1; 
+    const fl = p.fl || p.posFL;
+    
+    if (p1) p1Counts[p1] = (p1Counts[p1] || 0) + 1;
+    if (fl) flCounts[fl] = (flCounts[fl] || 0) + 1;
+  });
+
+  // --- ประมวลผลกราฟโดนัท (P1) ---
+  const p1Labels = Object.keys(p1Counts);
+  const p1Data = Object.values(p1Counts);
+  // สุ่มสีกรณีที่ไม่มีในฐานข้อมูลสี
+  const p1Colors = p1Labels.map(name => driverColors[name.split(' ').pop()] || '#888888');
+
+  const ctx = document.getElementById('p1PredictionChart').getContext('2d');
+  
+  // ลบกราฟอันเก่าทิ้งก่อนวาดใหม่
+  if (communityChartInstance) {
+    communityChartInstance.destroy();
+  }
+
+  communityChartInstance = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: p1Labels,
+      datasets: [{
+        data: p1Data,
+        backgroundColor: p1Colors,
+        borderWidth: 0,
+        hoverOffset: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '75%', // ความกลวงตรงกลาง
+      plugins: {
+        legend: {
+          position: 'right', // ย้ายชื่อไปไว้ด้านขวาให้ดูง่ายบนมือถือ
+          labels: { 
+            color: '#ffffff', 
+            font: { family: 'Kanit', size: 11 },
+            boxWidth: 12
+          }
+        }
+      }
+    }
+  });
+
+  // --- ประมวลผลแถบ Fastest Lap ---
+  let topFlDriver = "-";
+  let topFlCount = 0;
+  
+  // หาคนที่ถูกโหวต FL มากที่สุด
+  for (const [driver, count] of Object.entries(flCounts)) {
+    if (count > topFlCount) {
+      topFlCount = count;
+      topFlDriver = driver;
+    }
+  }
+
+  // คำนวณเปอร์เซ็นต์และอัปเดต UI
+  if (topFlCount > 0) {
+    const flPercent = Math.round((topFlCount / totalVotes) * 100);
+    document.getElementById('consensusFlText').innerHTML = `<i class="fa-solid fa-bolt text-info"></i> เต็ง Fastest Lap: ${topFlDriver}`;
+    document.getElementById('consensusFlPercent').innerText = `${flPercent}% (${topFlCount}/${totalVotes})`;
+    document.getElementById('consensusFlBar').style.width = `${flPercent}%`;
+  }
+}
