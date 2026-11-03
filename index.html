@@ -610,60 +610,53 @@
     <div style="height: 40px;"></div>
   </div>
 <!-- F1 Driver Hero Modal (สไตล์ Editorial Stack ไร้กรอบ) -->
-  <div class="modal fade" id="driverHeroModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-fullscreen">
-      <!-- ⚠️ ย้าย id="heroBgColor" มาไว้ที่กล่องนอกสุดตรงนี้ -->
-      <div class="modal-content border-0 hero-modal-content" id="heroBgColor">
+<div class="modal fade" id="driverHeroModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-fullscreen">
+    <div class="modal-content border-0 hero-modal-content" id="heroBgColor">
+      
+      <!-- Header (โลโก้ F1 & ปุ่มปิด) -->
+      <div class="modal-header border-0 position-absolute top-0 w-100 z-3 px-4 pt-4">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/3/33/F1.svg" alt="F1" style="height: 20px;">
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <!-- Main Content -->
+      <div class="modal-body p-0 position-relative d-flex flex-column justify-content-end overflow-auto">
         
-        <!-- Header (โลโก้ F1 & ปุ่มปิด) -->
-        <div class="modal-header border-0 position-absolute top-0 w-100 z-3 px-4 pt-4">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/3/33/F1.svg" alt="F1" style="height: 20px;">
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        <!-- ข้อมูลนักแข่ง (ชื่อ & ทีม) วางชิดซ้ายด้านบน -->
+        <div class="position-absolute top-0 start-0 w-100 px-4 z-2" style="margin-top: 80px;">
+          <div class="d-flex align-items-center gap-2 mb-1">
+            <img id="heroTeamLogo" src="" alt="Team" class="hero-team-icon">
+            <span class="text-white-50 small text-uppercase fw-bold" id="heroTeamName">Team</span>
+          </div>
+          <h1 class="hero-driver-title text-white m-0" id="heroDriverFirstName">FIRST</h1>
+          <h1 class="hero-driver-title text-white m-0 fw-bold" id="heroDriverLastName">LAST</h1>
         </div>
 
-        <!-- Main Content (เปลี่ยน overflow-hidden เป็น overflow-auto เพื่อให้เลื่อนดูกราฟได้) -->
-        <div class="modal-body p-0 position-relative d-flex flex-column justify-content-end overflow-auto">
-          
-          <!-- ข้อมูลนักแข่ง (ชื่อ & ทีม) วางชิดซ้ายด้านบน -->
-          <div class="position-absolute top-0 start-0 w-100 px-4 z-2" style="margin-top: 80px;">
-            <div class="d-flex align-items-center gap-2 mb-1">
-              <img id="heroTeamLogo" src="" alt="Team" class="hero-team-icon">
-              <span class="text-white-50 small text-uppercase fw-bold" id="heroTeamName">Team</span>
+        <!-- รูปนักแข่ง & เอฟเฟกต์กระจกเบลอ -->
+        <div class="hero-driver-photo-container">
+          <img id="heroDriverImg" src="" class="hero-driver-cutout" alt="Driver">
+          <div class="hero-photo-blur"></div>
+        </div>
+
+        <!-- 🎯 1. แผงสถิติดั้งเดิม (แสดงเฉพาะตอนกดมาจากหน้า Standings) -->
+        <div id="heroStandardStats" class="hero-bottom-stats z-3 px-4 pb-5 position-absolute bottom-0 start-0 w-100">
+          <div class="d-flex flex-column gap-3">
+            <div class="editorial-stat-block">
+              <div class="stat-label-mini">POINTS</div>
+              <div class="stat-value-massive text-gold">
+                <span id="heroPoints">0</span><span class="stat-unit">PTS</span>
+              </div>
             </div>
-            <h1 class="hero-driver-title text-white m-0" id="heroDriverFirstName">FIRST</h1>
-            <h1 class="hero-driver-title text-white m-0 fw-bold" id="heroDriverLastName">LAST</h1>
-          </div>
-
-          <!-- รูปนักแข่ง & เอฟเฟกต์กระจกเบลอ -->
-          <div class="hero-driver-photo-container">
-            <img id="heroDriverImg" src="" class="hero-driver-cutout" alt="Driver">
-            <div class="hero-photo-blur"></div>
-          </div>
-
-          <!-- แผงสถิติด้านล่าง (Editorial Stack - ไร้กรอบ ชิดซ้าย) -->
-          <div class="hero-bottom-stats z-3 px-4 pb-4 position-relative w-100">
-            <div class="d-flex flex-column gap-3">
-              
-              <!-- บรรทัดบน: POINTS (ตัวเลขสีทอง) -->
-              <div class="editorial-stat-block">
-                <div class="stat-label-mini">POINTS</div>
-                <div class="stat-value-massive text-gold">
-                  <span id="heroPoints">0</span><span class="stat-unit">PTS</span>
-                </div>
-              </div>
-
-              <!-- บรรทัดล่าง: CHAMPIONSHIP (ตัวเลขไล่สีโปร่งใส Fade-out) -->
-              <div class="editorial-stat-block">
-                <div class="stat-label-mini">CHAMPIONSHIP</div>
-                <div class="stat-value-massive text-gradient-fade" id="heroPos">P1</div>
-              </div>
-              
+            <div class="editorial-stat-block">
+              <div class="stat-label-mini">CHAMPIONSHIP</div>
+              <div class="stat-value-massive text-gradient-fade" id="heroPos">P1</div>
             </div>
           </div>
+        </div>
 
-          <!-- 🎯 วางโค้ดกราฟเรดาร์และปุ่มต่อท้ายตรงนี้ (อยู่ด้านล่างสถิติ) -->
-          
-          <!-- 1. พื้นที่วาดกราฟ Radar -->
+        <!-- 🎯 2. พื้นที่กราฟ Radar และปุ่มเลือก (แสดงเฉพาะตอนกดมาจากหน้าทายผล) -->
+        <div id="heroPredictSection" style="display: none;">
           <div class="driver-radar-container mx-4 mb-3 z-3">
             <h6 class="text-center text-white mb-2" style="font-family: 'Rajdhani', sans-serif; letter-spacing: 1px; font-size: 0.85rem;">
               <i class="fa-solid fa-satellite-dish text-info me-2"></i>FORM ANALYSIS
@@ -673,17 +666,17 @@
             </div>
           </div>
 
-          <!-- 2. ปุ่มกดเลือกนักแข่ง (จะแสดงเฉพาะตอนกดมาจากหน้าทายผล) -->
-          <div id="heroPredictAction" class="px-4 pb-5 z-3" style="display: none;">
+          <div class="px-4 pb-5 z-3">
             <button id="btnConfirmHeroPick" class="btn btn-warning fw-bold w-100 py-3 shadow" style="font-family: 'Rajdhani', sans-serif; font-size: 1.1rem; letter-spacing: 1px; border-radius: 8px;">
               <i class="fa-solid fa-check-circle me-2"></i>SELECT FOR <span id="lblHeroSlot"></span>
             </button>
           </div>
-
         </div>
+
       </div>
     </div>
   </div>
+</div>
   <!-- Modals -->
   <div class="modal fade" id="loginGateModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
