@@ -2097,39 +2097,37 @@ function renderDriverRadar(fullName, teamColor) {
   });
 }
 
-// 🎯 ฟังก์ชันถูกเรียกเมื่อกดนักแข่งจากหน้า "ทายผล"
+// 🎯 ฟังก์ชันถูกเรียกเมื่อกดนักแข่งจากหน้า "ทายผล" (ฉบับแก้ไขบั๊กซ้อนทับและดึงคะแนน)
 function previewDriverBeforeSelect(fullName) {
   triggerHaptic();
   
-  // 1. เช็คและปิดหน้าต่างเลือกนักแข่ง (Grid) ก่อน
-  const gridModalEl = document.getElementById('driverSelectorModal');
-  let delay = 0;
-  if (gridModalEl && gridModalEl.classList.contains('show') && window.driverSelectorModalInstance) {
-    window.driverSelectorModalInstance.hide();
-    delay = 350; 
-  }
-
   const info = DRIVER_INFO[fullName];
-  if(!info) return;
+  if (!info) return;
 
   // ========================================================
-  // 🎯 ดึงข้อมูลคะแนน (Points) และอันดับ (Position) จากหน้า Standings
+  // 🎯 1. ดึงข้อมูลคะแนน (Points) และอันดับ (Position) จากหน้า Standings
   // ========================================================
   let currentPts = "0";
   let currentPos = "-";
   
-  // ค้นหาแถวของนักแข่งคนนี้ในตาราง Standings
-  const standingRows = document.querySelectorAll('.driver-row');
+  // ค้นหาจากคลาส .f1-standings-row ในตาราง #driverStandingsList
+  const standingRows = document.querySelectorAll('#driverStandingsList .f1-standings-row');
   standingRows.forEach(row => {
-    if (row.innerHTML.includes(fullName)) { // ถ้าเจอชื่อนักแข่งในแถวนี้
+    const onclickAttr = row.getAttribute('onclick') || '';
+    const lastName = fullName.split(' ').slice(1).join(' ');
+    
+    // เช็คจากชื่อเต็มใน onclick หรือเช็คจากนามสกุลในแถว
+    if (onclickAttr.includes(fullName) || (lastName && row.innerText.includes(lastName))) {
       const ptsEl = row.querySelector('.col-pts');
       const posEl = row.querySelector('.col-pos');
-      if (ptsEl) currentPts = ptsEl.innerText;
-      if (posEl) currentPos = posEl.innerText;
+      if (ptsEl) currentPts = ptsEl.innerText.trim();
+      if (posEl) currentPos = posEl.innerText.trim();
     }
   });
-  // ========================================================
 
+  // ========================================================
+  // 🎯 2. เตรียมข้อมูลและอัปเดตหน้าต่าง Hero Modal
+  // ========================================================
   const parts = fullName.split(' ');
   document.getElementById('heroDriverFirstName').innerText = parts[0];
   document.getElementById('heroDriverLastName').innerText = parts.slice(1).join(' ');
@@ -2138,56 +2136,76 @@ function previewDriverBeforeSelect(fullName) {
   document.getElementById('heroDriverImg').src = getDriveDirectLink(info.heroImg || info.img); 
   document.getElementById('heroBgColor').style.background = `linear-gradient(to bottom, #0a0e1c 0%, ${info.color}40 15%, #0a0e1c 65%)`;
 
-  // ========================================================
-  // 🎯 อัปเดตตัวเลขคะแนนและอันดับให้หน้า Hero
-  // ========================================================
   const heroPtsEl = document.getElementById('heroPoints');
-  heroPtsEl.innerText = "0"; // รีเซ็ตเป็น 0 ก่อนเริ่มแอนิเมชันวิ่ง
-  
-  setTimeout(() => {
-    if (typeof animateCountUp === 'function') {
-      animateCountUp(heroPtsEl, currentPts, 2200); // เล่นเอฟเฟกต์ตัวเลขวิ่ง
-    } else {
-      heroPtsEl.innerText = currentPts;
-    }
-  }, 10); 
-  
+  if (heroPtsEl) heroPtsEl.innerText = "0"; 
   document.getElementById('heroPos').innerText = 'P' + currentPos;
-  // ========================================================
 
   // วาดกราฟ Radar
   renderDriverRadar(fullName, info.color);
 
-  // ตั้งค่าปุ่มกดเลือกให้ทำงานในระบบทายผล
+  // ========================================================
+  // 🎯 3. ตั้งค่าปุ่มกดยืนยันเลือกนักแข่ง (SELECT FOR P...)
+  // ========================================================
   const actionDiv = document.getElementById('heroPredictAction');
   const btn = document.getElementById('btnConfirmHeroPick');
   const slotLabels = { 'pos1': 'P1', 'pos2': 'P2', 'pos3': 'P3', 'pos4': 'P4', 'posFL': 'FASTEST LAP' };
   
-  if (actionDiv && btn && typeof currentSelectingSlot !== 'undefined') {
+  if (actionDiv && btn && currentSelectingSlot) {
     actionDiv.style.display = 'block';
     document.getElementById('lblHeroSlot').innerText = slotLabels[currentSelectingSlot] || '';
     
     btn.onclick = function() {
-      // เมื่อกดยืนยัน ให้ปิด Hero Modal ก่อน
-      if (window.driverHeroModalInstance) {
-        window.driverHeroModalInstance.hide();
-      }
-      // รอให้ Hero ปิดสนิท ค่อยยืนยันข้อมูลและเปิด Grid ของช่องถัดไปขึ้นมา
-      setTimeout(function() {
+      const heroModalEl = document.getElementById('driverHeroModal');
+      const heroInst = bootstrap.Modal.getInstance(heroModalEl) || window.driverHeroModalInstance;
+      
+      if (heroModalEl && heroInst) {
+        // รอให้ Hero Modal ปิดสนิท 100% ก่อน แล้วค่อยรันคำสั่งเลือกช่องถัดไป
+        heroModalEl.addEventListener('hidden.bs.modal', function onHeroHidden() {
+          confirmSelectDriver(fullName);
+        }, { once: true });
+        
+        heroInst.hide();
+      } else {
         confirmSelectDriver(fullName);
-      }, 350);
+      }
     };
   }
 
-  // รอให้ Grid ปิดสนิท (ถ้ามี) แล้วค่อยเปิด Hero Modal ขึ้นมาโชว์
-  setTimeout(function() {
+  // ========================================================
+  // 🎯 4. สลับหน้าต่างแบบสมูท (ปิด Grid ให้สนิท -> เปิด Hero + วิ่งตัวเลข)
+  // ========================================================
+  const showHeroAndAnimate = function() {
+    const heroModalEl = document.getElementById('driverHeroModal');
     if (!window.driverHeroModalInstance) {
-      window.driverHeroModalInstance = new bootstrap.Modal(document.getElementById('driverHeroModal'));
+      window.driverHeroModalInstance = new bootstrap.Modal(heroModalEl);
     }
     window.driverHeroModalInstance.show();
-  }, delay);
-}
 
+    // เริ่มวิ่งตัวเลขคะแนนหลังจากหน้าต่าง Hero เปิดขึ้นมาแล้ว
+    setTimeout(() => {
+      if (typeof animateCountUp === 'function' && heroPtsEl) {
+        animateCountUp(heroPtsEl, currentPts, 1800);
+      } else if (heroPtsEl) {
+        heroPtsEl.innerText = currentPts;
+      }
+    }, 150);
+  };
+
+  const gridModalEl = document.getElementById('driverSelectorModal');
+  // เรียกใช้ตัวแปร driverSelectorModalInstance โดยตรง (ไม่ผ่าน window.)
+  const gridInst = driverSelectorModalInstance || bootstrap.Modal.getInstance(gridModalEl);
+
+  if (gridModalEl && gridModalEl.classList.contains('show') && gridInst) {
+    // ดักรอให้ตารางเลือกนักแข่งเลื่อนปิดลงไปจนสุดก่อน ค่อยเด้งหน้า Hero ขึ้นมา
+    gridModalEl.addEventListener('hidden.bs.modal', function onGridHidden() {
+      showHeroAndAnimate();
+    }, { once: true });
+    
+    gridInst.hide();
+  } else {
+    showHeroAndAnimate();
+  }
+}
 // 🎯 ปรับปรุงฟังก์ชันเดิม (ถูกเรียกเมื่อกดจากหน้า Standings) ให้ซ่อนปุ่มทายผล
 const originalOpenDriverHero = openDriverHero;
 openDriverHero = function(fullName, rowEl) {
