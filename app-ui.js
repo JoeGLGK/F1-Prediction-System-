@@ -1892,18 +1892,19 @@ function getShortDriverName(fullName) {
   return parts.length > 1 ? parts[parts.length - 1] : fullName;
 }
 
-// ==========================================
-// 2. โค้ดดึงโพยเพื่อน (ดีไซน์ตั๋ว Paddock Pass Ticket)
-// ==========================================
+// =========================================================
+// 3. ฟังก์ชันดึงโพยและสร้างการ์ดตั๋ว (ลบโค้ดเก่าแล้ววางชุดนี้ทับ)
+// =========================================================
 function loadCommunityPredictions() {
   const raceId = document.getElementById('selCommRace').value; 
-  const box = document.getElementById('commContent');
+  const box = document.getElementById('commContent'); 
   
-  // 🎯 สั่งแสดงกล่องกราฟทันทีเมื่อมีการเลือกสนามแล้ว
+  // เปิดกล่องสถิติเมื่อมีการเลือกสนาม
   const consensusBox = document.getElementById('consensusContainer');
   if (consensusBox) {
     consensusBox.style.display = 'block';
   }
+
   box.innerHTML = '<div class="text-center text-secondary py-4"><i class="fa-solid fa-spinner fa-spin me-2"></i>กำลังดึงตั๋วโพยเพื่อน...</div>';
 
   const currentRace = globalRaces.find(function(r) { return r.id === raceId; });
@@ -1942,7 +1943,6 @@ function loadCommunityPredictions() {
       const p4 = p.p4 || p.pos4 || '-';
       const fl = p.fl || p.posFL || '';
 
-      // ดึงสีทีม (แบบปลอดภัย เผื่อไม่มีชื่อในฐานข้อมูล)
       const c1 = (typeof DRIVER_INFO !== 'undefined' && DRIVER_INFO[p1]) ? DRIVER_INFO[p1].color : '#64748b';
       const c2 = (typeof DRIVER_INFO !== 'undefined' && DRIVER_INFO[p2]) ? DRIVER_INFO[p2].color : '#64748b';
       const c3 = (typeof DRIVER_INFO !== 'undefined' && DRIVER_INFO[p3]) ? DRIVER_INFO[p3].color : '#64748b';
@@ -1984,6 +1984,12 @@ function loadCommunityPredictions() {
       `;
       box.insertAdjacentHTML('beforeend', cardHtml);
     });
+    
+  }).catch(function(err) {
+      console.error("Community Error:", err);
+      box.innerHTML = '<div class="text-center text-danger small py-4">เกิดข้อผิดพลาดในการโหลดข้อมูล<br><span style="font-size:0.7rem; color:#888;">(กรุณารีเฟรช)</span></div>';
+  });
+}
     
   }).catch(function(err) {
       // ผมเพิ่ม console.error ให้แสดงสาเหตุที่แท้จริงไว้ด้วย เผื่อมี Error อื่นครับ
