@@ -2021,7 +2021,7 @@ let DRIVER_STATS = {
 };
 
 // URL ของ Web App GAS ของคุณ (นำลิงก์ Exec จาก GAS มาใส่ตรงนี้)
-const GAS_STATS_API_URL = "https://script.google.com/macros/s/AKfycbwZ_VB9I7ClOgDpd8bDkaY09CzipETJMeQPDK6Qk6JYVNPdgfXA6ZrmXDG8gYsJ9I6u/exec";
+const GAS_STATS_API_URL = "https://script.google.com/macros/s/AKfycbwZ_VB9I7ClOgDpd8bDkaY09CzipETJMeQPDK6Qk6JYVNPdgfXA6ZrmXDG8gYsJ9I6u/exec?action=getStats";
 
 // ฟังก์ชันดึงข้อมูลสถิตินักแข่งแบบ Asynchronous
 async function loadDriverStatsAPI() {
