@@ -3562,92 +3562,88 @@ body {
   margin-bottom: 20px;
 }
 /* =========================================================
-   LATEST PADDOCK NEWS (HORIZONTAL SCROLL CARDS)
+   LATEST PADDOCK NEWS (CINEMATIC FULL-CARD DESIGN)
    ========================================================= */
 .news-scroll-container {
   display: flex;
   gap: 14px;
   overflow-x: auto;
-  padding-bottom: 12px; /* เผื่อพื้นที่ด้านล่างไม่ให้เงาการ์ดโดนตัด */
-  scroll-snap-type: x mandatory; /* ให้เวลาปัด การ์ดจะล็อกเข้าตำแหน่งพอดี */
-  -webkit-overflow-scrolling: touch; /* ปัดลื่นๆ บนมือถือ iOS */
-  scrollbar-width: none; /* ซ่อน Scrollbar ของ Firefox */
+  padding-bottom: 15px; /* เผื่อพื้นที่ให้เงาการ์ดด้านล่าง */
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 }
-/* ซ่อน Scrollbar ของ Chrome/Safari เพื่อความสวยงาม */
 .news-scroll-container::-webkit-scrollbar {
   display: none; 
 }
 
-.news-card {
+.news-card-cinematic {
+  position: relative;
   display: flex;
   flex-direction: column;
-  flex: 0 0 240px; /* บังคับความกว้างของการ์ดแต่ละใบ */
-  background: linear-gradient(145deg, #161822 0%, #0a0c10 100%);
+  justify-content: flex-end; /* 🎯 ดันข้อความลงไปชิดขอบล่างสุด */
+  flex: 0 0 260px; /* ความกว้างของการ์ด */
+  height: 190px; /* ความสูงของการ์ด */
+  background: #000;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
   overflow: hidden;
   text-decoration: none;
-  scroll-snap-align: start; /* จุดล็อกการ์ดเวลาปัด */
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+  scroll-snap-align: start;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
   transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
 
-.news-card:hover, .news-card:active {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7);
-  border-color: rgba(13, 202, 240, 0.5); /* ขอบเรืองแสงสีฟ้าอ่อนๆ ตอนแตะ */
+.news-card-cinematic:hover, .news-card-cinematic:active {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.8);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
-.news-thumb {
-  position: relative;
-  width: 100%;
-  height: 120px;
-  background: #050608;
-  overflow: hidden;
-}
-
-.news-thumb img {
+/* 🎯 รูปภาพพื้นหลังเต็มการ์ด */
+.news-bg-img {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.35s ease;
+  object-position: top center;
+  z-index: 1;
+  transition: transform 0.4s ease;
+}
+.news-card-cinematic:hover .news-bg-img,
+.news-card-cinematic:active .news-bg-img {
+  transform: scale(1.05); /* เอฟเฟกต์ซูมออกแบบเนียนๆ ตอนกด */
 }
 
-.news-card:hover .news-thumb img, 
-.news-card:active .news-thumb img {
-  transform: scale(1.06); /* ซูมรูปนิดนึงตอนแตะ */
-}
-
-.news-badge {
+/* 🎯 เลเยอร์ไล่สีดำจางๆ (Gradient Fade) จากข้างล่างขึ้นข้างบน */
+.news-gradient-overlay {
   position: absolute;
-  top: 8px;
-  left: 8px;
-  background: #e10600;
-  color: #fff;
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 0.6rem;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  box-shadow: 0 2px 5px rgba(225, 6, 0, 0.5);
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 80%; /* ดึงเงาดำขึ้นมาให้สูงพอที่ตัวหนังสือจะอ่านง่าย */
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.6) 45%, transparent 100%);
+  z-index: 2;
+  pointer-events: none;
 }
 
-.news-content {
-  padding: 12px 14px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  flex-grow: 1; 
+/* กล่องครอบตัวอักษรพาดหัวข่าว (ดันชิดขอบล่าง) */
+.news-content-overlay {
+  position: relative;
+  z-index: 3;
+  padding: 16px 16px 14px 16px; /* จัดระยะขอบให้สวยงาม */
 }
 
-.news-headline {
-  font-family: 'Kanit', sans-serif;
-  font-size: 0.85rem;
+/* 🎯 ตัวหนังสือพาดหัวข่าว */
+.news-headline-overlay {
+  font-family: 'Rajdhani', 'Kanit', sans-serif; /* ใช้ฟอนต์ให้ดูมีความสปอร์ต */
+  font-size: 1.05rem;
   font-weight: 600;
-  color: #f8fafc;
-  line-height: 1.35;
-  margin-bottom: 12px;
+  color: #ffffff;
+  line-height: 1.25;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9); /* เพิ่มเงาตัวหนังสือให้ลอยเด่น */
   
   /* บังคับตัดคำ 2 บรรทัดเป๊ะๆ ถ้าเกินให้ขึ้น ... */
   display: -webkit-box;
@@ -3658,15 +3654,7 @@ body {
   transition: color 0.2s ease;
 }
 
-.news-card:hover .news-headline,
-.news-card:active .news-headline {
-  color: #0dcaf0; /* เปลี่ยนสีหัวข้อตอนแตะ */
-}
-
-.news-meta {
-  font-family: 'Rajdhani', sans-serif;
-  font-size: 0.7rem;
-  color: #94a3b8;
-  font-weight: 700;
-  letter-spacing: 0.5px;
+.news-card-cinematic:hover .news-headline-overlay,
+.news-card-cinematic:active .news-headline-overlay {
+  color: #e2e8f0; 
 }
