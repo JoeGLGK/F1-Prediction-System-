@@ -704,7 +704,6 @@ function onCenterRaceChange() {
     }
   }
 
-  // 🎯 สั่งให้โหลดข้อมูล Sector และ Speed Trap เมื่อเปลี่ยนสนาม
   if (typeof loadTelemetryHUD === 'function') {
     loadTelemetryHUD(raceId);
   }
@@ -1030,7 +1029,7 @@ function showPlayerStats(playerName) {
     `;
     body.innerHTML = html;
 
-    // การวาดกราฟผ่าน Chart.js (แสดงคะแนนรายสนาม พร้อมป้ายโชว์คะแนนรวมสะสม)
+    // การวาดกราฟผ่าน Chart.js
     if (res.history && res.history.length > 0) {
       if (playerChartInstance) {
         playerChartInstance.destroy();
@@ -1200,11 +1199,9 @@ async function handleFetchOfficialResults() {
   btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังดึงผล OpenF1...'; 
   
   try {
-    // 1. ดึง Profile นักแข่ง
     const driverRes = await fetch('https://api.openf1.org/v1/drivers?session_key=latest');
     const drivers = await driverRes.json();
     
-    // 2. ดึงข้อมูลอันดับ P1-P4
     const posRes = await fetch('https://api.openf1.org/v1/position?session_key=latest');
     const positions = await posRes.json();
     
@@ -1227,7 +1224,6 @@ async function handleFetchOfficialResults() {
     matchDriverOption('adP3', results.p3); 
     matchDriverOption('adP4', results.p4); 
 
-    // 3. ดึงข้อมูล Fastest Lap (ตรวจสอบว่าไม่ใช่ Sprint Race)
     const raceSelect = document.getElementById('adminRace');
     const isSprint = raceSelect.options[raceSelect.selectedIndex].dataset.type === 'Sprint';
     
@@ -1238,7 +1234,6 @@ async function handleFetchOfficialResults() {
       let fastestLap = null;
       let minDuration = Infinity;
       
-      // วนลูปหาเวลาต่อรอบที่น้อยที่สุด
       laps.forEach(lap => {
         if (lap.lap_duration && lap.lap_duration < minDuration) {
           minDuration = lap.lap_duration;
@@ -1246,7 +1241,6 @@ async function handleFetchOfficialResults() {
         }
       });
       
-      // เทียบหมายเลขรถเพื่อหาชื่อนักแข่ง และอัปเดตช่อง adFL
       if (fastestLap) {
         const flDriver = drivers.find(d => d.driver_number === fastestLap.driver_number);
         if (flDriver) {
@@ -1396,13 +1390,13 @@ function switchStandings(type) {
     'user': document.getElementById('user-standings-view'),
     'driver': document.getElementById('driver-standings-view'),
     'team': document.getElementById('team-standings-view'),
-    'results': document.getElementById('results-standings-view') // เพิ่มบรรทัดนี้
+    'results': document.getElementById('results-standings-view') 
   };
   const btns = {
     'user': document.getElementById('btn-user-standings'),
     'driver': document.getElementById('btn-driver-standings'),
     'team': document.getElementById('btn-team-standings'),
-    'results': document.getElementById('btn-results-standings') // เพิ่มบรรทัดนี้
+    'results': document.getElementById('btn-results-standings') 
   };
 
   Object.keys(views).forEach(key => {
@@ -1477,7 +1471,6 @@ document.addEventListener('DOMContentLoaded', () => {
   fetchF1TeamStandings();     
 });
 
-// ฟังก์ชันสร้างลูกเล่นตัวเลขวิ่ง (Count-up Animation สไตล์ Cubic Ease-out)
 function animateCountUp(element, target, duration = 2200) {
   let startTimestamp = null;
   const targetNum = parseInt(String(target).replace(/,/g, '').trim(), 10) || 0;
@@ -1502,7 +1495,6 @@ function animateCountUp(element, target, duration = 2200) {
   window.requestAnimationFrame(step);
 }
 
-// ฟังก์ชันสำหรับเปิดหน้า F1 Driver Hero
 function openDriverHero(fullName, rowEl) {
   triggerHaptic();
   const info = DRIVER_INFO[fullName];
@@ -1536,7 +1528,6 @@ function openDriverHero(fullName, rowEl) {
   window.driverHeroModalInstance.show();
 }
 
-// 1. โหลดเฉพาะสนามของปี 2026 ที่เริ่มทำการแข่งขันแล้ว
 async function loadOpenF1Meetings() {
   const rSel = document.getElementById('selResultsRace');
   if (!rSel) return;
@@ -1549,7 +1540,6 @@ async function loadOpenF1Meetings() {
     
     const now = new Date();
     
-    // กรองเฉพาะสนามที่ถึงกำหนดเวลาเริ่มแข่งแล้ว และตัด Pre-Season Testing ออก
     const startedMeetings = (Array.isArray(meetings) ? meetings : []).filter(m => {
       const startDate = new Date(m.date_start);
       const isTesting = (m.meeting_name || '').toLowerCase().includes('testing');
@@ -1561,7 +1551,6 @@ async function loadOpenF1Meetings() {
       return;
     }
 
-    // เรียงลำดับตามวันที่แข่งจากสนามแรกไปสนามล่าสุด
     startedMeetings.sort((a, b) => new Date(a.date_start) - new Date(b.date_start));
     
     let opts = '<option value="" disabled selected>-- เลือกสนาม --</option>';
@@ -1570,7 +1559,6 @@ async function loadOpenF1Meetings() {
     });
     rSel.innerHTML = opts;
 
-    // เลือกสนามล่าสุดที่เพิ่งแข่งไปให้อัตโนมัติ
     const latestMeeting = startedMeetings[startedMeetings.length - 1];
     rSel.value = latestMeeting.meeting_key;
     onResultsRaceChange();
@@ -1581,7 +1569,6 @@ async function loadOpenF1Meetings() {
   }
 }
 
-// 2. เมื่อเลือกสนาม ให้แสดงปุ่มเฉพาะเซสชันที่เริ่มวิ่งแล้วเท่านั้น
 async function onResultsRaceChange() {
   const rSel = document.getElementById('selResultsRace');
   const meetingKey = rSel.value;
@@ -1596,7 +1583,6 @@ async function onResultsRaceChange() {
     
     const now = new Date();
     
-    // กรองเอาเฉพาะเซสชันที่เริ่มทำการแข่งขันไปแล้ว (เซสชันที่ยังไม่ถึงเวลาจะไม่แสดงปุ่ม)
     const startedSessions = (Array.isArray(sessions) ? sessions : []).filter(s => {
       return new Date(s.date_start) <= now;
     });
@@ -1609,22 +1595,19 @@ async function onResultsRaceChange() {
       return;
     }
 
-    // สร้างปุ่มและตั้งค่าให้เลือกเซสชันล่าสุดของสนามนั้นเป็นค่าเริ่มต้น (Active)
     const lastIdx = startedSessions.length - 1;
     btnGroup.innerHTML = startedSessions.map((s, index) => 
       `<button class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 ${index === lastIdx ? 'active text-white border-white' : ''}" style="font-family: 'Rajdhani', sans-serif; font-weight: 700;" onclick="loadResultsSessionData('${s.session_key}', this)">${s.session_name.toUpperCase()}</button>`
     ).join('');
     
-    // ดึงข้อมูลของเซสชันล่าสุดมาแสดงทันที (เช่น ถ้าแข่งจบแล้วจะโชว์หน้า RACE ทันที)
     loadResultsSessionData(startedSessions[lastIdx].session_key, btnGroup.lastElementChild);
     
   } catch (error) {
     btnGroup.innerHTML = '<span class="text-danger small">โหลดเซสชันล้มเหลว</span>';
   }
 }
-// ฟังก์ชันสำหรับอัปเดตข้อมูล Sector และ Speed Trap ในหน้า Telemetry
+
 async function loadTelemetryHUD(sessionKey) {
-  // 1. ตั้งค่า Loading State ให้หน้าจอ (ใส่ขีดแดช หรือไอคอนโหลดรอไว้)
   const loadingHtml = '<i class="fa-solid fa-spinner fa-spin text-secondary"></i>';
   document.getElementById('fastestSec1').innerHTML = `<div class="driver-tag">---</div><div class="sector-time text-secondary">${loadingHtml}</div>`;
   document.getElementById('fastestSec2').innerHTML = `<div class="driver-tag">---</div><div class="sector-time text-secondary">${loadingHtml}</div>`;
@@ -1632,7 +1615,6 @@ async function loadTelemetryHUD(sessionKey) {
   document.getElementById('highestSpeed').innerHTML = `<div class="driver-tag me-3">---</div><div class="speed-val">${loadingHtml}</div>`;
 
   try {
-    // 2. ยิง API ดึงข้อมูลรอบวิ่ง (laps) และข้อมูลนักแข่ง (drivers) ของเซสชันนั้น
     const [lapsRes, driversRes] = await Promise.all([
       fetch(`https://api.openf1.org/v1/laps?session_key=${sessionKey}`),
       fetch(`https://api.openf1.org/v1/drivers?session_key=${sessionKey}`)
@@ -1641,7 +1623,6 @@ async function loadTelemetryHUD(sessionKey) {
     const laps = await lapsRes.json();
     const drivers = await driversRes.json();
 
-    // 3. สร้างตัวแปรเก็บสถิติที่ดีที่สุด (เริ่มต้นด้วยค่า Infinity สำหรับเวลา และ 0 สำหรับความเร็ว)
     let best = {
       sec1: { time: Infinity, driverNum: null },
       sec2: { time: Infinity, driverNum: null },
@@ -1649,7 +1630,6 @@ async function loadTelemetryHUD(sessionKey) {
       speed: { val: 0, driverNum: null }
     };
 
-    // 4. ลูปหาเวลา Sector ที่น้อยที่สุด และความเร็ว (Speed Trap) ที่มากที่สุด
     if (Array.isArray(laps)) {
       laps.forEach(lap => {
         if (lap.duration_sector_1 && lap.duration_sector_1 < best.sec1.time) {
@@ -1667,7 +1647,6 @@ async function loadTelemetryHUD(sessionKey) {
       });
     }
 
-    // 5. ฟังก์ชันย่อยสำหรับค้นหาชื่อและสีทีมของนักแข่งจากเบอร์รถ
     const getDriverUI = (dNum) => {
       const d = drivers.find(x => x.driver_number === dNum);
       if (!d) return { tag: '---', color: '#888888' };
@@ -1679,14 +1658,11 @@ async function loadTelemetryHUD(sessionKey) {
       }) || d.full_name;
       
       const info = DRIVER_INFO[appDriver] || { color: d.team_colour ? `#${d.team_colour}` : '#888888' };
-      // ใช้ตัวย่อชื่อ 3 ตัวอักษร (เช่น VER, NOR, HAM)
       const shortName = d.name_acronym || (d.last_name || '').substring(0, 3).toUpperCase();
       
       return { tag: shortName, color: info.color };
     };
 
-    // 6. วาดข้อมูลลงบน UI
-    // Sector 1
     if (best.sec1.driverNum) {
       const d = getDriverUI(best.sec1.driverNum);
       document.getElementById('fastestSec1').innerHTML = `
@@ -1697,7 +1673,6 @@ async function loadTelemetryHUD(sessionKey) {
       document.getElementById('fastestSec1').innerHTML = `<div class="driver-tag">---</div><div class="sector-time">NO DATA</div>`;
     }
 
-    // Sector 2
     if (best.sec2.driverNum) {
       const d = getDriverUI(best.sec2.driverNum);
       document.getElementById('fastestSec2').innerHTML = `
@@ -1708,7 +1683,6 @@ async function loadTelemetryHUD(sessionKey) {
       document.getElementById('fastestSec2').innerHTML = `<div class="driver-tag">---</div><div class="sector-time">NO DATA</div>`;
     }
 
-    // Sector 3
     if (best.sec3.driverNum) {
       const d = getDriverUI(best.sec3.driverNum);
       document.getElementById('fastestSec3').innerHTML = `
@@ -1719,7 +1693,6 @@ async function loadTelemetryHUD(sessionKey) {
       document.getElementById('fastestSec3').innerHTML = `<div class="driver-tag">---</div><div class="sector-time">NO DATA</div>`;
     }
 
-    // Speed Trap
     if (best.speed.driverNum) {
       const d = getDriverUI(best.speed.driverNum);
       document.getElementById('highestSpeed').innerHTML = `
@@ -1739,30 +1712,27 @@ async function loadTelemetryHUD(sessionKey) {
     document.getElementById('highestSpeed').innerHTML = errorHtml;
   }
 }
-// ฟังก์ชันสำหรับเรียกโหลดข้อมูลหน้า Telemetry 
+
 function refreshTelemetryDashboard(sessionKey = 'latest') {
   triggerHaptic();
   
-  // เรียกใช้ฟังก์ชันหลักจาก api-service.js (ถ้าฟังก์ชันโหลดพร้อมแล้ว)
   if (typeof loadTelemetryHUD === 'function') {
     loadTelemetryHUD(sessionKey);
   } else {
     console.warn("ไม่พบฟังก์ชัน loadTelemetryHUD กรุณาตรวจสอบไฟล์ api-service.js");
   }
 }
-// ตัวแปรเก็บกราฟ (ป้องกันการวาดซ้อนกันเมื่อเปลี่ยนสนาม)
+
 let communityChartInstance = null;
 
-// สีประจำทีมคร่าวๆ สำหรับกราฟโดนัท
 const driverColors = {
-  "Verstappen": "#3671C6", "Perez": "#3671C6", "Hadjar": "#3671C6", // Red Bull
-  "Norris": "#FF8000", "Piastri": "#FF8000", // McLaren
-  "Leclerc": "#E80020", "Hamilton": "#E80020", "Bearman": "#E80020", // Ferrari
-  "Russell": "#27F4D2", "Antonelli": "#27F4D2", // Mercedes
-  "Alonso": "#229971", "Stroll": "#229971", // Aston Martin
+  "Verstappen": "#3671C6", "Perez": "#3671C6", "Hadjar": "#3671C6", 
+  "Norris": "#FF8000", "Piastri": "#FF8000", 
+  "Leclerc": "#E80020", "Hamilton": "#E80020", "Bearman": "#E80020", 
+  "Russell": "#27F4D2", "Antonelli": "#27F4D2", 
+  "Alonso": "#229971", "Stroll": "#229971", 
 };
 
-// ฟังก์ชันสำหรับประมวลผลและวาดกราฟสถิติมหาชน (Consensus Chart) พร้อมเปอร์เซ็นต์
 function renderConsensusChart(predictionsData, isParcFermeClosed) {
   const lockOverlay = document.getElementById('parcFermeLock');
   const totalBadge = document.getElementById('totalVotersBadge');
@@ -1772,7 +1742,6 @@ function renderConsensusChart(predictionsData, isParcFermeClosed) {
     totalBadge.innerHTML = `${totalVotes} PADDOCK PASSES`;
   }
 
-  // 1. ระบบล็อก: ถ้ายังไม่ถึงเวลา Parc Ferm์ (ยังไม่ปิดรับทายผล) ให้แสดงแผ่นล็อกซ่อนกราฟไว้
   if (lockOverlay) {
     if (!isParcFermeClosed) {
       lockOverlay.style.display = 'flex'; 
@@ -1783,7 +1752,6 @@ function renderConsensusChart(predictionsData, isParcFermeClosed) {
 
   if (totalVotes === 0) return;
 
-  // 2. นับคะแนนโหวตแชมป์ (P1) และ Fastest Lap (FL)
   let p1Counts = {};
   let flCounts = {};
 
@@ -1795,7 +1763,6 @@ function renderConsensusChart(predictionsData, isParcFermeClosed) {
     if (fl) flCounts[fl] = (flCounts[fl] || 0) + 1;
   });
 
-  // --- ประมวลผลกราฟโดนัท (P1) ---
   const p1Labels = Object.keys(p1Counts);
   const p1Data = Object.values(p1Counts);
   const p1Colors = p1Labels.map(name => driverColors[name.split(' ').pop()] || '#888888');
@@ -1828,10 +1795,9 @@ function renderConsensusChart(predictionsData, isParcFermeClosed) {
           position: 'right', 
           labels: { 
             color: '#ffffff', 
-            font: { family: 'Kanit', size: 11 },
-            boxWidth: 12,
-            padding: 12,
-            // 🎯 ฟังก์ชันแสดง เปอร์เซ็นต์ และสัดส่วน (จำนวนโหวต/ทั้งหมด) ต่อท้ายชื่อนักแข่ง
+            font: { family: 'Kanit', size: 10 },
+            boxWidth: 10,
+            padding: 15,
             generateLabels: function(chart) {
               const data = chart.data;
               if (data.labels.length && data.datasets.length) {
@@ -1861,7 +1827,6 @@ function renderConsensusChart(predictionsData, isParcFermeClosed) {
     }
   });
 
-  // --- ประมวลผลแถบ Fastest Lap ---
   let topFlDriver = "-";
   let topFlCount = 0;
   
@@ -1883,23 +1848,17 @@ function renderConsensusChart(predictionsData, isParcFermeClosed) {
     if (flBarEl) flBarEl.style.width = `${flPercent}%`;
   }
 }
-// ==========================================
-// 1. ฟังก์ชันตัวช่วย: ย่อชื่อนักแข่ง (ป้องกันการถูกลบหาย)
-// ==========================================
+
 function getShortDriverName(fullName) {
   if (!fullName || fullName === '-') return '-';
   const parts = fullName.trim().split(' ');
   return parts.length > 1 ? parts[parts.length - 1] : fullName;
 }
 
-// =========================================================
-// 3. ฟังก์ชันดึงโพยและสร้างการ์ดตั๋ว (ลบโค้ดเก่าแล้ววางชุดนี้ทับ)
-// =========================================================
 function loadCommunityPredictions() {
   const raceId = document.getElementById('selCommRace').value; 
   const box = document.getElementById('commContent'); 
   
-  // เปิดกล่องสถิติเมื่อมีการเลือกสนาม
   const consensusBox = document.getElementById('consensusContainer');
   if (consensusBox) {
     consensusBox.style.display = 'block';
@@ -1913,12 +1872,10 @@ function loadCommunityPredictions() {
   callGAS("getCommunityPredictions", { raceId: raceId }).then(function(res) {
     const predictionsData = res.data || res.predictions || []; 
     
-    // วาดกราฟโดนัทมหาชน
     if (typeof renderConsensusChart === "function") {
       renderConsensusChart(predictionsData, res.locked);
     }
 
-    // ถ้ายังไม่ถึงเวลาปิดรับทายผล (ล็อกตั๋วไว้)
     if (!res.locked) { 
       box.innerHTML = 
         '<div class="locked-ticket-card">' +
@@ -1935,7 +1892,6 @@ function loadCommunityPredictions() {
       return;
     }
 
-    // วาดการ์ดตั๋ว Paddock Pass
     predictionsData.forEach(function(p, index) {
       const p1 = p.p1 || p.pos1 || '-';
       const p2 = p.p2 || p.pos2 || '-';
@@ -1988,12 +1944,5 @@ function loadCommunityPredictions() {
   }).catch(function(err) {
       console.error("Community Error:", err);
       box.innerHTML = '<div class="text-center text-danger small py-4">เกิดข้อผิดพลาดในการโหลดข้อมูล<br><span style="font-size:0.7rem; color:#888;">(กรุณารีเฟรช)</span></div>';
-  });
-}
-    
-  }).catch(function(err) {
-      // ผมเพิ่ม console.error ให้แสดงสาเหตุที่แท้จริงไว้ด้วย เผื่อมี Error อื่นครับ
-      console.error("Community Rendering Error:", err);
-      box.innerHTML = '<div class="text-center text-danger small py-4">เกิดข้อผิดพลาดในการโหลดข้อมูล<br><span style="font-size:0.7rem; color:#888;">(กรุณารีเฟรชหรือดู Console)</span></div>';
   });
 }
