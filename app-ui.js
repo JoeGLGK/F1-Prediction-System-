@@ -1858,12 +1858,17 @@ function renderConsensusChart(predictionsData, isParcFermeClosed) {
   }
 }
 // ==========================================
-// 2. โค้ดดึงโพยเพื่อน (นำมาวางต่อท้ายสุดของไฟล์)
+// โค้ดดึงโพยเพื่อน (ดีไซน์ตั๋ว Paddock Pass Ticket)
+// นำมาวางทับฟังก์ชันเดิมที่ด้านล่างสุดของไฟล์ app-ui.js
 // ==========================================
 function loadCommunityPredictions() {
   const raceId = document.getElementById('selCommRace').value; 
   const box = document.getElementById('commContent'); 
   box.innerHTML = '<div class="text-center text-secondary py-4"><i class="fa-solid fa-spinner fa-spin me-2"></i>กำลังดึงตั๋วโพยเพื่อน...</div>';
+
+  // เช็กสถานะสนามว่าคำนวณคะแนนแล้วหรือยัง (เพื่อกำหนดป้ายที่หางตั๋ว)
+  const currentRace = globalRaces.find(function(r) { return r.id === raceId; });
+  const isCalculated = currentRace && currentRace.status === 'CALCULATED';
 
   callGAS("getCommunityPredictions", { raceId: raceId }).then(function(res) {
     const predictionsData = res.data || res.predictions || []; 
@@ -1891,22 +1896,56 @@ function loadCommunityPredictions() {
       return;
     }
 
-    // วาดการ์ดโพยของเพื่อนๆ
+    // วาดการ์ดโพยของเพื่อนๆ (ดีไซน์ตั๋ว Paddock Pass แบบพรีเมียม)
     predictionsData.forEach(function(p, index) {
+      // เตรียมข้อมูลนักแข่ง
+      const p1 = p.p1 || p.pos1 || '-';
+      const p2 = p.p2 || p.pos2 || '-';
+      const p3 = p.p3 || p.pos3 || '-';
+      const p4 = p.p4 || p.pos4 || '-';
+      const fl = p.fl || p.posFL || '';
+
+      // ดึงสีทีมของแต่ละตำแหน่ง
+      const c1 = (DRIVER_INFO[p1] || {}).color || '#64748b';
+      const c2 = (DRIVER_INFO[p2] || {}).color || '#64748b';
+      const c3 = (DRIVER_INFO[p3] || {}).color || '#64748b';
+      const c4 = (DRIVER_INFO[p4] || {}).color || '#64748b';
+
+      // จัดการส่วนหางตั๋ว (แสดงคะแนน หรือ แสดงป้าย Locked In)
+      let stubContent = '';
+      if (isCalculated || Number(p.score) > 0) {
+        stubContent = 
+          '<div class="ticket-pts-val text-warning">' + (p.score || 0) + '</div>' +
+          '<div class="ticket-pts-lbl">POINTS</div>';
+      } else {
+        stubContent = 
+          '<div class="ticket-pending-stamp">LOCKED IN</div>' +
+          '<div class="ticket-pts-lbl mt-1">WAITING</div>';
+      }
+
+      const passNum = String(index + 1).padStart(2, '0');
+      const playerName = p.playerName || p.player || 'Unknown';
+
+      // โครงสร้าง HTML แบบตั๋ว
       const cardHtml = `
-        <div class="f1-card p-3 mb-2" style="background: #111217; border: 1px solid rgba(255,255,255,0.05);">
-          <div class="d-flex justify-content-between mb-2">
-            <span class="fw-bold text-white"><i class="fa-solid fa-user text-secondary me-2"></i>${p.playerName || p.player || 'Unknown'}</span>
-            <span class="badge bg-dark text-secondary">PASS #${index + 1}</span>
-          </div>
-          <div class="row g-1 small text-secondary">
-             <div class="col-6"><span class="text-warning">P1:</span> <span class="text-white">${p.p1 || p.pos1 || '-'}</span></div>
-             <div class="col-6"><span>P2:</span> <span class="text-white">${p.p2 || p.pos2 || '-'}</span></div>
-             <div class="col-6"><span>P3:</span> <span class="text-white">${p.p3 || p.pos3 || '-'}</span></div>
-             <div class="col-6"><span>P4:</span> <span class="text-white">${p.p4 || p.pos4 || '-'}</span></div>
-             <div class="col-12 mt-1"><span class="text-info"><i class="fa-solid fa-bolt"></i> FL:</span> <span class="text-white">${p.fl || p.posFL || '-'}</span></div>
+        <div class="pred-ticket">
+           <div class="ticket-main">
+             <div class="ticket-player-header">
+               <div class="ticket-player-name"><i class="fa-solid fa-id-badge text-danger me-2"></i>${playerName}</div>
+               <span class="ticket-pass-tag">PASS #${passNum}</span>
+             </div>
+             <div class="ticket-picks-grid">
+               <div class="ticket-pick-item"><span class="ticket-pos-pill p1">P1</span><span class="ticket-driver-dot" style="background:${c1}"></span><span class="ticket-driver-txt">${getShortDriverName(p1)}</span></div>
+               <div class="ticket-pick-item"><span class="ticket-pos-pill p2">P2</span><span class="ticket-driver-dot" style="background:${c2}"></span><span class="ticket-driver-txt">${getShortDriverName(p2)}</span></div>
+               <div class="ticket-pick-item"><span class="ticket-pos-pill p3">P3</span><span class="ticket-driver-dot" style="background:${c3}"></span><span class="ticket-driver-txt">${getShortDriverName(p3)}</span></div>
+               <div class="ticket-pick-item"><span class="ticket-pos-pill">P4</span><span class="ticket-driver-dot" style="background:${c4}"></span><span class="ticket-driver-txt">${getShortDriverName(p4)}</span></div>
+             </div>
+             ${fl ? `<div class="ticket-fl-bar"><i class="fa-solid fa-bolt"></i><span>FL: ${getShortDriverName(fl)}</span></div>` : ''}
            </div>
-        </div>
+           <div class="ticket-stub">
+             ${stubContent}
+           </div>
+         </div>
       `;
       box.insertAdjacentHTML('beforeend', cardHtml);
     });
