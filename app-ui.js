@@ -57,6 +57,7 @@ window.onload = function() {
   loadData();
   loadOpenF1Meetings();
   loadLatestNews();
+  loadDriverStatsAPI();
 };
 
 function buildDriverGrid() {
@@ -2014,19 +2015,28 @@ async function loadLatestNews() {
 // =========================================================
 let heroRadarChartInstance = null;
 
-// ข้อมูลจำลองสถิติ 6 ด้าน (เต็ม 100) [Quali, Racecraft, Tyre, Consistency, Wet, Form]
-const DRIVER_STATS = {
-  "Max Verstappen": [97, 98, 92, 95, 96, 90],
-  "Lando Norris": [96, 90, 88, 92, 85, 95],
-  "Charles Leclerc": [96, 88, 85, 89, 82, 90],
-  "Lewis Hamilton": [88, 95, 96, 90, 94, 85],
-  "George Russell": [92, 89, 88, 87, 86, 88],
-  "Oscar Piastri": [90, 87, 85, 88, 80, 92],
-  "Carlos Sainz": [90, 92, 89, 91, 84, 88],
-  "Kimi Antonelli": [88, 85, 80, 82, 75, 98],
-  "Fernando Alonso": [85, 96, 90, 88, 92, 82],
+// ประกาศตัวแปรเก็บข้อมูลสถิติที่ดึงมาจาก API (ค่าเริ่มต้นใส่ default ไว้กันเหนียว)
+let DRIVER_STATS = {
   "default": [80, 80, 80, 80, 80, 80]
 };
+
+// URL ของ Web App GAS ของคุณ (นำลิงก์ Exec จาก GAS มาใส่ตรงนี้)
+const GAS_STATS_API_URL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec?action=getStats";
+
+// ฟังก์ชันดึงข้อมูลสถิตินักแข่งแบบ Asynchronous
+async function loadDriverStatsAPI() {
+  try {
+    const response = await fetch(GAS_STATS_API_URL);
+    const result = await response.json();
+    
+    if (result.status === "success" && result.data) {
+      DRIVER_STATS = { ...DRIVER_STATS, ...result.data };
+      console.log("✅ Driver Stats Loaded via API");
+    }
+  } catch (error) {
+    console.error("❌ Failed to fetch driver stats:", error);
+  }
+}
 
 // ฟังก์ชันสำหรับวาดกราฟ Radar ลงใน Hero Modal
 function renderDriverRadar(fullName, teamColor) {
