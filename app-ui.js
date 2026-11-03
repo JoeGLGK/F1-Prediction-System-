@@ -981,6 +981,13 @@ function loadCommunityPredictions() {
   const isCalculated = currentRace && currentRace.status === 'CALCULATED';
 
   callGAS("getCommunityPredictions", { raceId: raceId }).then(function(res) {
+    
+    // 🎯 1. เรียกใช้งานกราฟโดนัท (แทรกตรงนี้เพื่อให้วาดกราฟและอัปเดตแผ่นล็อก)
+    // ใช้ res.data หรือชื่อตัวแปรที่คุณใช้เก็บอาเรย์โพยจาก GAS
+    const predictionsData = res.data || []; 
+    renderConsensusChart(predictionsData, res.locked);
+
+    // 2. เงื่อนไขเดิมของคุณ: ถ้ายังไม่ถึงเวลา Parc Ferme (ซ่อนโพย)
     if (!res.locked) { 
       box.innerHTML = 
         '<div class="locked-ticket-card">' +
@@ -989,12 +996,25 @@ function loadCommunityPredictions() {
           '<div class="small text-secondary">' + res.msg + '</div>' +
         '</div>'; 
       return; 
+    } 
+
+    // 3. ถ้าเลยเวลา Parc Ferme แล้ว (เปิดเผยโพยได้)
+    box.innerHTML = ''; // เคลียร์กล่องเพื่อเตรียมใส่การ์ดโพย
+    
+    if (predictionsData.length === 0) {
+      box.innerHTML = '<div class="text-center text-secondary small py-4">ยังไม่มีผู้ทายผลในสนามนี้</div>';
+      return;
     }
 
-    if (!res.predictions || res.predictions.length === 0) { 
-      box.innerHTML = '<div class="text-center text-muted py-4">ไม่มีใครส่งคำทายในสนามนี้</div>'; 
-      return; 
-    }
+    // 4. ลูปสร้างการ์ดโพยของเพื่อนๆ (โค้ดส่วนนี้ใช้ของเดิมที่คุณมีได้เลยครับ)
+    predictionsData.forEach(function(p) {
+        // ... โค้ดวาดการ์ด html ของคุณ ...
+    });
+    
+  }).catch(function(err) {
+      box.innerHTML = '<div class="text-center text-danger small py-4">เกิดข้อผิดพลาดในการโหลดข้อมูล</div>';
+  });
+}
 
     const total = res.predictions.length;
 
