@@ -1762,32 +1762,32 @@ const driverColors = {
   "Alonso": "#229971", "Stroll": "#229971", // Aston Martin
 };
 
-// ฟังก์ชันหลักสำหรับประมวลผลสถิติ
+// ฟังก์ชันสำหรับประมวลผลและวาดกราฟสถิติมหาชน (Consensus Chart) พร้อมเปอร์เซ็นต์
 function renderConsensusChart(predictionsData, isParcFermeClosed) {
   const lockOverlay = document.getElementById('parcFermeLock');
   const totalBadge = document.getElementById('totalVotersBadge');
   
-  // อัปเดตจำนวนผู้ทายผลทั้งหมด
   const totalVotes = predictionsData.length;
-  totalBadge.innerHTML = `${totalVotes} PADDOCK PASSES`;
-
-  // ตรวจสอบระบบล็อก Parc Fermé
-  if (!isParcFermeClosed) {
-    lockOverlay.style.display = 'flex'; // ล็อกกราฟไว้
-    return; 
-  } else {
-    lockOverlay.style.display = 'none'; // ปลดล็อก
+  if (totalBadge) {
+    totalBadge.innerHTML = `${totalVotes} PADDOCK PASSES`;
   }
 
-  // หากไม่มีข้อมูลเลย
+  // 1. ระบบล็อก: ถ้ายังไม่ถึงเวลา Parc Ferm์ (ยังไม่ปิดรับทายผล) ให้แสดงแผ่นล็อกซ่อนกราฟไว้
+  if (lockOverlay) {
+    if (!isParcFermeClosed) {
+      lockOverlay.style.display = 'flex'; 
+    } else {
+      lockOverlay.style.display = 'none'; 
+    }
+  }
+
   if (totalVotes === 0) return;
 
-  // 1. นับคะแนนโหวตแชมป์ (P1) และ Fastest Lap (FL)
+  // 2. นับคะแนนโหวตแชมป์ (P1) และ Fastest Lap (FL)
   let p1Counts = {};
   let flCounts = {};
 
   predictionsData.forEach(p => {
-    // สมมติว่าโครงสร้างข้อมูลมี p.p1 และ p.fl (ปรับชื่อ key ตามที่คุณดึงมาจาก Sheets)
     const p1 = p.p1 || p.pos1; 
     const fl = p.fl || p.posFL;
     
@@ -1798,12 +1798,12 @@ function renderConsensusChart(predictionsData, isParcFermeClosed) {
   // --- ประมวลผลกราฟโดนัท (P1) ---
   const p1Labels = Object.keys(p1Counts);
   const p1Data = Object.values(p1Counts);
-  // สุ่มสีกรณีที่ไม่มีในฐานข้อมูลสี
   const p1Colors = p1Labels.map(name => driverColors[name.split(' ').pop()] || '#888888');
 
-  const ctx = document.getElementById('p1PredictionChart').getContext('2d');
+  const canvasEl = document.getElementById('p1PredictionChart');
+  if (!canvasEl) return;
+  const ctx = canvasEl.getContext('2d');
   
-  // ลบกราฟอันเก่าทิ้งก่อนวาดใหม่
   if (communityChartInstance) {
     communityChartInstance.destroy();
   }
@@ -1822,15 +1822,39 @@ function renderConsensusChart(predictionsData, isParcFermeClosed) {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      cutout: '75%', // ความกลวงตรงกลาง
+      cutout: '75%', 
       plugins: {
-       legend: {
+        legend: {
           position: 'right', 
           labels: { 
             color: '#ffffff', 
-            font: { family: 'Kanit', size: 10 }, // ลดฟอนต์ลง 1 เบอร์
-            boxWidth: 10, // บีบกล่องสีให้เล็กลงนิดนึง
-            padding: 15 // เพิ่มระยะห่างให้ชื่อไม่ชนกัน
+            font: { family: 'Kanit', size: 11 },
+            boxWidth: 12,
+            padding: 12,
+            // 🎯 ฟังก์ชันแสดง เปอร์เซ็นต์ และสัดส่วน (จำนวนโหวต/ทั้งหมด) ต่อท้ายชื่อนักแข่ง
+            generateLabels: function(chart) {
+              const data = chart.data;
+              if (data.labels.length && data.datasets.length) {
+                const dataset = data.datasets[0];
+                const total = dataset.data.reduce((acc, val) => acc + val, 0);
+                
+                return data.labels.map(function(label, i) {
+                  const value = dataset.data[i];
+                  const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                  const color = dataset.backgroundColor[i];
+                  
+                  return {
+                    text: `${label} (${percentage}% - ${value}/${total})`,
+                    fillStyle: color,
+                    strokeStyle: color,
+                    lineWidth: 0,
+                    hidden: isNaN(dataset.data[i]) || chart.getDatasetMeta(0).data[i].hidden,
+                    index: i
+                  };
+                });
+              }
+              return [];
+            }
           }
         }
       }
@@ -1841,7 +1865,6 @@ function renderConsensusChart(predictionsData, isParcFermeClosed) {
   let topFlDriver = "-";
   let topFlCount = 0;
   
-  // หาคนที่ถูกโหวต FL มากที่สุด
   for (const [driver, count] of Object.entries(flCounts)) {
     if (count > topFlCount) {
       topFlCount = count;
@@ -1849,12 +1872,15 @@ function renderConsensusChart(predictionsData, isParcFermeClosed) {
     }
   }
 
-  // คำนวณเปอร์เซ็นต์และอัปเดต UI
   if (topFlCount > 0) {
     const flPercent = Math.round((topFlCount / totalVotes) * 100);
-    document.getElementById('consensusFlText').innerHTML = `<i class="fa-solid fa-bolt text-info"></i> เต็ง Fastest Lap: ${topFlDriver}`;
-    document.getElementById('consensusFlPercent').innerText = `${flPercent}% (${topFlCount}/${totalVotes})`;
-    document.getElementById('consensusFlBar').style.width = `${flPercent}%`;
+    const flTextEl = document.getElementById('consensusFlText');
+    const flPercentEl = document.getElementById('consensusFlPercent');
+    const flBarEl = document.getElementById('consensusFlBar');
+
+    if (flTextEl) flTextEl.innerHTML = `<i class="fa-solid fa-bolt text-info"></i> เต็ง Fastest Lap: ${topFlDriver}`;
+    if (flPercentEl) flPercentEl.innerText = `${flPercent}% (${topFlCount}/${totalVotes})`;
+    if (flBarEl) flBarEl.style.width = `${flPercent}%`;
   }
 }
 // ==========================================
