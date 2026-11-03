@@ -70,7 +70,7 @@ function buildDriverGrid() {
     const logoUrl = TEAM_LOGOS[info.team] ? getDriveDirectLink(TEAM_LOGOS[info.team]) : '';
     const logoHtml = logoUrl ? '<img src="' + logoUrl + '" class="driver-pick-team-logo" alt="">' : '';
 
-    html += '<div class="driver-pick-btn" data-drivername="' + name.replace(/"/g, '&quot;') + '" style="--team-color: ' + info.color + '" onclick="confirmSelectDriver(\'' + safeName + '\')">' +
+   html += '<div class="driver-pick-btn" data-drivername="' + name.replace(/"/g, '&quot;') + '" style="--team-color: ' + info.color + '" onclick="previewDriverBeforeSelect(\'' + safeName + '\')">' +
               '<div class="driver-pick-badges"></div>' +
               '<div class="driver-pick-name">' + name + '</div>' +
               '<div class="driver-pick-team">' + info.team + logoHtml + '</div>' +
@@ -2009,3 +2009,131 @@ async function loadLatestNews() {
     container.innerHTML = '<div class="text-danger small py-5 text-center w-100">เกิดข้อผิดพลาดในการโหลดข่าวสาร</div>';
   }
 }
+// =========================================================
+// 🎯 DRIVER FORM RADAR & PREDICTION HERO FLOW
+// =========================================================
+let heroRadarChartInstance = null;
+
+// ข้อมูลจำลองสถิติ 6 ด้าน (เต็ม 100) [Quali, Racecraft, Tyre, Consistency, Wet, Form]
+const DRIVER_STATS = {
+  "Max Verstappen": [97, 98, 92, 95, 96, 90],
+  "Lando Norris": [96, 90, 88, 92, 85, 95],
+  "Charles Leclerc": [96, 88, 85, 89, 82, 90],
+  "Lewis Hamilton": [88, 95, 96, 90, 94, 85],
+  "George Russell": [92, 89, 88, 87, 86, 88],
+  "Oscar Piastri": [90, 87, 85, 88, 80, 92],
+  "Carlos Sainz": [90, 92, 89, 91, 84, 88],
+  "Kimi Antonelli": [88, 85, 80, 82, 75, 98],
+  "Fernando Alonso": [85, 96, 90, 88, 92, 82],
+  "default": [80, 80, 80, 80, 80, 80]
+};
+
+// ฟังก์ชันสำหรับวาดกราฟ Radar ลงใน Hero Modal
+function renderDriverRadar(fullName, teamColor) {
+  const canvasEl = document.getElementById('driverRadarChart');
+  if (!canvasEl) return;
+  const ctx = canvasEl.getContext('2d');
+  
+  if (heroRadarChartInstance) heroRadarChartInstance.destroy();
+
+  const statsData = DRIVER_STATS[fullName] || DRIVER_STATS["default"];
+  const colorCode = teamColor || "#0dcaf0";
+
+  heroRadarChartInstance = new Chart(ctx, {
+    type: 'radar',
+    data: {
+      labels: ['Quali', 'Racecraft', 'Tyre Mgmt', 'Consistency', 'Wet', 'Form'],
+      datasets: [{
+        label: fullName,
+        data: statsData,
+        backgroundColor: colorCode + '40', 
+        borderColor: colorCode,
+        pointBackgroundColor: '#000',
+        pointBorderColor: colorCode,
+        pointHoverBackgroundColor: colorCode,
+        pointHoverBorderColor: '#fff',
+        borderWidth: 2,
+        pointRadius: 3
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        r: {
+          angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+          grid: { color: 'rgba(255, 255, 255, 0.1)' },
+          pointLabels: { color: '#94a3b8', font: { family: 'Rajdhani', size: 11, weight: 'bold' } },
+          ticks: { display: false, min: 50, max: 100 } 
+        }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(10, 12, 16, 0.95)',
+          titleColor: '#fff',
+          bodyColor: colorCode,
+          titleFont: { family: 'Rajdhani', size: 14, weight: 'bold' },
+          bodyFont: { family: 'Rajdhani', size: 13, weight: 'bold' },
+          borderColor: colorCode,
+          borderWidth: 1,
+          displayColors: false,
+          callbacks: {
+            label: function(context) { return context.raw + ' / 100'; }
+          }
+        }
+      }
+    }
+  });
+}
+
+// 🎯 ฟังก์ชันถูกเรียกเมื่อกดนักแข่งจากหน้า "ทายผล"
+function previewDriverBeforeSelect(fullName) {
+  triggerHaptic();
+  const info = DRIVER_INFO[fullName];
+  if(!info) return;
+
+  const parts = fullName.split(' ');
+  document.getElementById('heroDriverFirstName').innerText = parts[0];
+  document.getElementById('heroDriverLastName').innerText = parts.slice(1).join(' ');
+  document.getElementById('heroTeamName').innerText = info.team;
+  document.getElementById('heroTeamLogo').src = getDriveDirectLink(TEAM_LOGOS[info.team] || '');
+  document.getElementById('heroDriverImg').src = getDriveDirectLink(info.heroImg || info.img); 
+  document.getElementById('heroBgColor').style.background = `linear-gradient(to bottom, #0a0e1c 0%, ${info.color}40 15%, #0a0e1c 65%)`;
+
+  // วาดกราฟ
+  renderDriverRadar(fullName, info.color);
+
+  // ตั้งค่าปุ่มกดเลือกให้ทำงานในระบบทายผล
+  const actionDiv = document.getElementById('heroPredictAction');
+  const btn = document.getElementById('btnConfirmHeroPick');
+  const slotLabels = { 'pos1': 'P1', 'pos2': 'P2', 'pos3': 'P3', 'pos4': 'P4', 'posFL': 'FASTEST LAP' };
+  
+  if (actionDiv && btn && currentSelectingSlot) {
+    actionDiv.style.display = 'block';
+    document.getElementById('lblHeroSlot').innerText = slotLabels[currentSelectingSlot] || '';
+    btn.onclick = function() {
+      // เมื่อกดยืนยัน ให้ปิด Hero Modal และส่งชื่อไปเข้าฟังก์ชันเลือกของเดิม
+      if (window.driverHeroModalInstance) window.driverHeroModalInstance.hide();
+      confirmSelectDriver(fullName);
+    };
+  }
+
+  if (!window.driverHeroModalInstance) {
+    window.driverHeroModalInstance = new bootstrap.Modal(document.getElementById('driverHeroModal'));
+  }
+  window.driverHeroModalInstance.show();
+}
+
+// 🎯 ปรับปรุงฟังก์ชันเดิม (ถูกเรียกเมื่อกดจากหน้า Standings) ให้ซ่อนปุ่มทายผล
+const originalOpenDriverHero = openDriverHero;
+openDriverHero = function(fullName, rowEl) {
+  originalOpenDriverHero(fullName, rowEl);
+  
+  const info = DRIVER_INFO[fullName];
+  if (info) renderDriverRadar(fullName, info.color);
+  
+  // ซ่อนปุ่มเลือกนักแข่ง เพราะเรากดเข้ามาดูประวัติเฉยๆ จาก Standings
+  const actionDiv = document.getElementById('heroPredictAction');
+  if (actionDiv) actionDiv.style.display = 'none';
+};
