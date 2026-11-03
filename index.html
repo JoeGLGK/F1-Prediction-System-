@@ -578,6 +578,38 @@
             <div class="lock-desc">Revealed after Parc Fermé</div>
           </div>
         </div>
+        <!-- 🎯 ห่อหุ้มด้วย id="consensusContainer" และซ่อนไว้ก่อน (display: none) -->
+<div id="consensusContainer" style="display: none;" class="consensus-card position-relative p-3 mb-3">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <span class="text-info" style="font-family: 'Share Tech Mono', monospace; font-size: 0.9rem;">
+      <i class="fa-solid fa-bolt"></i> CONSENSUS TELEMETRY
+    </span>
+    <span id="totalVotersBadge" class="badge" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);">0 PADDOCK PASSES</span>
+  </div>
+
+  <!-- ส่วนพื้นที่กราฟโดนัท P1 -->
+  <div class="chart-container position-relative mb-3 d-flex justify-content-center" style="height: 160px; width: 100%;">
+    <canvas id="p1PredictionChart"></canvas>
+  </div>
+
+  <!-- แถบ Fastest Lap -->
+  <div class="fl-consensus mt-2">
+    <div class="d-flex justify-content-between text-white mb-1" style="font-size: 0.85rem; font-family: 'Kanit', sans-serif;">
+      <span id="consensusFlText"><i class="fa-solid fa-bolt text-info"></i> เต็ง Fastest Lap: --</span>
+      <span class="text-info" id="consensusFlPercent">0% (0/0)</span>
+    </div>
+    <div class="progress" style="height: 6px; background: #2a2d3e; border-radius: 10px;">
+      <div id="consensusFlBar" class="progress-bar bg-info" style="width: 0%; border-radius: 10px; box-shadow: 0 0 8px rgba(0, 255, 255, 0.5);"></div>
+    </div>
+  </div>
+
+  <!-- แผ่นล็อกข้อมูล Parc Fermé -->
+  <div id="parcFermeLock" class="parc-ferme-overlay" style="display: none;">
+    <i class="fa-solid fa-lock mb-2 lock-icon"></i>
+    <div class="lock-title">DATA ENCRYPTED</div>
+    <div class="lock-desc">Revealed after Parc Fermé</div>
+  </div>
+</div>
         <!-- 🎯 จบกล่องกราฟ -->
 
         <!-- รายการโพยของเพื่อนๆ จะถูกโหลดมาใส่ใน div นี้ -->
