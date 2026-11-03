@@ -1944,12 +1944,13 @@ function renderConsensusChart(predictionsData, isParcFermeClosed) {
       maintainAspectRatio: false,
       cutout: '75%', // ความกลวงตรงกลาง
       plugins: {
-        legend: {
-          position: 'right', // ย้ายชื่อไปไว้ด้านขวาให้ดูง่ายบนมือถือ
+       legend: {
+          position: 'right', 
           labels: { 
             color: '#ffffff', 
-            font: { family: 'Kanit', size: 11 },
-            boxWidth: 12
+            font: { family: 'Kanit', size: 10 }, // ลดฟอนต์ลง 1 เบอร์
+            boxWidth: 10, // บีบกล่องสีให้เล็กลงนิดนึง
+            padding: 15 // เพิ่มระยะห่างให้ชื่อไม่ชนกัน
           }
         }
       }
