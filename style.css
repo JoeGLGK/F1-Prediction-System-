@@ -3658,3 +3658,102 @@ body {
 .news-card-cinematic:active .news-headline-overlay {
   color: #e2e8f0; 
 }
+/* =========================================
+   📻 TEAM RADIO UI & ANIMATIONS
+   ========================================= */
+/* ปุ่มวิทยุลอยตัว */
+.team-radio-fab {
+  position: fixed;
+  bottom: 90px; /* ขยับหนีปุ่ม Navigation ด้านล่าง */
+  right: 20px;
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #e10600 0%, #a80000 100%);
+  color: white;
+  border: 2px solid #ff4d4d;
+  font-size: 1.5rem;
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.team-radio-fab:active { transform: scale(0.9); }
+
+/* เอฟเฟกต์กระเพื่อมเรียกร้องความสนใจ */
+.radio-pulse {
+  position: absolute;
+  width: 100%; height: 100%;
+  border-radius: 50%;
+  background: rgba(225, 6, 0, 0.5);
+  animation: pulse-ring 2s infinite;
+  z-index: -1;
+}
+@keyframes pulse-ring {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+/* หน้าต่าง HUD วิทยุ */
+.radio-panel-overlay {
+  position: fixed; top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 1100;
+  display: flex; align-items: center; justify-content: center;
+}
+.radio-panel-content {
+  background: #0a0e1c;
+  border: 1px solid #3b82f6;
+  border-radius: 12px;
+  width: 90%; max-width: 400px;
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+  overflow: hidden;
+}
+.radio-header {
+  background: #111827;
+  padding: 10px 15px;
+  display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+.live-dot {
+  width: 10px; height: 10px;
+  background-color: #ef4444;
+  border-radius: 50%;
+  animation: blink 1s infinite;
+}
+@keyframes blink { 50% { opacity: 0.3; } }
+.btn-close-radio {
+  background: transparent; border: none; color: #9ca3af; font-size: 1.2rem;
+}
+.radio-body {
+  padding: 20px;
+  min-height: 120px;
+}
+.radio-message-text {
+  color: #10b981; /* สีเขียวสไตล์เทอร์มินัล */
+  font-size: 1.1rem;
+  line-height: 1.5;
+  text-shadow: 0 0 5px rgba(16, 185, 129, 0.4);
+}
+
+/* คลื่นเสียง Audio Wave */
+.audio-wave {
+  display: flex; gap: 3px; align-items: flex-end; height: 20px;
+}
+.audio-wave span {
+  display: block; width: 4px; background: #3b82f6; border-radius: 2px;
+  animation: wave-bounce 1s infinite ease-in-out;
+}
+.audio-wave span:nth-child(1) { animation-delay: 0.0s; }
+.audio-wave span:nth-child(2) { animation-delay: 0.2s; }
+.audio-wave span:nth-child(3) { animation-delay: 0.4s; }
+.audio-wave span:nth-child(4) { animation-delay: 0.2s; }
+.audio-wave span:nth-child(5) { animation-delay: 0.1s; }
+@keyframes wave-bounce {
+  0%, 100% { height: 4px; }
+  50% { height: 20px; }
+}
