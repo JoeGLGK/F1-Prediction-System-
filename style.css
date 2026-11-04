@@ -3663,9 +3663,9 @@ body {
    ========================================= */
 /* ปุ่มวิทยุลอยตัว */
 .team-radio-fab {
-  position: fixed;
-  bottom: 90px; /* ขยับหนีปุ่ม Navigation ด้านล่าง */
-  right: 20px;
+  position: fixed !important;
+  bottom: 110px !important; /* ขยับให้สูงขึ้นพ้นแถบเมนูด้านล่าง */
+  right: 20px !important;
   width: 55px;
   height: 55px;
   border-radius: 50%;
@@ -3673,8 +3673,8 @@ body {
   color: white;
   border: 2px solid #ff4d4d;
   font-size: 1.5rem;
-  z-index: 1050;
-  display: flex;
+  z-index: 99999 !important; /* 🎯 บังคับให้อยู่เลเยอร์บนสุดของเว็บ */
+  display: flex !important; /* 🎯 บังคับให้แสดงผล */
   align-items: center;
   justify-content: center;
   cursor: pointer;
