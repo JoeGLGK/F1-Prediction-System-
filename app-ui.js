@@ -2138,12 +2138,29 @@ function previewDriverBeforeSelect(fullName) {
 
   const heroPtsEl = document.getElementById('heroPoints');
   if (heroPtsEl) heroPtsEl.innerText = "0"; 
-  document.getElementById('heroPos').innerText = 'P' + currentPos;
+  const heroPosEl = document.getElementById('heroPos');
+  if (heroPosEl) heroPosEl.innerText = 'P' + currentPos;
 
-  // เปิดแสดงแผงสถิติ และเปิดส่วนกราฟเรดาร์พร้อมปุ่มเลือกในโหมดทายผล
+  // ==========================================================
+  // 🔧 จัดการแผงสถิติเฉพาะโหมด "ทายผล" (ย้ายลงด้านล่าง + ลดขนาด)
+  // ==========================================================
   const standardStatsEl = document.getElementById('heroStandardStats');
   const predictSectionEl = document.getElementById('heroPredictSection');
-  if (standardStatsEl) standardStatsEl.style.display = 'block';
+  
+  if (standardStatsEl) {
+    standardStatsEl.style.display = 'block';
+    standardStatsEl.style.marginTop = "35px"; // ขยับกล่องลงด้านล่าง (ปรับตัวเลขได้ตามต้องการ)
+    
+    // ลดขนาดฟอนต์ของตัวเลขคะแนน
+    if (heroPtsEl && heroPtsEl.parentElement) {
+      heroPtsEl.parentElement.style.fontSize = "2.0rem";
+    }
+    // ลดขนาดฟอนต์ของตัวเลขอันดับ
+    if (heroPosEl) {
+      heroPosEl.style.fontSize = "2.0rem";
+    }
+  }
+  
   if (predictSectionEl) predictSectionEl.style.display = 'block';
 
   // วาดกราฟ Radar
@@ -2196,7 +2213,9 @@ function previewDriverBeforeSelect(fullName) {
   }
 }
 
-// ฟังก์ชันเมื่อกดดูจากหน้า Standings
+// ==========================================================
+// 🎯 ฟังก์ชันเมื่อกดดูจากหน้า Standings
+// ==========================================================
 const originalOpenDriverHero = openDriverHero;
 openDriverHero = function(fullName, rowEl) {
   triggerHaptic();
@@ -2214,19 +2233,37 @@ openDriverHero = function(fullName, rowEl) {
   document.getElementById('heroTeamName').innerText = info.team;
   document.getElementById('heroTeamLogo').src = getDriveDirectLink(TEAM_LOGOS[info.team] || '');
   document.getElementById('heroDriverImg').src = getDriveDirectLink(info.heroImg || info.img); 
-  document.getElementById('heroPos').innerText = 'P' + pos;
+  
+  const heroPtsEl = document.getElementById('heroPoints');
+  const heroPosEl = document.getElementById('heroPos');
+  if (heroPosEl) heroPosEl.innerText = 'P' + pos;
 
+  // ==========================================================
+  // 🔧 จัดการแผงสถิติโหมด "Standings" (รีเซ็ตตำแหน่งและขนาดกลับเป็นปกติ)
+  // ==========================================================
   const standardStatsEl = document.getElementById('heroStandardStats');
   const predictSectionEl = document.getElementById('heroPredictSection');
-  if (standardStatsEl) standardStatsEl.style.display = 'block';
+  
+  if (standardStatsEl) {
+    standardStatsEl.style.display = 'block';
+    standardStatsEl.style.marginTop = "0px"; // รีเซ็ตตำแหน่งกลับไปค่าเดิม
+    
+    // รีเซ็ตขนาดฟอนต์กลับไปใช้ค่าเดิมจาก CSS
+    if (heroPtsEl && heroPtsEl.parentElement) {
+      heroPtsEl.parentElement.style.fontSize = ""; 
+    }
+    if (heroPosEl) {
+      heroPosEl.style.fontSize = ""; 
+    }
+  }
+  
   // ซ่อนกราฟเรดาร์และปุ่มเลือกเมื่อเปิดจากหน้า Standings
   if (predictSectionEl) predictSectionEl.style.display = 'none';
 
-  const ptsEl = document.getElementById('heroPoints');
-  ptsEl.innerText = "0"; 
+  if (heroPtsEl) heroPtsEl.innerText = "0"; 
   
   setTimeout(() => {
-    animateCountUp(ptsEl, pts, 2200); 
+    animateCountUp(heroPtsEl, pts, 2200); 
   }, 10); 
 
   document.getElementById('heroBgColor').style.background = `linear-gradient(to bottom, #0a0e1c 0%, ${info.color}40 15%, #0a0e1c 65%)`;
