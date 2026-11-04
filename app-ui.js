@@ -2142,22 +2142,32 @@ function previewDriverBeforeSelect(fullName) {
   if (heroPosEl) heroPosEl.innerText = 'P' + currentPos;
 
   // ==========================================================
-  // 🔧 จัดการแผงสถิติเฉพาะโหมด "ทายผล" (ย้ายลงด้านล่าง + ลดขนาด)
+  // 🔧 จัดการแผงสถิติเฉพาะโหมด "ทายผล" (จัดระนาบซ้าย + ขยายขนาด)
   // ==========================================================
   const standardStatsEl = document.getElementById('heroStandardStats');
   const predictSectionEl = document.getElementById('heroPredictSection');
   
   if (standardStatsEl) {
     standardStatsEl.style.display = 'block';
-    standardStatsEl.style.marginTop = "35px"; // ขยับกล่องลงด้านล่าง (ปรับตัวเลขได้ตามต้องการ)
+    standardStatsEl.style.marginTop = "35px"; 
     
-    // ลดขนาดฟอนต์ของตัวเลขคะแนน
+    // ตั้งค่าให้คะแนน (Points) และอันดับ (Championship) อยู่ระนาบเดียวกันชิดซ้าย
+    standardStatsEl.style.display = "flex";
+    standardStatsEl.style.flexDirection = "column";
+    standardStatsEl.style.alignItems = "flex-start"; // บังคับชิดซ้าย
+    standardStatsEl.style.gap = "15px"; // ระยะห่างระหว่าง Points กับ Championship
+    
+    // เพิ่มขนาดตัวอักษรคะแนน (Points) ให้ใหญ่ขึ้น
     if (heroPtsEl && heroPtsEl.parentElement) {
-      heroPtsEl.parentElement.style.fontSize = "2.0rem";
+      heroPtsEl.parentElement.style.fontSize = "3.5rem"; // ปรับขนาดตัวเลขให้ใหญ่
+      heroPtsEl.parentElement.style.lineHeight = "0.9";
+      heroPtsEl.parentElement.style.textAlign = "left";
     }
-    // ลดขนาดฟอนต์ของตัวเลขอันดับ
+    // เพิ่มขนาดตัวอักษรอันดับ (Championship P1) ให้ใหญ่ขึ้น
     if (heroPosEl) {
-      heroPosEl.style.fontSize = "2.0rem";
+      heroPosEl.style.fontSize = "3.5rem"; // ปรับขนาดตัวเลขให้ใหญ่
+      heroPosEl.style.lineHeight = "0.9";
+      heroPosEl.style.textAlign = "left";
     }
   }
   
