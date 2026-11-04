@@ -867,5 +867,36 @@
       });
     }
   </script>
+    <!-- 📻 FLOATING TEAM RADIO BUTTON -->
+<button id="btnTeamRadio" class="team-radio-fab shadow-lg" onclick="openTeamRadio()">
+  <div class="radio-pulse"></div>
+  <i class="fa-solid fa-headset"></i>
+</button>
+
+<!-- 📡 TEAM RADIO HUD PANEL -->
+<div id="radioPanelOverlay" class="radio-panel-overlay d-none">
+  <div class="radio-panel-content">
+    <div class="radio-header">
+      <div class="d-flex align-items-center">
+        <span class="live-dot me-2"></span> 
+        <span class="f1-font text-white" style="letter-spacing: 1px;">PIT WALL RADIO</span>
+      </div>
+      <button type="button" class="btn-close-radio" onclick="closeTeamRadio()">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    
+    <div class="radio-body">
+      <!-- คลื่นเสียงตอนกำลังโหลด/พูด -->
+      <div id="radioAudioWave" class="audio-wave d-none mb-2">
+         <span></span><span></span><span></span><span></span><span></span>
+      </div>
+      <!-- พื้นที่แสดงข้อความ AI -->
+      <div id="radioMessage" class="radio-message-text f1-font">
+        Standby for race engineer...
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
