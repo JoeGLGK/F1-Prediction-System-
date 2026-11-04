@@ -2159,13 +2159,13 @@ function previewDriverBeforeSelect(fullName) {
     
     // เพิ่มขนาดตัวอักษรคะแนน (Points) ให้ใหญ่ขึ้น
     if (heroPtsEl && heroPtsEl.parentElement) {
-      heroPtsEl.parentElement.style.fontSize = "3.5rem"; // ปรับขนาดตัวเลขให้ใหญ่
+      heroPtsEl.parentElement.style.fontSize = "4.5rem"; // ปรับขนาดตัวเลขให้ใหญ่
       heroPtsEl.parentElement.style.lineHeight = "0.9";
       heroPtsEl.parentElement.style.textAlign = "left";
     }
     // เพิ่มขนาดตัวอักษรอันดับ (Championship P1) ให้ใหญ่ขึ้น
     if (heroPosEl) {
-      heroPosEl.style.fontSize = "3.5rem"; // ปรับขนาดตัวเลขให้ใหญ่
+      heroPosEl.style.fontSize = "4.5rem"; // ปรับขนาดตัวเลขให้ใหญ่
       heroPosEl.style.lineHeight = "0.9";
       heroPosEl.style.textAlign = "left";
     }
