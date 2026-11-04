@@ -2283,3 +2283,74 @@ openDriverHero = function(fullName, rowEl) {
   }
   window.driverHeroModalInstance.show();
 };
+// =========================================================
+// 🤖 TEAM RADIO AI CONTROLLER (Frontend Logic)
+// =========================================================
+
+let aiTypeWriterTimeout = null;
+
+function openTeamRadio() {
+  triggerHaptic();
+  
+  // 1. เปิดหน้าต่างวิทยุ
+  const panel = document.getElementById('radioPanelOverlay');
+  const msgEl = document.getElementById('radioMessage');
+  const waveEl = document.getElementById('radioAudioWave');
+  panel.classList.remove('d-none');
+  
+  // 2. ดึงชื่อผู้เล่น และชื่อสนามปัจจุบัน
+  const player = localStorage.getItem('f1_player_name') || 'Driver';
+  const rSel = document.getElementById('selRace');
+  let raceName = "สนามถัดไป";
+  if (rSel && rSel.selectedIndex > 0) {
+    // ลบอิโมจิวงกลมออก เอาแค่ชื่อสนาม
+    raceName = rSel.options[rSel.selectedIndex].text.replace(/🟢|🔴|🏁|⚡/g, '').trim();
+  }
+
+  // 3. แสดงสถานะกำลังโหลด
+  msgEl.innerHTML = '<span class="text-warning">CONNECTING PIT WALL...</span>';
+  waveEl.classList.remove('d-none');
+
+  // 4. วิ่งไปเรียกฟังก์ชันหลังบ้าน (GAS) ที่เราใส่ Gemini ไว้
+  callGAS("askRaceEngineer", { playerName: player, raceName: raceName })
+    .then(function(res) {
+      if (res && res.success) {
+        // เมื่อ AI ตอบกลับมา ให้เรียกใช้เอฟเฟกต์พิมพ์ดีด
+        typeWriterEffect(res.message, msgEl, waveEl);
+      } else {
+        msgEl.innerHTML = '<span class="text-danger">CONNECTION LOST. PIT WALL IS UNAVAILABLE.</span>';
+        waveEl.classList.add('d-none');
+      }
+    })
+    .catch(function(err) {
+      msgEl.innerHTML = '<span class="text-danger">*STATIC NOISE* SIGNAL LOST.</span>';
+      waveEl.classList.add('d-none');
+    });
+}
+
+function typeWriterEffect(text, textElement, waveElement) {
+  textElement.innerHTML = '';
+  let i = 0;
+  
+  if (aiTypeWriterTimeout) clearTimeout(aiTypeWriterTimeout);
+  
+  function type() {
+    if (i < text.length) {
+      textElement.innerHTML += text.charAt(i);
+      i++;
+      // ความเร็วในการพิมพ์ (สุ่มให้ดูเหมือนคนพิมพ์/พูดจริง 20-50ms)
+      const speed = Math.floor(Math.random() * 30) + 20; 
+      aiTypeWriterTimeout = setTimeout(type, speed);
+    } else {
+      // พิมพ์เสร็จแล้ว ปิดคลื่นเสียง
+      if(waveElement) waveElement.classList.add('d-none');
+    }
+  }
+  type();
+}
+
+function closeTeamRadio() {
+  triggerHaptic();
+  document.getElementById('radioPanelOverlay').classList.add('d-none');
+  if (aiTypeWriterTimeout) clearTimeout(aiTypeWriterTimeout);
+}
