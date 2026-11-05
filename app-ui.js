@@ -48,6 +48,15 @@ window.onload = function() {
   const driverModalEl = document.getElementById('driverSelectorModal');
   if (driverModalEl) {
     driverSelectorModalInstance = new bootstrap.Modal(driverModalEl);
+    
+    // 🎯 เพื่อคืนค่าปุ่ม Radio เมื่อปิดหน้าต่างเลือกนักแข่ง
+    driverModalEl.addEventListener('hidden.bs.modal', function () {
+      const predTab = document.getElementById('tab-pred');
+      const radioBtn = document.getElementById('btnTeamRadio');
+      if (predTab && predTab.style.display !== 'none' && radioBtn) {
+        radioBtn.style.setProperty('display', 'flex', 'important');
+      }
+    });
   }
 
   const optHtml = '<option value="" disabled selected>-- เลือกนักแข่ง --</option>' + DRIVERS.map(function(d) { return '<option value="' + d + '">' + d + '</option>'; }).join('');
@@ -84,6 +93,13 @@ function buildDriverGrid() {
 function openDriverSelector(slotId) {
   triggerHaptic();
   currentSelectingSlot = slotId;
+
+  // 🎯 ซ่อนปุ่ม Radio ทันทีเมื่อเปิดหน้าต่างเลือกนักแข่ง
+  const radioBtn = document.getElementById('btnTeamRadio');
+  if (radioBtn) {
+    radioBtn.style.setProperty('display', 'none', 'important');
+  }
+
   const titles = { 
     'pos1': 'P1 (อันดับที่ 1)', 
     'pos2': 'P2 (อันดับที่ 2)', 
@@ -103,11 +119,11 @@ function openDriverSelector(slotId) {
   });
 
   const currentPicks = {
-    'p1': document.getElementById('pos1') ? document.getElementById('pos1').value : '',
-    'p2': document.getElementById('pos2') ? document.getElementById('pos2').value : '',
-    'p3': document.getElementById('pos3') ? document.getElementById('pos3').value : '',
-    'p4': document.getElementById('pos4') ? document.getElementById('pos4').value : '',
-    'pfl': document.getElementById('posFL') ? document.getElementById('posFL').value : ''
+    'p1': document.getElementById('pos1') ? document.getElementById('pos1'].value : '',
+    'p2': document.getElementById('pos2') ? document.getElementById('pos2'].value : '',
+    'p3': document.getElementById('pos3') ? document.getElementById('pos3'].value : '',
+    'p4': document.getElementById('pos4') ? document.getElementById('pos4'].value : '',
+    'pfl': document.getElementById('posFL') ? document.getElementById('posFL'].value : ''
   };
   
   const posLabels = { 'p1': 'P1', 'p2': 'P2', 'p3': 'P3', 'p4': 'P4', 'pfl': 'FL' };
@@ -322,6 +338,18 @@ function showTab(tabId, el) {
   document.querySelectorAll('.f1-nav-link').forEach(function(l) { l.classList.remove('active'); }); 
   document.getElementById(tabId).style.display = 'block'; 
   el.classList.add('active'); 
+
+  // 🎯 ควบคุมการแสดงผลปุ่ม Radio (แสดงเฉพาะหน้าทายผล tab-pred เท่านั้น)
+  const radioBtn = document.getElementById('btnTeamRadio');
+  if (radioBtn) {
+    if (tabId === 'tab-pred') {
+      radioBtn.style.setProperty('display', 'flex', 'important');
+    } else {
+      radioBtn.style.setProperty('display', 'none', 'important');
+      // เผื่อกรณีเปิดหน้าต่างวิทยุค้างไว้แล้วเปลี่ยนหน้า ให้ปิด Modal วิทยุด้วย
+      closeTeamRadio();
+    }
+  }
 }
 
 function forceRefreshData() { 
@@ -2349,10 +2377,4 @@ function typeWriterEffect(text, textElement, waveElement) {
     }
   }
   type();
-}
-
-function closeTeamRadio() {
-  triggerHaptic();
-  document.getElementById('radioPanelOverlay').classList.add('d-none');
-  if (aiTypeWriterTimeout) clearTimeout(aiTypeWriterTimeout);
 }
