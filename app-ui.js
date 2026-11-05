@@ -2313,15 +2313,20 @@ function openTeamRadio() {
 
   // 4. วิ่งไปเรียกฟังก์ชันหลังบ้าน (GAS) ที่เราใส่ Gemini ไว้
   callGAS("askRaceEngineer", { playerName: player, raceName: raceName })
-    .then(function(res) {
-      if (res && res.success) {
-        // เมื่อ AI ตอบกลับมา ให้เรียกใช้เอฟเฟกต์พิมพ์ดีด
-        typeWriterEffect(res.message, msgEl, waveEl);
-      } else {
-        msgEl.innerHTML = '<span class="text-danger">CONNECTION LOST. PIT WALL IS UNAVAILABLE.</span>';
-        waveEl.classList.add('d-none');
-      }
-    })
+.then(function(res) {
+  if (res && res.success) {
+    typeWriterEffect(res.message, msgEl, waveEl);
+  } else {
+    // 🎯 ดึงข้อความ Error จริงๆ จากหลังบ้านมาแสดง
+    let errorMsg = res.message || res.msg || "UNKNOWN ERROR";
+    msgEl.innerHTML = '<span class="text-danger" style="font-size: 0.85rem;">ERROR: ' + errorMsg + '</span>';
+    waveEl.classList.add('d-none');
+  }
+})
+.catch(function(err) {
+  msgEl.innerHTML = '<span class="text-danger" style="font-size: 0.85rem;">JS ERROR: ' + err.toString() + '</span>';
+  waveEl.classList.add('d-none');
+});
     .catch(function(err) {
       msgEl.innerHTML = '<span class="text-danger">*STATIC NOISE* SIGNAL LOST.</span>';
       waveEl.classList.add('d-none');
