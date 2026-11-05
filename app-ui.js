@@ -2311,7 +2311,7 @@ function openTeamRadio() {
   msgEl.innerHTML = '<span class="text-warning">CONNECTING PIT WALL...</span>';
   waveEl.classList.remove('d-none');
 
-  // 4. วิ่งไปเรียกฟังก์ชันหลังบ้าน (GAS)
+// 4. วิ่งไปเรียกฟังก์ชันหลังบ้าน (GAS)
   callGAS("askRaceEngineer", { playerName: player, raceName: raceName })
     .then(function(res) {
       if (res && res.success) {
@@ -2323,21 +2323,11 @@ function openTeamRadio() {
         msgEl.innerHTML = '<span class="text-danger" style="font-size: 0.85rem;">ERROR: ' + errorMsg + '</span>';
         waveEl.classList.add('d-none');
       }
-    })
+    }) 
     .catch(function(err) {
       msgEl.innerHTML = '<span class="text-danger" style="font-size: 0.85rem;">JS ERROR: ' + err.toString() + '</span>';
       waveEl.classList.add('d-none');
-    });
-}
-.catch(function(err) {
-  msgEl.innerHTML = '<span class="text-danger" style="font-size: 0.85rem;">JS ERROR: ' + err.toString() + '</span>';
-  waveEl.classList.add('d-none');
-});
-    .catch(function(err) {
-      msgEl.innerHTML = '<span class="text-danger">*STATIC NOISE* SIGNAL LOST.</span>';
-      waveEl.classList.add('d-none');
-    });
-}
+    }); 
 
 function typeWriterEffect(text, textElement, waveElement) {
   textElement.innerHTML = '';
