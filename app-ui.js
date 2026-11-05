@@ -2328,6 +2328,7 @@ function openTeamRadio() {
       msgEl.innerHTML = '<span class="text-danger" style="font-size: 0.85rem;">JS ERROR: ' + err.toString() + '</span>';
       waveEl.classList.add('d-none');
     }); 
+  }
 
 function typeWriterEffect(text, textElement, waveElement) {
   textElement.innerHTML = '';
