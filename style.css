@@ -3662,19 +3662,20 @@ body {
    📻 TEAM RADIO UI & ANIMATIONS
    ========================================= */
 /* ปุ่มวิทยุลอยตัว */
+/* ปุ่มวิทยุลอยตัว (ซ่อนเป็นค่าเริ่มต้น) */
 .team-radio-fab {
   position: fixed !important;
-  bottom: 110px !important; /* ขยับให้สูงขึ้นพ้นแถบเมนูด้านล่าง */
+  bottom: 110px !important;
   right: 20px !important;
-  width: 55px;
-  height: 55px;
+  width: 40px !important;  /* ปรับขนาดให้เล็กลง (จาก 55px เหลือ 45px) */
+  height: 40px !important; /* ปรับขนาดให้เล็กลง */
   border-radius: 50%;
   background: linear-gradient(135deg, #e10600 0%, #a80000 100%);
   color: white;
   border: 2px solid #ff4d4d;
-  font-size: 1.5rem;
-  z-index: 99999 !important; /* 🎯 บังคับให้อยู่เลเยอร์บนสุดของเว็บ */
-  display: flex !important; /* 🎯 บังคับให้แสดงผล */
+  font-size: 1.0rem !important; /* ปรับขนาดไอคอนเล็กลงตามขนาดปุ่ม */
+  z-index: 99999 !important;
+  display: none !important; /* ⬅️ ซ่อนไว้ก่อนเป็นค่าเริ่มต้น */
   align-items: center;
   justify-content: center;
   cursor: pointer;
