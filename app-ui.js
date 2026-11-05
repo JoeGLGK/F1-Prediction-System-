@@ -37,6 +37,26 @@ function triggerHaptic() {
   if (navigator.vibrate) navigator.vibrate(40); 
 }
 
+// ฟังก์ชันเช็คและคืนค่าปุ่ม Radio เฉพาะเมื่ออยู่หน้าทายผลและไม่มี Modal เลือกนักแข่งเปิดอยู่
+function updateRadioButtonVisibility() {
+  const predTab = document.getElementById('tab-pred');
+  const radioBtn = document.getElementById('btnTeamRadio');
+  const driverModalEl = document.getElementById('driverSelectorModal');
+  const heroModalEl = document.getElementById('driverHeroModal');
+
+  if (!radioBtn) return;
+
+  const isPredTabActive = predTab && predTab.style.display !== 'none';
+  const isDriverModalOpen = driverModalEl && driverModalEl.classList.contains('show');
+  const isHeroModalOpen = heroModalEl && heroModalEl.classList.contains('show');
+
+  if (isPredTabActive && !isDriverModalOpen && !isHeroModalOpen) {
+    radioBtn.style.setProperty('display', 'flex', 'important');
+  } else {
+    radioBtn.style.setProperty('display', 'none', 'important');
+  }
+}
+
 window.onload = function() {
   adminModalInstance = new bootstrap.Modal(document.getElementById('adminModal')); 
   statsModalInstance = new bootstrap.Modal(document.getElementById('statsModal')); 
@@ -48,14 +68,15 @@ window.onload = function() {
   const driverModalEl = document.getElementById('driverSelectorModal');
   if (driverModalEl) {
     driverSelectorModalInstance = new bootstrap.Modal(driverModalEl);
-    
-    // 🎯 เพื่อคืนค่าปุ่ม Radio เมื่อปิดหน้าต่างเลือกนักแข่ง
     driverModalEl.addEventListener('hidden.bs.modal', function () {
-      const predTab = document.getElementById('tab-pred');
-      const radioBtn = document.getElementById('btnTeamRadio');
-      if (predTab && predTab.style.display !== 'none' && radioBtn) {
-        radioBtn.style.setProperty('display', 'flex', 'important');
-      }
+      setTimeout(updateRadioButtonVisibility, 200);
+    });
+  }
+
+  const heroModalEl = document.getElementById('driverHeroModal');
+  if (heroModalEl) {
+    heroModalEl.addEventListener('hidden.bs.modal', function () {
+      setTimeout(updateRadioButtonVisibility, 200);
     });
   }
 
@@ -67,6 +88,7 @@ window.onload = function() {
   loadOpenF1Meetings();
   loadLatestNews();
   loadDriverStatsAPI();
+  updateRadioButtonVisibility();
 };
 
 function buildDriverGrid() {
@@ -80,7 +102,7 @@ function buildDriverGrid() {
     const logoUrl = TEAM_LOGOS[info.team] ? getDriveDirectLink(TEAM_LOGOS[info.team]) : '';
     const logoHtml = logoUrl ? '<img src="' + logoUrl + '" class="driver-pick-team-logo" alt="">' : '';
 
-   html += '<div class="driver-pick-btn" data-drivername="' + name.replace(/"/g, '&quot;') + '" style="--team-color: ' + info.color + '" onclick="previewDriverBeforeSelect(\'' + safeName + '\')">' +
+    html += '<div class="driver-pick-btn" data-drivername="' + name.replace(/"/g, '&quot;') + '" style="--team-color: ' + info.color + '" onclick="previewDriverBeforeSelect(\'' + safeName + '\')">' +
               '<div class="driver-pick-badges"></div>' +
               '<div class="driver-pick-name">' + name + '</div>' +
               '<div class="driver-pick-team">' + info.team + logoHtml + '</div>' +
@@ -119,11 +141,11 @@ function openDriverSelector(slotId) {
   });
 
   const currentPicks = {
-    'p1': document.getElementById('pos1') ? document.getElementById('pos1'].value : '',
-    'p2': document.getElementById('pos2') ? document.getElementById('pos2'].value : '',
-    'p3': document.getElementById('pos3') ? document.getElementById('pos3'].value : '',
-    'p4': document.getElementById('pos4') ? document.getElementById('pos4'].value : '',
-    'pfl': document.getElementById('posFL') ? document.getElementById('posFL'].value : ''
+    'p1': document.getElementById('pos1') ? document.getElementById('pos1').value : '',
+    'p2': document.getElementById('pos2') ? document.getElementById('pos2').value : '',
+    'p3': document.getElementById('pos3') ? document.getElementById('pos3').value : '',
+    'p4': document.getElementById('pos4') ? document.getElementById('pos4').value : '',
+    'pfl': document.getElementById('posFL') ? document.getElementById('posFL').value : ''
   };
   
   const posLabels = { 'p1': 'P1', 'p2': 'P2', 'p3': 'P3', 'p4': 'P4', 'pfl': 'FL' };
@@ -177,6 +199,7 @@ function confirmSelectDriver(driverName) {
     if (driverSelectorModalInstance) {
       driverSelectorModalInstance.hide();
     }
+    setTimeout(updateRadioButtonVisibility, 250);
   }
 }
 
@@ -346,7 +369,6 @@ function showTab(tabId, el) {
       radioBtn.style.setProperty('display', 'flex', 'important');
     } else {
       radioBtn.style.setProperty('display', 'none', 'important');
-      // เผื่อกรณีเปิดหน้าต่างวิทยุค้างไว้แล้วเปลี่ยนหน้า ให้ปิด Modal วิทยุด้วย
       closeTeamRadio();
     }
   }
@@ -738,6 +760,7 @@ function onCenterRaceChange() {
     loadTelemetryHUD(raceId);
   }
 }
+
 function on2025RaceChange() {
   const raceId = document.getElementById('sel2025Race').value; 
   const currentRace = globalRaces.find(function(r) { return r.id === raceId; }); 
@@ -1977,6 +2000,7 @@ function loadCommunityPredictions() {
       box.innerHTML = '<div class="text-center text-danger small py-4">เกิดข้อผิดพลาดในการโหลดข้อมูล<br><span style="font-size:0.7rem; color:#888;">(กรุณารีเฟรช)</span></div>';
   });
 }
+
 // =========================================================
 // 📰 LATEST PADDOCK NEWS (ระบบดึงข่าวอัตโนมัติจาก RSS)
 // =========================================================
@@ -1985,7 +2009,6 @@ async function loadLatestNews() {
   if (!container) return;
 
   try {
-    // ใช้ rss2json ดึงข่าวจาก Motorsport.com F1 Feed
     const rssUrl = 'https://www.motorsport.com/rss/f1/news/';
     const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}&api_key=`;
     
@@ -1997,26 +2020,22 @@ async function loadLatestNews() {
       return;
     }
 
-    // เอาเฉพาะ 6 ข่าวล่าสุด
     const latestNews = data.items.slice(0, 6);
     let newsHtml = '';
     
     latestNews.forEach(item => {
-      // 1. ดึง URL รูปภาพปกข่าว
-      let imgUrl = 'https://lh3.googleusercontent.com/d/1UPM7PH4G6QD3W-9YFb_UTcLFsLWZ2fAj'; // รูปสำรองกรณีไม่มีรูป
+      let imgUrl = 'https://lh3.googleusercontent.com/d/1UPM7PH4G6QD3W-9YFb_UTcLFsLWZ2fAj';
       if (item.enclosure && item.enclosure.link) {
         imgUrl = item.enclosure.link;
       } else if (item.thumbnail) {
         imgUrl = item.thumbnail;
       }
 
-      // 2. คำนวณเวลาว่าลงข่าวผ่านไปกี่ชั่วโมง/วันแล้ว
       const pubDate = new Date(item.pubDate.replace(' ', 'T'));
       const diffHrs = Math.floor((new Date() - pubDate) / (1000 * 60 * 60));
       const diffDays = Math.floor(diffHrs / 24);
       let timeText = diffHrs < 1 ? 'Just now' : (diffHrs < 24 ? `${diffHrs} hrs ago` : `${diffDays} days ago`);
 
-      // 3. สร้าง HTML ของการ์ดข่าว (Cinematic Card)
       newsHtml += `
         <a href="${item.link}" class="news-card-cinematic" target="_blank">
           <img src="${imgUrl}" class="news-bg-img" alt="News Image" onerror="this.src='https://lh3.googleusercontent.com/d/1UPM7PH4G6QD3W-9YFb_UTcLFsLWZ2fAj'">
@@ -2038,20 +2057,18 @@ async function loadLatestNews() {
     container.innerHTML = '<div class="text-danger small py-5 text-center w-100">เกิดข้อผิดพลาดในการโหลดข่าวสาร</div>';
   }
 }
+
 // =========================================================
 // 🎯 DRIVER FORM RADAR & PREDICTION HERO FLOW
 // =========================================================
 let heroRadarChartInstance = null;
 
-// ประกาศตัวแปรเก็บข้อมูลสถิติที่ดึงมาจาก API (ค่าเริ่มต้นใส่ default ไว้กันเหนียว)
 let DRIVER_STATS = {
   "default": [80, 80, 80, 80, 80, 80]
 };
 
-// URL ของ Web App GAS ของคุณ (นำลิงก์ Exec จาก GAS มาใส่ตรงนี้)
 const GAS_STATS_API_URL = "https://script.google.com/macros/s/AKfycbwZ_VB9I7ClOgDpd8bDkaY09CzipETJMeQPDK6Qk6JYVNPdgfXA6ZrmXDG8gYsJ9I6u/exec?action=getStats";
 
-// ฟังก์ชันดึงข้อมูลสถิตินักแข่งแบบ Asynchronous
 async function loadDriverStatsAPI() {
   try {
     const response = await fetch(GAS_STATS_API_URL);
@@ -2066,7 +2083,6 @@ async function loadDriverStatsAPI() {
   }
 }
 
-// ฟังก์ชันสำหรับวาดกราฟ Radar ลงใน Hero Modal
 function renderDriverRadar(fullName, teamColor) {
   const canvasEl = document.getElementById('driverRadarChart');
   if (!canvasEl) return;
@@ -2125,21 +2141,19 @@ function renderDriverRadar(fullName, teamColor) {
   });
 }
 
-// 🎯 ฟังก์ชันถูกเรียกเมื่อกดนักแข่งจากหน้า "ทายผล"
 function previewDriverBeforeSelect(fullName) {
   triggerHaptic();
   
-  const gridModalEl = document.getElementById('driverSelectorModal');
-  let delay = 0;
-  if (gridModalEl && gridModalEl.classList.contains('show') && driverSelectorModalInstance) {
-    driverSelectorModalInstance.hide();
-    delay = 350; 
+  // 🎯 ซ่อนปุ่ม Radio ไว้ตลอดระหว่างดูกราฟนักแข่ง
+  const radioBtn = document.getElementById('btnTeamRadio');
+  if (radioBtn) {
+    radioBtn.style.setProperty('display', 'none', 'important');
   }
 
+  const gridModalEl = document.getElementById('driverSelectorModal');
   const info = DRIVER_INFO[fullName];
   if (!info) return;
 
-  // ดึงข้อมูลคะแนนและอันดับจากตาราง Standings มาแสดงด้วย
   let currentPts = "0";
   let currentPos = "-";
   
@@ -2169,31 +2183,23 @@ function previewDriverBeforeSelect(fullName) {
   const heroPosEl = document.getElementById('heroPos');
   if (heroPosEl) heroPosEl.innerText = 'P' + currentPos;
 
-  // ==========================================================
-  // 🔧 จัดการแผงสถิติเฉพาะโหมด "ทายผล" (จัดระนาบซ้าย + ขยายขนาด)
-  // ==========================================================
   const standardStatsEl = document.getElementById('heroStandardStats');
   const predictSectionEl = document.getElementById('heroPredictSection');
   
   if (standardStatsEl) {
-    standardStatsEl.style.display = 'block';
+    standardStatsEl.style.display = 'flex';
     standardStatsEl.style.marginTop = "35px"; 
-    
-    // ตั้งค่าให้คะแนน (Points) และอันดับ (Championship) อยู่ระนาบเดียวกันชิดซ้าย
-    standardStatsEl.style.display = "flex";
     standardStatsEl.style.flexDirection = "column";
-    standardStatsEl.style.alignItems = "flex-start"; // บังคับชิดซ้าย
-    standardStatsEl.style.gap = "15px"; // ระยะห่างระหว่าง Points กับ Championship
+    standardStatsEl.style.alignItems = "flex-start";
+    standardStatsEl.style.gap = "15px";
     
-    // เพิ่มขนาดตัวอักษรคะแนน (Points) ให้ใหญ่ขึ้น
     if (heroPtsEl && heroPtsEl.parentElement) {
-      heroPtsEl.parentElement.style.fontSize = "4.5rem"; // ปรับขนาดตัวเลขให้ใหญ่
+      heroPtsEl.parentElement.style.fontSize = "4.5rem";
       heroPtsEl.parentElement.style.lineHeight = "0.9";
       heroPtsEl.parentElement.style.textAlign = "left";
     }
-    // เพิ่มขนาดตัวอักษรอันดับ (Championship P1) ให้ใหญ่ขึ้น
     if (heroPosEl) {
-      heroPosEl.style.fontSize = "4.5rem"; // ปรับขนาดตัวเลขให้ใหญ่
+      heroPosEl.style.fontSize = "4.5rem";
       heroPosEl.style.lineHeight = "0.9";
       heroPosEl.style.textAlign = "left";
     }
@@ -2201,7 +2207,6 @@ function previewDriverBeforeSelect(fullName) {
   
   if (predictSectionEl) predictSectionEl.style.display = 'block';
 
-  // วาดกราฟ Radar
   renderDriverRadar(fullName, info.color);
 
   const btn = document.getElementById('btnConfirmHeroPick');
@@ -2251,9 +2256,6 @@ function previewDriverBeforeSelect(fullName) {
   }
 }
 
-// ==========================================================
-// 🎯 ฟังก์ชันเมื่อกดดูจากหน้า Standings
-// ==========================================================
 const originalOpenDriverHero = openDriverHero;
 openDriverHero = function(fullName, rowEl) {
   triggerHaptic();
@@ -2276,17 +2278,13 @@ openDriverHero = function(fullName, rowEl) {
   const heroPosEl = document.getElementById('heroPos');
   if (heroPosEl) heroPosEl.innerText = 'P' + pos;
 
-  // ==========================================================
-  // 🔧 จัดการแผงสถิติโหมด "Standings" (รีเซ็ตตำแหน่งและขนาดกลับเป็นปกติ)
-  // ==========================================================
   const standardStatsEl = document.getElementById('heroStandardStats');
   const predictSectionEl = document.getElementById('heroPredictSection');
   
   if (standardStatsEl) {
     standardStatsEl.style.display = 'block';
-    standardStatsEl.style.marginTop = "0px"; // รีเซ็ตตำแหน่งกลับไปค่าเดิม
+    standardStatsEl.style.marginTop = "0px";
     
-    // รีเซ็ตขนาดฟอนต์กลับไปใช้ค่าเดิมจาก CSS
     if (heroPtsEl && heroPtsEl.parentElement) {
       heroPtsEl.parentElement.style.fontSize = ""; 
     }
@@ -2295,7 +2293,6 @@ openDriverHero = function(fullName, rowEl) {
     }
   }
   
-  // ซ่อนกราฟเรดาร์และปุ่มเลือกเมื่อเปิดจากหน้า Standings
   if (predictSectionEl) predictSectionEl.style.display = 'none';
 
   if (heroPtsEl) heroPtsEl.innerText = "0"; 
@@ -2311,6 +2308,7 @@ openDriverHero = function(fullName, rowEl) {
   }
   window.driverHeroModalInstance.show();
 };
+
 // =========================================================
 // 🤖 TEAM RADIO AI CONTROLLER (Frontend Logic)
 // =========================================================
@@ -2324,6 +2322,7 @@ function openTeamRadio() {
   const panel = document.getElementById('radioPanelOverlay');
   const msgEl = document.getElementById('radioMessage');
   const waveEl = document.getElementById('radioAudioWave');
+  if (!panel || !msgEl || !waveEl) return;
   panel.classList.remove('d-none');
   
   // 2. ดึงชื่อผู้เล่น และชื่อสนามปัจจุบัน
@@ -2331,7 +2330,6 @@ function openTeamRadio() {
   const rSel = document.getElementById('selRace');
   let raceName = "สนามถัดไป";
   if (rSel && rSel.selectedIndex > 0) {
-    // ลบอิโมจิวงกลมออก เอาแค่ชื่อสนาม
     raceName = rSel.options[rSel.selectedIndex].text.replace(/🟢|🔴|🏁|⚡/g, '').trim();
   }
 
@@ -2339,15 +2337,13 @@ function openTeamRadio() {
   msgEl.innerHTML = '<span class="text-warning">CONNECTING PIT WALL...</span>';
   waveEl.classList.remove('d-none');
 
-// 4. วิ่งไปเรียกฟังก์ชันหลังบ้าน (GAS)
+  // 4. วิ่งไปเรียกฟังก์ชันหลังบ้าน (GAS)
   callGAS("askRaceEngineer", { playerName: player, raceName: raceName })
     .then(function(res) {
       if (res && res.success) {
-        // เมื่อ AI ตอบกลับมา ให้เรียกใช้เอฟเฟกต์พิมพ์ดีด
         typeWriterEffect(res.message, msgEl, waveEl);
       } else {
-        // ดึงข้อความ Error จริงๆ จากหลังบ้านมาแสดง
-        let errorMsg = res.message || res.msg || "UNKNOWN ERROR";
+        let errorMsg = (res && (res.message || res.msg)) ? (res.message || res.msg) : "UNKNOWN ERROR";
         msgEl.innerHTML = '<span class="text-danger" style="font-size: 0.85rem;">ERROR: ' + errorMsg + '</span>';
         waveEl.classList.add('d-none');
       }
@@ -2356,7 +2352,7 @@ function openTeamRadio() {
       msgEl.innerHTML = '<span class="text-danger" style="font-size: 0.85rem;">JS ERROR: ' + err.toString() + '</span>';
       waveEl.classList.add('d-none');
     }); 
-  }
+}
 
 function typeWriterEffect(text, textElement, waveElement) {
   textElement.innerHTML = '';
@@ -2368,13 +2364,18 @@ function typeWriterEffect(text, textElement, waveElement) {
     if (i < text.length) {
       textElement.innerHTML += text.charAt(i);
       i++;
-      // ความเร็วในการพิมพ์ (สุ่มให้ดูเหมือนคนพิมพ์/พูดจริง 20-50ms)
       const speed = Math.floor(Math.random() * 30) + 20; 
       aiTypeWriterTimeout = setTimeout(type, speed);
     } else {
-      // พิมพ์เสร็จแล้ว ปิดคลื่นเสียง
       if(waveElement) waveElement.classList.add('d-none');
     }
   }
   type();
+}
+
+function closeTeamRadio() {
+  triggerHaptic();
+  const panel = document.getElementById('radioPanelOverlay');
+  if (panel) panel.classList.add('d-none');
+  if (aiTypeWriterTimeout) clearTimeout(aiTypeWriterTimeout);
 }
