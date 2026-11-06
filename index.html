@@ -20,6 +20,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   
   <link rel="stylesheet" href="style.css">
+  
   <!-- OneSignal Web Push SDK -->
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
   <script>
@@ -27,6 +28,12 @@
     OneSignalDeferred.push(async function(OneSignal) {
       await OneSignal.init({
         appId: "c8d50ad3-c024-4c14-be21-45df9aaaa061",
+        
+        // 🎯 เพิ่ม 3 บรรทัดนี้เพื่อระบุโฟลเดอร์ของ GitHub Pages (แก้ Error 404)
+        path: "/F1-Prediction-System-/",
+        serviceWorkerPath: "OneSignalSDKWorker.js",
+        serviceWorkerParam: { scope: "/F1-Prediction-System-/" },
+
         notifyButton: {
           enable: true, // เปิดปุ่มกระดิ่งมุมจอให้คนกดรับแจ้งเตือน
           displayPredicate: () => OneSignal.isPushNotificationsEnabled().then(is => !is),
