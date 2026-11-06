@@ -757,7 +757,7 @@ function onCenterRaceChange() {
   }
 
   if (typeof loadTelemetryHUD === 'function') {
-    loadTelemetryHUD(raceId);
+    loadTelemetryHUD('latest'); // บังคับให้ดึงข้อมูลของสนามล่าสุดเสมอ
   }
 }
 
@@ -1588,11 +1588,21 @@ async function loadOpenF1Meetings() {
   rSel.innerHTML = '<option value="" disabled selected>-- กำลังโหลดข้อมูลสนาม 2026 --</option>';
   
   try {
-    const res = await fetch('https://api.openf1.org/v1/meetings?year=2026');
-    const meetings = await res.json();
+    let meetings = null;
+    // 🎯 เช็คว่าเคยโหลดข้อมูลเก็บไว้ใน session แล้วหรือยัง (ป้องกัน Error 429)
+    const cachedMeetings = sessionStorage.getItem('openF1_meetings_2026');
+    
+    if (cachedMeetings) {
+      meetings = JSON.parse(cachedMeetings);
+    } else {
+      const res = await fetch('https://api.openf1.org/v1/meetings?year=2026');
+      if (!res.ok) throw new Error(`API Error: ${res.status}`);
+      meetings = await res.json();
+      // เก็บลง Cache ชั่วคราว
+      sessionStorage.setItem('openF1_meetings_2026', JSON.stringify(meetings));
+    }
     
     const now = new Date();
-    
     const startedMeetings = (Array.isArray(meetings) ? meetings : []).filter(m => {
       const startDate = new Date(m.date_start);
       const isTesting = (m.meeting_name || '').toLowerCase().includes('testing');
@@ -1603,6 +1613,25 @@ async function loadOpenF1Meetings() {
       rSel.innerHTML = '<option value="" disabled selected>-- ยังไม่มีสนามที่ทำการแข่งขันในปี 2026 --</option>';
       return;
     }
+
+    startedMeetings.sort((a, b) => new Date(a.date_start) - new Date(b.date_start));
+    
+    let opts = '<option value="" disabled selected>-- เลือกสนาม --</option>';
+    startedMeetings.forEach(m => {
+      opts += `<option value="${m.meeting_key}">🏁 ${m.meeting_name}</option>`;
+    });
+    rSel.innerHTML = opts;
+
+    const latestMeeting = startedMeetings[startedMeetings.length - 1];
+    rSel.value = latestMeeting.meeting_key;
+    onResultsRaceChange();
+    
+  } catch (error) {
+    console.error('OpenF1 Meetings Error:', error);
+    // หากโดน Block (429) ให้แสดงข้อความเนียนๆ
+    rSel.innerHTML = '<option value="" disabled selected>เชื่อมต่อฐานข้อมูลล่าช้า (API Limit)</option>';
+  }
+}
 
     startedMeetings.sort((a, b) => new Date(a.date_start) - new Date(b.date_start));
     
