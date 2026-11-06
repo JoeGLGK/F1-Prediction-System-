@@ -1628,26 +1628,8 @@ async function loadOpenF1Meetings() {
     
   } catch (error) {
     console.error('OpenF1 Meetings Error:', error);
-    // หากโดน Block (429) ให้แสดงข้อความเนียนๆ
+    // หากโดน Block (429) หรือมีปัญหาขัดข้อง ให้แสดงข้อความนี้
     rSel.innerHTML = '<option value="" disabled selected>เชื่อมต่อฐานข้อมูลล่าช้า (API Limit)</option>';
-  }
-}
-
-    startedMeetings.sort((a, b) => new Date(a.date_start) - new Date(b.date_start));
-    
-    let opts = '<option value="" disabled selected>-- เลือกสนาม --</option>';
-    startedMeetings.forEach(m => {
-      opts += `<option value="${m.meeting_key}">🏁 ${m.meeting_name}</option>`;
-    });
-    rSel.innerHTML = opts;
-
-    const latestMeeting = startedMeetings[startedMeetings.length - 1];
-    rSel.value = latestMeeting.meeting_key;
-    onResultsRaceChange();
-    
-  } catch (error) {
-    console.error('OpenF1 Meetings Error:', error);
-    rSel.innerHTML = '<option value="" disabled selected>โหลดข้อมูลสนามล้มเหลว</option>';
   }
 }
 
