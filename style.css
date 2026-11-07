@@ -3858,3 +3858,50 @@ body {
 }
 .send-btn:hover { background: #e02000; transform: scale(1.05); }
 .send-btn:active { transform: scale(0.95); }
+/* ========================================== */
+/* 📻 FLOATING TEAM RADIO BUTTON STYLES       */
+/* ========================================== */
+.team-radio-fab {
+  position: fixed;
+  bottom: 90px; /* ลอยอยู่เหนือแถบเมนูด้านล่าง */
+  right: 20px;  /* จัดให้อยู่มุมขวาล่าง */
+  width: 60px;
+  height: 60px;
+  background-color: #ff2800; /* สีแดง Racing Red */
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 4px 15px rgba(255, 40, 0, 0.4);
+  cursor: pointer;
+  z-index: 9990;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.team-radio-fab:hover {
+  background-color: #d11d00;
+  transform: scale(1.08);
+}
+
+.team-radio-fab:active {
+  transform: scale(0.95);
+}
+
+/* เอฟเฟกต์วงคลื่นสีแดงด้านหลังปุ่ม (Pulse) */
+.team-radio-fab .radio-pulse {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: #ff2800;
+  border-radius: 50%;
+  z-index: -1;
+  animation: fab-pulse 2s infinite;
+}
+
+@keyframes fab-pulse {
+  0% { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
