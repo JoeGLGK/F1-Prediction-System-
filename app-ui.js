@@ -2419,7 +2419,6 @@ function sendRadioMessage() {
       chatBox.scrollTop = chatBox.scrollHeight;
     });
 }
-
   // 3. เตรียมข้อมูลผู้เล่นและสนามจริง ส่งไป Backend
   const player = localStorage.getItem('f1_player_name') || 'Driver';
   const rSel = document.getElementById('selRace');
