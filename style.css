@@ -3863,7 +3863,7 @@ body {
 /* ========================================== */
 .team-radio-fab {
   position: fixed;
-  bottom: 85px; /* ลอยอยู่เหนือแถบเมนูด้านล่าง */
+  bottom: 100px; /* ลอยอยู่เหนือแถบเมนูด้านล่าง */
   right: 20px;  /* จัดให้อยู่มุมขวาล่าง */
   width: 40px;
   height: 40px;
@@ -3907,7 +3907,7 @@ body {
 }
 /* 🏎️ เพิ่มพื้นที่ว่างด้านล่างสุดของหน้าจอ เพื่อไม่ให้เนื้อหาถูกแถบเมนูปิดทับ */
 body, .tab-pane-custom, .container, .content-wrapper {
-  padding-bottom: 60px !important;
+  padding-bottom: 25px !important;
 }
 
 /* 📌 ปรับให้ปุ่ม SUBMIT PREDICTION มีพื้นที่หายใจและไม่ชิดติดแถบเมนูป้านเกินไป */
