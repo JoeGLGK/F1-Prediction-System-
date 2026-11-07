@@ -3658,128 +3658,203 @@ body {
 .news-card-cinematic:active .news-headline-overlay {
   color: #e2e8f0; 
 }
-/* =========================================
-   📻 TEAM RADIO UI & ANIMATIONS
-   ========================================= */
-/* ปุ่มวิทยุลอยตัว */
-/* ปุ่มวิทยุลอยตัว (ซ่อนเป็นค่าเริ่มต้น) */
-.team-radio-fab {
-  position: fixed !important;
-  bottom: 110px !important;
-  right: 20px !important;
-  width: 40px !important;  /* ปรับขนาดให้เล็กลง (จาก 55px เหลือ 45px) */
-  height: 40px !important; /* ปรับขนาดให้เล็กลง */
-  border-radius: 50%;
-  background: linear-gradient(135deg, #e10600 0%, #a80000 100%);
-  color: white;
-  border: 2px solid #ff4d4d;
-  font-size: 1.0rem !important; /* ปรับขนาดไอคอนเล็กลงตามขนาดปุ่ม */
-  z-index: 99999 !important;
-  display: none !important; /* ⬅️ ซ่อนไว้ก่อนเป็นค่าเริ่มต้น */
-  align-items: center;
+/* ========================================== */
+/* 🔴 PIT WALL RADIO STYLES                   */
+/* ========================================== */
+@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
+
+/* Overlay พื้นหลังดำโปร่งแสง */
+.pit-wall-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
   justify-content: center;
-  cursor: pointer;
-  transition: transform 0.2s;
+  align-items: center;
+  z-index: 9999;
+  opacity: 1;
+  transition: opacity 0.3s ease;
 }
-.team-radio-fab:active { transform: scale(0.9); }
-
-/* เอฟเฟกต์กระเพื่อมเรียกร้องความสนใจ */
-.radio-pulse {
-  position: absolute;
-  width: 100%; height: 100%;
-  border-radius: 50%;
-  background: rgba(225, 6, 0, 0.5);
-  animation: pulse-ring 2s infinite;
-  z-index: -1;
-}
-@keyframes pulse-ring {
-  0% { transform: scale(1); opacity: 0.8; }
-  100% { transform: scale(1.6); opacity: 0; }
+.pit-wall-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
 }
 
-/* หน้าต่าง HUD วิทยุ */
-.radio-panel-overlay {
-  position: fixed; top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
-  z-index: 1100;
-  display: flex; align-items: center; justify-content: center;
-}
-.radio-panel-content {
-  background: #0a0e1c;
-  border: 1px solid #3b82f6;
-  border-radius: 12px;
-  width: 90%; max-width: 400px;
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+/* กล่องแชทหลัก (Glassmorphism) */
+.pit-wall-container {
+  width: 90%;
+  max-width: 450px;
+  height: 80vh;
+  max-height: 600px;
+  background: rgba(15, 18, 25, 0.85); /* Carbon Black */
+  border: 1px solid rgba(255, 40, 0, 0.2); /* Red tint border */
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 40, 0, 0.1);
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
+  font-family: 'Chakra Petch', sans-serif;
+  transform: translateY(0);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
-.radio-header {
-  background: #111827;
-  padding: 10px 15px;
-  display: flex; justify-content: space-between; align-items: center;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+.pit-wall-overlay.hidden .pit-wall-container {
+  transform: translateY(20px) scale(0.95);
 }
-.live-dot {
-  width: 10px; height: 10px;
-  background-color: #ef4444;
+
+/* ส่วนหัว Header */
+.pit-wall-header {
+  padding: 15px 20px;
+  background: linear-gradient(90deg, rgba(25, 25, 30, 0.9) 0%, rgba(40, 15, 15, 0.9) 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.header-title {
+  color: #fff;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+/* จุดแดงกะพริบ (Pulse) */
+.pulse-dot {
+  width: 10px;
+  height: 10px;
+  background-color: #ff2800; /* Racing Red */
   border-radius: 50%;
-  animation: blink 1s infinite;
+  box-shadow: 0 0 10px #ff2800;
+  animation: pulse-red 1.5s infinite;
 }
-@keyframes blink { 50% { opacity: 0.3; } }
-.btn-close-radio {
-  background: transparent; border: none; color: #9ca3af; font-size: 1.2rem;
+@keyframes pulse-red {
+  0% { box-shadow: 0 0 0 0 rgba(255, 40, 0, 0.7); }
+  70% { box-shadow: 0 0 0 8px rgba(255, 40, 0, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 40, 0, 0); }
 }
-.radio-body {
+.close-btn {
+  background: none; border: none; color: #888; font-size: 18px; cursor: pointer; transition: color 0.2s;
+}
+.close-btn:hover { color: #ff2800; }
+
+/* พื้นที่แชท */
+.pit-wall-chat {
+  flex: 1;
   padding: 20px;
-  min-height: 120px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 }
-.radio-message-text {
-  color: #10b981; /* สีเขียวสไตล์เทอร์มินัล */
-  font-size: 1.1rem;
-  line-height: 1.5;
-  text-shadow: 0 0 5px rgba(16, 185, 129, 0.4);
-}
+.pit-wall-chat::-webkit-scrollbar { width: 6px; }
+.pit-wall-chat::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
 
-/* คลื่นเสียง Audio Wave */
-.audio-wave {
-  display: flex; gap: 3px; align-items: flex-end; height: 20px;
+/* ดีไซน์ข้อความ */
+.msg-wrapper {
+  display: flex;
+  width: 100%;
+  animation: slideUpFade 0.3s ease forwards;
 }
-.audio-wave span {
-  display: block; width: 4px; background: #3b82f6; border-radius: 2px;
-  animation: wave-bounce 1s infinite ease-in-out;
+@keyframes slideUpFade {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
-.audio-wave span:nth-child(1) { animation-delay: 0.0s; }
-.audio-wave span:nth-child(2) { animation-delay: 0.2s; }
-.audio-wave span:nth-child(3) { animation-delay: 0.4s; }
-.audio-wave span:nth-child(4) { animation-delay: 0.2s; }
-.audio-wave span:nth-child(5) { animation-delay: 0.1s; }
-@keyframes wave-bounce {
-  0%, 100% { height: 4px; }
-  50% { height: 20px; }
-}
-/* สไตล์กล่องข้อความ AI Race Engineer (ซ้าย) */
-.chat-bubble-ai {
-  align-self: flex-start;
-  background: rgba(225, 6, 0, 0.15);
-  border-left: 3px solid #e10600;
-  color: #fff;
-  padding: 10px 14px;
-  border-radius: 0px 12px 12px 12px;
+.msg-bubble {
   max-width: 85%;
-  font-size: 0.9rem;
+  padding: 12px 16px;
+  font-size: 14px;
   line-height: 1.5;
 }
 
-/* สไตล์กล่องข้อความ User (ขวา) */
-.chat-bubble-user {
-  align-self: flex-end;
-  background: #2a2a2b;
-  border-right: 3px solid #0dcaf0;
-  color: #fff;
-  padding: 10px 14px;
-  border-radius: 12px 0px 12px 12px;
-  max-width: 85%;
-  font-size: 0.9rem;
-  line-height: 1.5;
+/* ข้อความผู้เล่น (User) */
+.msg-wrapper.user { justify-content: flex-end; }
+.msg-wrapper.user .msg-bubble {
+  background: rgba(255, 255, 255, 0.08);
+  color: #e0e0e0;
+  border-radius: 14px 14px 0 14px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
+
+/* ข้อความ Race Engineer (AI) */
+.msg-wrapper.ai { justify-content: flex-start; }
+.msg-wrapper.ai .msg-bubble {
+  background: linear-gradient(135deg, rgba(255, 40, 0, 0.05) 0%, rgba(0, 0, 0, 0.2) 100%);
+  color: #fff;
+  border-left: 3px solid #ff2800; /* ขีดแดงสไตล์ Telemetry */
+  border-radius: 0 14px 14px 14px;
+  border-top: 1px solid rgba(255, 40, 0, 0.1);
+  border-right: 1px solid rgba(255, 40, 0, 0.1);
+  border-bottom: 1px solid rgba(255, 40, 0, 0.1);
+}
+
+/* ไฮไลท์ข้อมูล Telemetry (ตัวเลข, P1-P4 จะถูกเปลี่ยนเป็นสีฟ้า Cyan) */
+.telemetry-cyan {
+  color: #00e5ff;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  text-shadow: 0 0 5px rgba(0, 229, 255, 0.4);
+}
+
+/* แอนิเมชันตอน AI คิด (กราฟคลื่นวิทยุ) */
+.radio-wave {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 15px;
+  padding: 5px 0;
+}
+.wave-bar {
+  width: 3px;
+  background-color: #ff2800;
+  border-radius: 2px;
+  animation: equalize 1s infinite alternate ease-in-out;
+}
+.wave-bar:nth-child(1) { animation-delay: 0.1s; height: 30%; }
+.wave-bar:nth-child(2) { animation-delay: 0.3s; height: 100%; }
+.wave-bar:nth-child(3) { animation-delay: 0.2s; height: 50%; }
+.wave-bar:nth-child(4) { animation-delay: 0.4s; height: 80%; }
+@keyframes equalize { 0% { height: 30%; } 100% { height: 100%; } }
+
+/* พื้นที่พิมพ์ข้อความ Input */
+.pit-wall-input-zone {
+  padding: 15px;
+  background: rgba(10, 12, 16, 0.9);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  gap: 10px;
+}
+#chatInput {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 12px 15px;
+  color: #fff;
+  font-family: 'Chakra Petch', sans-serif;
+  transition: all 0.3s;
+}
+#chatInput:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 40, 0, 0.5);
+  box-shadow: 0 0 10px rgba(255, 40, 0, 0.2);
+}
+.send-btn {
+  background: #ff2800;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  width: 45px;
+  height: 45px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.2s;
+}
+.send-btn:hover { background: #e02000; transform: scale(1.05); }
+.send-btn:active { transform: scale(0.95); }
