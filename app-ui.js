@@ -2320,162 +2320,103 @@ openDriverHero = function(fullName, rowEl) {
   window.driverHeroModalInstance.show();
 };
 
-// =========================================================
-// 🤖 TEAM RADIO AI CONTROLLER (Chat Version)
-// =========================================================
+// ==========================================
+// 🔴 PIT WALL RADIO LOGIC (FRONT-END TELEMETRY)
+// ==========================================
 
-let aiTypeWriterTimeout = null;
-let currentChatHistory = []; // ตัวแปรเก็บประวัติการคุยทั้งหมด
-
-function openTeamRadio() {
-  triggerHaptic();
-  
-  const panel = document.getElementById('radioPanelOverlay');
-  if (!panel) return;
-  panel.classList.remove('d-none');
-  
-  const historyContainer = document.getElementById('radioChatHistory');
-  
-  // ถ้าเพิ่งเปิดแชทครั้งแรก (ประวัติยังว่าง) ให้ระบบเริ่มทักทาย AI อัตโนมัติเพื่อขอวิเคราะห์แรก
-  if (currentChatHistory.length === 0) {
-    if (historyContainer) {
-      historyContainer.innerHTML = '<div class="text-center text-secondary small f1-font" style="margin-top: auto; margin-bottom: auto; letter-spacing: 2px;">SECURE CHANNEL OPENED</div>';
-    }
-    
-    const player = localStorage.getItem('f1_player_name') || 'Driver';
-    const rSel = document.getElementById('selRace');
-    let raceName = "สนามถัดไป";
-    if (rSel && rSel.selectedIndex > 0) {
-      raceName = rSel.options[rSel.selectedIndex].text.replace(/🟢|🔴|🏁|⚡/g, '').trim();
-    }
-    
-    // เรียกใช้ AI ครั้งแรกเพื่อขอคำแนะนำเบื้องต้น โดยแอบส่งคำถามไป
-    sendToPitWall(player, raceName, "ขอโพยสนามนี้หน่อย");
-  }
+// เปิด/ปิด หน้าต่างวิทยุ
+function togglePitWall() {
+  const modal = document.getElementById('pitWallModal');
+  if (modal) modal.classList.toggle('hidden');
 }
 
-// ฟังก์ชันดักจับเวลากดปุ่ม Enter ในช่องแชท
-function handleChatKeyPress(event) {
+// กดปุ่ม Enter เพื่อส่ง
+function handleChatEnter(event) {
   if (event.key === 'Enter') {
     event.preventDefault();
-    sendChatMessage();
+    sendRadioMessage();
   }
 }
 
-// ฟังก์ชันส่งข้อความแชท
-function sendChatMessage() {
-  const inputEl = document.getElementById('chatInputMessage');
+// ฟังก์ชันไฮไลท์คำสำคัญ (P1, P2, Fastest Lap) ให้เป็นสี Cyan แนวนักซิ่ง
+function formatTelemetryText(text) {
+  return text.replace(/\b(P[1-5]|Fastest Lap|Undercut|Safety Car)\b/gi, '<span class="telemetry-cyan">$&</span>');
+}
+
+// ส่งข้อความไปหา AI
+function sendRadioMessage() {
+  const inputEl = document.getElementById('chatInput');
   const message = inputEl.value.trim();
-  
-  if (!message) return; // ถ้าไม่ได้พิมพ์อะไรก็ไม่ต้องส่ง
-  
-  triggerHaptic();
-  
-  // 1. นำข้อความผู้เล่นไปวาดแสดงผลฝั่งขวา
-  appendChatBubble(message, 'user');
-  inputEl.value = ''; // เคลียร์ช่องพิมพ์
-  
-  // 2. แสดงคลื่นเสียง (สถานะกำลังคิด)
-  const waveEl = document.getElementById('radioAudioWave');
-  if (waveEl) waveEl.classList.remove('d-none');
-  
-  // 3. เตรียมข้อมูล
+  if (!message) return;
+
+  const chatBox = document.getElementById('chatBox');
+
+  // 1. เพิ่มข้อความของผู้เล่น (User) ฝั่งขวา
+  chatBox.innerHTML += `
+    <div class="msg-wrapper user">
+      <div class="msg-bubble">${message}</div>
+    </div>
+  `;
+  inputEl.value = "";
+  chatBox.scrollTop = chatBox.scrollHeight;
+
+  // 2. ขึ้นแอนิเมชันคลื่นวิทยุ (รอ AI คิด) ฝั่งซ้าย
+  const waveId = 'wave-' + Date.now();
+  chatBox.innerHTML += `
+    <div class="msg-wrapper ai" id="${waveId}">
+      <div class="msg-bubble">
+        <div class="radio-wave">
+          <div class="wave-bar"></div><div class="wave-bar"></div>
+          <div class="wave-bar"></div><div class="wave-bar"></div>
+        </div>
+      </div>
+    </div>
+  `;
+  chatBox.scrollTop = chatBox.scrollHeight;
+
+  // 3. เตรียมข้อมูลผู้เล่นและสนามจริง ส่งไป Backend
   const player = localStorage.getItem('f1_player_name') || 'Driver';
   const rSel = document.getElementById('selRace');
-  let raceName = "สนามถัดไป";
+  let currentRace = "สนามถัดไป";
   if (rSel && rSel.selectedIndex > 0) {
-    raceName = rSel.options[rSel.selectedIndex].text.replace(/🟢|🔴|🏁|⚡/g, '').trim();
+    currentRace = rSel.options[rSel.selectedIndex].text.replace(/🟢|🔴|🏁|⚡/g, '').trim();
   }
-  
-  // ส่งไปหลังบ้าน
-  sendToPitWall(player, raceName, message);
-}
 
-// ฟังก์ชันศูนย์กลางยิงข้อมูลไปให้ Google Apps Script
-function sendToPitWall(playerName, raceName, currentMessage) {
-  const waveEl = document.getElementById('radioAudioWave');
-  if (waveEl) waveEl.classList.remove('d-none'); // เปิดคลื่นเสียงอีกรอบเผื่อเหนียว
-  
-  // ส่งข้อมูล "ประวัติการแชทเดิม" + "ข้อความใหม่" ไปให้หลังบ้าน
-  callGAS("askRaceEngineer", { 
-    playerName: playerName, 
-    raceName: raceName,
-    chatHistory: currentChatHistory,
-    message: currentMessage
-  })
-  .then(function(res) {
-    if (waveEl) waveEl.classList.add('d-none');
-    
-    if (res && res.success) {
-      // 4. นำคำตอบ AI ไปวาดแสดงผลฝั่งซ้าย (พร้อมเอฟเฟกต์พิมพ์ดีด)
-      const aiResponse = res.message;
-      appendChatBubble(aiResponse, 'ai', true);
+  const clientData = {
+    playerName: player,
+    raceName: currentRace,
+    message: message,
+    chatHistory: [] // อนาคตสามารถเพิ่มระบบจำประวัติแชทได้ที่นี่
+  };
+
+  // 4. เรียกฟังก์ชัน askRaceEngineer ฝั่ง Google Apps Script
+  google.script.run
+    .withSuccessHandler(function(response) {
+      // ลบคลื่นวิทยุออก
+      const waveEl = document.getElementById(waveId);
+      if (waveEl) waveEl.remove();
       
-      // บันทึกคำถามผู้เล่นและคำตอบ AI ลงประวัติ (จัดรูปแบบตามที่ Gemini API ต้องการ)
-      currentChatHistory.push({ role: "user", parts: [{ text: currentMessage }] });
-      currentChatHistory.push({ role: "model", parts: [{ text: aiResponse }] });
+      // ใส่ข้อความที่ตอบกลับมา (พร้อมทำสีไฮไลท์คำศัพท์ F1)
+      let finalMsg = response.message || response.msg || "ไม่มีการตอบกลับ";
+      const formattedText = formatTelemetryText(finalMsg);
       
-    } else {
-      let errorMsg = (res && (res.message || res.msg)) ? (res.message || res.msg) : "UNKNOWN ERROR";
-      appendChatBubble('ERROR: ' + errorMsg, 'ai');
-    }
-  }) 
-  .catch(function(err) {
-    if (waveEl) waveEl.classList.add('d-none');
-    appendChatBubble('JS ERROR: ' + err.toString(), 'ai');
-  }); 
-}
-
-// ฟังก์ชันสร้างกล่องข้อความ (Chat Bubble) บนหน้าจอ
-function appendChatBubble(text, sender, useTypewriter = false) {
-  const historyContainer = document.getElementById('radioChatHistory');
-  if (!historyContainer) return;
-  
-  // ลบข้อความ "SECURE CHANNEL OPENED" ออกเมื่อมีข้อความแรก
-  const initialText = historyContainer.querySelector('.text-center.text-secondary');
-  if (initialText) initialText.remove();
-  
-  // สร้าง Div กล่องข้อความ
-  const bubble = document.createElement('div');
-  bubble.className = sender === 'ai' ? 'chat-bubble-ai f1-font' : 'chat-bubble-user';
-  
-  historyContainer.appendChild(bubble);
-  
-  if (useTypewriter && sender === 'ai') {
-    typeWriterEffect(text, bubble);
-  } else {
-    bubble.innerHTML = text;
-  }
-  
-  // สั่งให้หน้าจอเลื่อนลงไปล่างสุดเสมอ (Auto-scroll to bottom)
-  historyContainer.scrollTop = historyContainer.scrollHeight;
-}
-
-// เอฟเฟกต์พิมพ์ดีด
-function typeWriterEffect(text, textElement) {
-  textElement.innerHTML = '';
-  let i = 0;
-  
-  if (aiTypeWriterTimeout) clearTimeout(aiTypeWriterTimeout);
-  
-  function type() {
-    if (i < text.length) {
-      textElement.innerHTML += text.charAt(i);
-      i++;
-      const speed = Math.floor(Math.random() * 20) + 10; // พิมพ์เร็วขึ้น
-      aiTypeWriterTimeout = setTimeout(type, speed);
+      chatBox.innerHTML += `
+        <div class="msg-wrapper ai">
+          <div class="msg-bubble">${formattedText}</div>
+        </div>
+      `;
+      chatBox.scrollTop = chatBox.scrollHeight;
+    })
+    .withFailureHandler(function(error) {
+      const waveEl = document.getElementById(waveId);
+      if (waveEl) waveEl.remove();
       
-      // ดันหน้าจอลงมาระหว่างพิมพ์
-      const historyContainer = document.getElementById('radioChatHistory');
-      if (historyContainer) historyContainer.scrollTop = historyContainer.scrollHeight;
-    }
-  }
-  type();
-}
-
-function closeTeamRadio() {
-  triggerHaptic();
-  const panel = document.getElementById('radioPanelOverlay');
-  if (panel) panel.classList.add('d-none');
-  if (aiTypeWriterTimeout) clearTimeout(aiTypeWriterTimeout);
+      chatBox.innerHTML += `
+        <div class="msg-wrapper ai">
+          <div class="msg-bubble" style="border-left-color: #ff9800;">⚠️ สัญญาณขาดหาย: ${error.message}</div>
+        </div>
+      `;
+      chatBox.scrollTop = chatBox.scrollHeight;
+    })
+    .askRaceEngineer(clientData);
 }
