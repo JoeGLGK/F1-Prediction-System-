@@ -3905,3 +3905,12 @@ body {
   0% { transform: scale(1); opacity: 0.6; }
   100% { transform: scale(1.6); opacity: 0; }
 }
+/* 🏎️ เพิ่มพื้นที่ว่างด้านล่างสุดของหน้าจอ เพื่อไม่ให้เนื้อหาถูกแถบเมนูปิดทับ */
+body, .tab-pane-custom, .container, .content-wrapper {
+  padding-bottom: 120px !important;
+}
+
+/* 📌 ปรับให้ปุ่ม SUBMIT PREDICTION มีพื้นที่หายใจและไม่ชิดติดแถบเมนูป้านเกินไป */
+#btnPred {
+  margin-bottom: 30px !important;
+}
