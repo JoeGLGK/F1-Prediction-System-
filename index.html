@@ -875,44 +875,42 @@
     }
   </script>
 
-  <!-- 📻 FLOATING TEAM RADIO BUTTON -->
-  <button id="btnTeamRadio" class="team-radio-fab shadow-lg" onclick="openTeamRadio()">
+  <!-- 📻 FLOATING TEAM RADIO BUTTON (คงไว้แต่เปลี่ยนคำสั่งเปิด) -->
+  <button id="btnTeamRadio" class="team-radio-fab shadow-lg" onclick="togglePitWall()">
     <div class="radio-pulse"></div>
     <i class="fa-solid fa-headset"></i>
   </button>
 
-  <!-- 📡 TEAM RADIO HUD PANEL (UPGRADED CHAT VERSION) -->
-  <div id="radioPanelOverlay" class="radio-panel-overlay d-none">
-    <div class="radio-panel-content" style="display: flex; flex-direction: column; height: 450px; max-height: 75vh; padding: 0;">
+  <!-- ========================================== -->
+  <!-- 🔴 PIT WALL RADIO MODAL (TELEMETRY UI ใหม่) -->
+  <!-- ========================================== -->
+  <div id="pitWallModal" class="pit-wall-overlay hidden">
+    <div class="pit-wall-container">
       
       <!-- Header -->
-      <div class="radio-header" style="padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.1);">
-        <div class="d-flex align-items-center">
-          <span class="live-dot me-2"></span> 
-          <span class="f1-font text-white" style="letter-spacing: 1px;">PIT WALL RADIO</span>
+      <div class="pit-wall-header">
+        <div class="header-title">
+          <span class="pulse-dot"></span> PIT WALL RADIO
         </div>
-        <button type="button" class="btn-close-radio" onclick="closeTeamRadio()">
+        <button type="button" class="close-btn" onclick="togglePitWall()">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
-      
-      <!-- Body (Chat History) -->
-      <div id="radioChatHistory" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 15px; scrollbar-width: thin;">
-        <!-- ข้อความจะถูกเพิ่มที่นี่ผ่าน JavaScript -->
-        <div class="text-center text-secondary small f1-font" style="margin-top: auto; margin-bottom: auto; letter-spacing: 2px;">
-          SECURE CHANNEL OPENED
+
+      <!-- Chat Area -->
+      <div class="pit-wall-chat" id="chatBox">
+        <!-- ข้อความต้อนรับจาก AI -->
+        <div class="msg-wrapper ai">
+          <div class="msg-bubble">
+            Radio check. สัญญาณชัดเจน พร้อมรับคำสั่งแล้ว...
+          </div>
         </div>
       </div>
 
-      <!-- Audio Wave (Typing Indicator) -->
-      <div id="radioAudioWave" class="audio-wave d-none text-center pb-2">
-         <span></span><span></span><span></span><span></span><span></span>
-      </div>
-      
-      <!-- Footer (Input Area) -->
-      <div class="radio-footer" style="padding: 10px 15px; background: rgba(0,0,0,0.5); border-top: 1px solid rgba(255,255,255,0.1); display: flex; gap: 8px;">
-        <input type="text" id="chatInputMessage" class="form-control" style="background: #111; color: white; border: 1px solid #333; font-size: 0.9rem;" placeholder="พิมพ์ถาม Race Engineer..." onkeypress="handleChatKeyPress(event)" autocomplete="off">
-        <button class="btn btn-danger" id="btnSendChat" onclick="sendChatMessage()" style="border-radius: 5px; padding: 0 15px;">
+      <!-- Input Area -->
+      <div class="pit-wall-input-zone">
+        <input type="text" id="chatInput" placeholder="Transmission to Pit Wall..." onkeypress="handleChatEnter(event)" autocomplete="off">
+        <button class="send-btn" onclick="sendRadioMessage()">
           <i class="fa-solid fa-paper-plane"></i>
         </button>
       </div>
