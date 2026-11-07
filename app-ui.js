@@ -2386,6 +2386,52 @@ function sendRadioMessage() {
     playerName: player,
     raceName: currentRace,
     message: message,
+    chatHistory: [] 
+  };
+
+  // 4. เรียกใช้ฟังก์ชัน callGAS เดิมของคุณ (แก้ไขจาก google.script.run)
+  callGAS("askRaceEngineer", clientData)
+    .then(function(response) {
+      // ลบคลื่นวิทยุออก
+      const waveEl = document.getElementById(waveId);
+      if (waveEl) waveEl.remove();
+      
+      // ใส่ข้อความที่ตอบกลับมา
+      let finalMsg = response.message || response.msg || "ไม่มีการตอบกลับ";
+      const formattedText = formatTelemetryText(finalMsg);
+      
+      chatBox.innerHTML += `
+        <div class="msg-wrapper ai">
+          <div class="msg-bubble">${formattedText}</div>
+        </div>
+      `;
+      chatBox.scrollTop = chatBox.scrollHeight;
+    })
+    .catch(function(error) {
+      const waveEl = document.getElementById(waveId);
+      if (waveEl) waveEl.remove();
+      
+      chatBox.innerHTML += `
+        <div class="msg-wrapper ai">
+          <div class="msg-bubble" style="border-left-color: #ff9800;">⚠️ สัญญาณขาดหาย: ${error.toString()}</div>
+        </div>
+      `;
+      chatBox.scrollTop = chatBox.scrollHeight;
+    });
+}
+
+  // 3. เตรียมข้อมูลผู้เล่นและสนามจริง ส่งไป Backend
+  const player = localStorage.getItem('f1_player_name') || 'Driver';
+  const rSel = document.getElementById('selRace');
+  let currentRace = "สนามถัดไป";
+  if (rSel && rSel.selectedIndex > 0) {
+    currentRace = rSel.options[rSel.selectedIndex].text.replace(/🟢|🔴|🏁|⚡/g, '').trim();
+  }
+
+  const clientData = {
+    playerName: player,
+    raceName: currentRace,
+    message: message,
     chatHistory: [] // อนาคตสามารถเพิ่มระบบจำประวัติแชทได้ที่นี่
   };
 
